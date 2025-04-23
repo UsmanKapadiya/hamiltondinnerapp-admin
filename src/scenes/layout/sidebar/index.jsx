@@ -10,6 +10,8 @@ import {
   DashboardOutlined,
   DonutLargeOutlined,
   HelpOutlineOutlined,
+  Home,
+  HomeMaxOutlined,
   MapOutlined,
   MenuOutlined,
   PeopleAltOutlined,
@@ -17,9 +19,11 @@ import {
   ReceiptOutlined,
   TimelineOutlined,
   WavesOutlined,
+  
 } from "@mui/icons-material";
 import avatar from "../../../assets/images/avatar.png";
-import logo from "../../../assets/images/logo.png";
+// import logo from "../../../assets/images/logo.png";
+import logos from "../../../assets/images/hamilton-logo.png";
 import Item from "./Item";
 import { ToggledContext } from "../../../App";
 
@@ -67,7 +71,7 @@ const SideBar = () => {
               >
                 <img
                   style={{ width: "30px", height: "30px", borderRadius: "8px" }}
-                  src={logo}
+                  src={logos}
                   alt="Argon"
                 />
                 <Typography
@@ -76,7 +80,7 @@ const SideBar = () => {
                   textTransform="capitalize"
                   color={colors.greenAccent[500]}
                 >
-                  Argon
+                  Dinning App
                 </Typography>
               </Box>
             )}
@@ -153,6 +157,12 @@ const SideBar = () => {
             },
           }}
         >
+          <Item
+            title="Room Details"
+            path="/room-details"
+            colors={colors}
+            icon={<Home />}
+          />
           <Item
             title="Manage Team"
             path="/team"

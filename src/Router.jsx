@@ -15,6 +15,10 @@ import {
   Calendar,
   Stream,
 } from "./scenes";
+import Room from "./scenes/room";
+import RoomDetailsForm from "./scenes/room/roomDetails-form";
+import RoomDetailsOrder from "./scenes/room/roomDetailsOrder";
+import RoomDetailsView from "./scenes/room/roomDetails-view";
 
 const AppRouter = () => {
   return (
@@ -22,6 +26,11 @@ const AppRouter = () => {
       <Routes>
         <Route path="/" element={<App />}>
           <Route path="/" element={<Dashboard />} />
+          <Route path="/room-details" element={<Room />} />
+          <Route path="/room-details/:id" element={<RoomDetailsView />} />
+          <Route path="/room-details/:id/edit" element={<RoomDetailsForm />} />
+          <Route path="/room-details/create" element={<RoomDetailsForm />} />
+          <Route path="/room-details/order" element={<RoomDetailsOrder/>} />
           <Route path="/team" element={<Team />} />
           <Route path="/contacts" element={<Contacts />} />
           <Route path="/invoices" element={<Invoices />} />
