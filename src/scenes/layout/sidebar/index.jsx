@@ -164,6 +164,12 @@ const SideBar = () => {
             icon={<Home />}
           />
           <Item
+            title="Category Details"
+            path="/category-details"
+            colors={colors}
+            icon={<Home />}
+          />
+          <Item
             title="Manage Team"
             path="/team"
             colors={colors}

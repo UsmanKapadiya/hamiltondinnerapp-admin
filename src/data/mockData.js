@@ -328,6 +328,186 @@ export const mockDataRomm = [
   }
 ];
 
+export const mockDataCategories = [
+  {
+    id: 1,
+    categoryName: "LUNCH ENTREE",
+    categoryChineseName: "Resident 1",
+    categoryType: "lunch",
+    parentId: "LunchEntree",
+  },
+  {
+    id: 2,
+    categoryName: "BREAKFAST DAILY SPECIAL",
+    categoryChineseName: "Resident 2",
+    categoryType: "breakfast",
+    parentId: "breakfastDailySpecial",
+  },
+  {
+    id: 3,
+    categoryName: "DINNER DESSERT",
+    categoryChineseName: "Resident 3",
+    categoryType: "dinner",
+    parentId: "dinnerDessert",
+  },
+  {
+    id: 4,
+    categoryName: "LUNCH ALTERNATIVE",
+    categoryChineseName: "Resident 4",
+    categoryType: "lunch",
+    parentId: "LunchAlternative",
+  },
+  {
+    id: 5,
+    categoryName: "DINNER ENTREE",
+    categoryChineseName: "Resident 5",
+    categoryType: "dinner",
+    parentId: "dinnerEntree",
+  },
+  {
+    id: 6,
+    categoryName: "BREAKFAST DAILY SPECIAL",
+    categoryChineseName: "Resident 6",
+    categoryType: "breakfast",
+    parentId: "breakfastDailySpecial",
+  },
+  {
+    id: 7,
+    categoryName: "LUNCH SOUP",
+    categoryChineseName: "Resident 7",
+    categoryType: "lunch",
+    parentId: "lunchSoup",
+  },
+  {
+    id: 8,
+    categoryName: "DINNER ALTERNATIVE",
+    categoryChineseName: "Resident 8",
+    categoryType: "dinner",
+    parentId: "dinnerAlternative",
+  },
+  {
+    id: 9,
+    categoryName: "BREAKFAST DAILY SPECIAL",
+    categoryChineseName: "Resident 9",
+    categoryType: "breakfast",
+    parentId: "breakfastDailySpecial",
+  },
+  {
+    id: 10,
+    categoryName: "LUNCH ENTREE",
+    categoryChineseName: "Resident 10",
+    categoryType: "lunch",
+    parentId: "LunchEntree",
+  },
+  {
+    id: 11,
+    categoryName: "DINNER ENTREE",
+    categoryChineseName: "Resident 11",
+    categoryType: "dinner",
+    parentId: "dinnerEntree",
+  },
+  {
+    id: 12,
+    categoryName: "LUNCH ALTERNATIVE",
+    categoryChineseName: "Resident 12",
+    categoryType: "lunch",
+    parentId: "LunchAlternative",
+  },
+  {
+    id: 13,
+    categoryName: "BREAKFAST DAILY SPECIAL",
+    categoryChineseName: "Resident 13",
+    categoryType: "breakfast",
+    parentId: "breakfastDailySpecial",
+  },
+  {
+    id: 14,
+    categoryName: "DINNER DESSERT",
+    categoryChineseName: "Resident 14",
+    categoryType: "dinner",
+    parentId: "dinnerDessert",
+  },
+  {
+    id: 15,
+    categoryName: "LUNCH SOUP",
+    categoryChineseName: "Resident 15",
+    categoryType: "lunch",
+    parentId: "lunchSoup",
+  },
+  {
+    id: 16,
+    categoryName: "DINNER ALTERNATIVE",
+    categoryChineseName: "Resident 16",
+    categoryType: "dinner",
+    parentId: "dinnerAlternative",
+  },
+  {
+    id: 17,
+    categoryName: "BREAKFAST DAILY SPECIAL",
+    categoryChineseName: "Resident 17",
+    categoryType: "breakfast",
+    parentId: "breakfastDailySpecial",
+  },
+  {
+    id: 18,
+    categoryName: "LUNCH ENTREE",
+    categoryChineseName: "Resident 18",
+    categoryType: "lunch",
+    parentId: "LunchEntree",
+  },
+  {
+    id: 19,
+    categoryName: "DINNER ENTREE",
+    categoryChineseName: "Resident 19",
+    categoryType: "dinner",
+    parentId: "dinnerEntree",
+  },
+  {
+    id: 20,
+    categoryName: "LUNCH ALTERNATIVE",
+    categoryChineseName: "Resident 20",
+    categoryType: "lunch",
+    parentId: "LunchAlternative",
+  },
+  {
+    id: 21,
+    categoryName: "BREAKFAST DAILY SPECIAL",
+    categoryChineseName: "Resident 21",
+    categoryType: "breakfast",
+    parentId: "breakfastDailySpecial",
+  },
+  {
+    id: 22,
+    categoryName: "DINNER DESSERT",
+    categoryChineseName: "Resident 22",
+    categoryType: "dinner",
+    parentId: "dinnerDessert",
+  },
+  {
+    id: 23,
+    categoryName: "LUNCH SOUP",
+    categoryChineseName: "Resident 23",
+    categoryType: "lunch",
+    parentId: "lunchSoup",
+  },
+  {
+    id: 24,
+    categoryName: "DINNER ALTERNATIVE",
+    categoryChineseName: "Resident 24",
+    categoryType: "dinner",
+    parentId: "dinnerAlternative",
+  },
+  {
+    id: 25,
+    categoryName: "BREAKFAST DAILY SPECIAL",
+    categoryChineseName: "Resident 25",
+    categoryType: "breakfast",
+    parentId: "breakfastDailySpecial",
+  },
+];
+
+
+
 
 export const mockDataContacts = [
   {

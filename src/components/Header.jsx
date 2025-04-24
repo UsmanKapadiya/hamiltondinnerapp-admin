@@ -14,7 +14,7 @@ import { useNavigate } from "react-router-dom";
 
 
 
-const Header = ({ title, icon, Buttons }) => {
+const Header = ({ title, icon, Buttons, addNewClick,  orderClick, showToggleClick }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const isMdDevices = useMediaQuery("(min-width: 724px)");
@@ -22,15 +22,7 @@ const Header = ({ title, icon, Buttons }) => {
   const navigate = useNavigate(); // Initialize useNavigate
 
 
-  const handleToggle = () => {
-    setShowDeleted((prev) => !prev);
-  };
-  const handleAddNewClick = () => {
-    navigate("/room-details/create");
-  };
-  const handleOrderClick = () => {
-    navigate("/room-details/order");
-  };
+  
   return (
     <Box mb="30px">
       <Box display="flex" alignItems="center" justifyContent="flex-start">
@@ -68,7 +60,7 @@ const Header = ({ title, icon, Buttons }) => {
               color: colors.greenAccent[700],
               hoverColor: colors.greenAccent[800],
               icon: <AddOutlined />,
-              onClick: handleAddNewClick,
+              onClick: addNewClick,
             },
             {
               label: "Bulk Delete",
@@ -81,14 +73,14 @@ const Header = ({ title, icon, Buttons }) => {
               color: colors.blueAccent[700],
               hoverColor: colors.blueAccent[800],
               icon: <MenuOutlined />,
-              onClick: handleOrderClick,
+              onClick: orderClick,
             },
             {
               label: showDeleted ? "Hide Deleted" : "Show Deleted",
               color: showDeleted ? colors.skyBlueAccent[700] : colors.gray[700],
               hoverColor: showDeleted ? colors.skyBlueAccent[800] : colors.gray[800],
               icon: showDeleted ? <VisibilityOffOutlined /> : <VisibilityOutlined />,
-              onClick: handleToggle,
+              onClick: showToggleClick,
             },
           ].map((button, index) => (
             <Button

@@ -1,10 +1,11 @@
 import { Box, Typography, useTheme, Button } from "@mui/material";
 import { Header } from "../../components";
 import { DataGrid } from "@mui/x-data-grid";
-import { mockDataRomm } from "../../data/mockData";
+import { mockDataCategories } from "../../data/mockData";
 import { tokens } from "../../theme";
 import {
   AdminPanelSettingsOutlined,
+  DvrOutlined,
   Home,
   SecurityOutlined,
 } from "@mui/icons-material";
@@ -12,14 +13,14 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
 
-const Room = () => {
+const Category = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
-  
+
   const handleDelete = (id) => {
     setSelectedId(id);
     setDialogOpen(true);
@@ -37,69 +38,63 @@ const Room = () => {
   };
 
   const handleView = (id) => {
-    const selectedRow = mockDataRomm.find((row) => row.id === id);
-    navigate(`/room-details/${id}`, { state: selectedRow }); 
+    const selectedRow = mockDataCategories.find((row) => row.id === id);
+    navigate(`/category-details/${id}`, { state: selectedRow });
   };
 
   const handleEdit = (id) => {
-    const selectedRow = mockDataRomm.find((row) => row.id === id);
-    navigate(`/room-details/${id}/edit`, { state: selectedRow });
+    const selectedRow = mockDataCategories.find((row) => row.id === id);
+    navigate(`/category-details/${id}/edit`, { state: selectedRow });
   };
-
   const handleToggle = () => {
     setShowDeleted((prev) => !prev);
   };
   const handleAddNewClick = () => {
-    navigate("/room-details/create");
+    navigate("/category-details/create");
   };
   const handleOrderClick = () => {
-    navigate("/room-details/order");
+    navigate("/category-details/order");
   };
+
   const columns = [
-    { field: "unitNumber", headerName: "Unit Number" },
+    { field: "categoryName", headerName: "Category Name" },
     {
-      field: "resident_name",
-      headerName: "Resident Name",
+      field: "categoryChineseName",
+      headerName: "Category Chinese Name",
       // // flex: 1,
       // cellClassName: "name-column--cell",
     },
-    {
-      field: "occupancy",
-      headerName: "Occupancy",
-      type: "number",
-      headerAlign: "left",
-      align: "left",
-    },
-    { field: "language_preference", headerName: "Language Preference", flex: 1 },
-    {
-      field: "active",
-      headerName: "Active",
-      flex: 1,
-      renderCell: ({ row: { active } }) => {
-        return (
-          <Box
-            width="120px"
-            p={1}
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            gap={1}
-            bgcolor={
-              active === true
-                ? colors.greenAccent[600]
-                : colors.greenAccent[700]
-            }
-            borderRadius={1}
-          >
-            {active === true && <AdminPanelSettingsOutlined />}
-            {active === false && <SecurityOutlined />}
-            <Typography textTransform="capitalize">
-              {active === true ? "active" : "Inactive"}
-            </Typography>
-          </Box>
-        );
-      },
-    },
+    { field: "categoryType", headerName: "Category Type", flex: 1 },
+    { field: "parentId", headerName: "Parent Id", flex: 1 },
+    // {
+    //   field: "active",
+    //   headerName: "Active",
+    //   flex: 1,
+    //   renderCell: ({ row: { active } }) => {
+    //     return (
+    //       <Box
+    //         width="120px"
+    //         p={1}
+    //         display="flex"
+    //         alignItems="center"
+    //         justifyContent="center"
+    //         gap={1}
+    //         bgcolor={
+    //           active === true
+    //             ? colors.greenAccent[600]
+    //             : colors.greenAccent[700]
+    //         }
+    //         borderRadius={1}
+    //       >
+    //         {active === true && <AdminPanelSettingsOutlined />}
+    //         {active === false && <SecurityOutlined />}
+    //         <Typography textTransform="capitalize">
+    //           {active === true ? "active" : "Inactive"}
+    //         </Typography>
+    //       </Box>
+    //     );
+    //   },
+    // },
     {
       field: "actions",
       headerName: "Actions",
@@ -140,14 +135,14 @@ const Room = () => {
 
   return (
     <Box m="20px">
-      <Header 
-        title="Room Details" 
-        icon={<Home />}
-        Buttons={true} 
+      <Header
+        title="Category Details"
+        icon={<DvrOutlined />}
+        Buttons={true}
         addNewClick={handleAddNewClick}
         orderClick={handleOrderClick}
         showToggleClick={handleToggle}
-        />
+      />
       <Box
         mt="40px"
         height="75vh"
@@ -182,7 +177,7 @@ const Room = () => {
         }}
       >
         <DataGrid
-          rows={mockDataRomm}
+          rows={mockDataCategories}
           columns={columns}
           initialState={{
             pagination: {
@@ -193,19 +188,17 @@ const Room = () => {
           }}
           checkboxSelection
         />
-        
         <ConfirmationDialog
-        open={dialogOpen}
-        title="Confirm Delete"
-        message="Are you sure you want to delete this room?"
-        onConfirm={confirmDelete}
-        onCancel={cancelDelete}
-      />
-
+          open={dialogOpen}
+          title="Confirm Delete"
+          message={`Are you sure you want to delete the "${mockDataCategories.find((row) => row.id === selectedId)?.categoryName || "selected"}" category?`}
+          onConfirm={confirmDelete}
+          onCancel={cancelDelete}
+        />
       </Box>
     </Box>
   );
 };
 
-export default Room;
+export default Category;
 
