@@ -710,7 +710,20 @@ export const mockDataItems =  [
 ];
 
 
+export const mockOptions = [
 
+
+  { id: 1, optionsName: "Yam Fries ( extra $5)", optionsChineseName: "豆腐炒", isPaidItem: false },
+  { id: 2, optionsName: "Noodles", optionsChineseName: "糖醋里脊", isPaidItem: true },
+  { id: 3, optionsName: "Rice", optionsChineseName: "炒饭", isPaidItem: true },
+];
+
+export const mockPreferences = [
+  { id: 1, preferencesName: "Less Oil", preferencesChineseName: "豆腐炒" },
+  { id: 2, preferencesName: "Less Salt", preferencesChineseName: "豆腐炒" },
+  { id: 3, preferencesName: "Less Sugar", preferencesChineseName: "豆腐炒" },
+  { id: 4, preferencesName: "No Rice", preferencesChineseName: "豆腐炒" }
+];
 
 
 export const mockDataContacts = [

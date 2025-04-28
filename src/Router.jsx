@@ -28,29 +28,53 @@ import ItemDetailsView from "./scenes/item/itemDetails-view";
 import ItemDetailsForm from "./scenes/item/itemDetails-form";
 import ItemDetailsOrder from "./scenes/item/itemDetailsOrder";
 import Login from "./scenes/login";
+import ItemOptions from "./scenes/options";
+import ItemoptionsForm from "./scenes/options/itemDetails-form";
+import ItemOptionsView from "./scenes/options/itemDetails-view";
+import ItemPreferences from "./scenes/preferences";
+import ItemPreferencesView from "./scenes/preferences/itemPreferences-view";
+import ItemPreferencesForm from "./scenes/preferences/itemPreferences-form";
 
 const AppRouter = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<Login/>}/>
+        <Route path="/login" element={<Login />} />
         <Route path="/" element={<App />}>
           <Route path="/" element={<Dashboard />} />
+          {/*Room  */}
           <Route path="/room-details" element={<Room />} />
-          <Route path="/room-details/:id" element={<RoomDetailsView />} />
-          <Route path="/room-details/:id/edit" element={<RoomDetailsForm />} />
           <Route path="/room-details/create" element={<RoomDetailsForm />} />
-          <Route path="/room-details/order" element={<RoomDetailsOrder/>} />
-          <Route path="/category-details" element={<Category />} />  
-          <Route path="/category-details/:id" element={<CategoryDetailsView />} />
-          <Route path="/category-details/:id/edit" element={<CategoryDetailsForm />} />
+          <Route path="/room-details/:id/edit" element={<RoomDetailsForm />} />
+          <Route path="/room-details/:id" element={<RoomDetailsView />} />
+          <Route path="/room-details/order" element={<RoomDetailsOrder />} />
+          {/*Category  */}
+          <Route path="/category-details" element={<Category />} />
           <Route path="/category-details/create" element={<CategoryDetailsForm />} />
-          <Route path="/category-details/order" element={<CategoryDetailsOrder/>} />     
-          <Route path="/item-details" element={<Item />} />  
+          <Route path="/category-details/:id/edit" element={<CategoryDetailsForm />} />
+          <Route path="/category-details/:id" element={<CategoryDetailsView />} />
+          <Route path="/category-details/order" element={<CategoryDetailsOrder />} />
+          {/*Item  */}
+          <Route path="/item-details" element={<Item />} />
           <Route path="/item-details/:id" element={<ItemDetailsView />} />
           <Route path="/item-details/:id/edit" element={<ItemDetailsForm />} />
           <Route path="/item-details/create" element={<ItemDetailsForm />} />
-          <Route path="/item-details/order" element={<ItemDetailsOrder/>} />        
+          <Route path="/item-details/order" element={<ItemDetailsOrder />} />
+          {/*Item Options */}
+          <Route path="/item-options" element={<ItemOptions />} />
+          <Route path="/item-options/create" element={<ItemoptionsForm />} />
+          <Route path="/item-options/:id/edit" element={<ItemoptionsForm />} />
+          <Route path="/item-options/:id" element={<ItemOptionsView />} />
+          {/*Item Preferences */}
+          <Route path="/item-preferences" element={<ItemPreferences />} />
+          <Route path="/item-preferences/create" element={<ItemPreferencesForm />} />
+          <Route path="/item-preferences/:id/edit" element={<ItemPreferencesForm />} />
+          <Route path="/item-preferences/:id" element={<ItemPreferencesView />} />
+
+
+
+
+
           <Route path="/team" element={<Team />} />
           <Route path="/contacts" element={<Contacts />} />
           <Route path="/invoices" element={<Invoices />} />

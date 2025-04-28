@@ -198,39 +198,39 @@ const SideBar = () => {
                 />
                 <Item
                   title="Item Options"
-                  path="/sub-item-2"
+                  path="/item-options"
                   colors={colors}
                   icon={<ContactsOutlined />}
                 />
                 <Item
                   title="Item Preferences"
-                  path="/sub-item-3"
+                  path="/item-preferences"
                   colors={colors}
                   icon={<ReceiptOutlined />}
                 />
               </List>
             </Collapse>
           </List>
-          <Item
+          {/* <Item
             title="Manage Team"
             path="/team"
             colors={colors}
             icon={<PeopleAltOutlined />}
-          />
-          <Item
+          /> */}
+          {/* <Item
             title="Contacts Information"
             path="/contacts"
             colors={colors}
             icon={<ContactsOutlined />}
-          />
-          <Item
+          /> */}
+          {/* <Item
             title="Invoices Balances"
             path="/invoices"
             colors={colors}
             icon={<ReceiptOutlined />}
-          />
+          /> */}
         </Menu>
-        <Typography
+        {/* <Typography
           variant="h6"
           color={colors.gray[300]}
           sx={{ m: "15px 0 5px 20px" }}
@@ -315,7 +315,7 @@ const SideBar = () => {
             colors={colors}
             icon={<WavesOutlined />}
           />
-        </Menu>
+        </Menu> */}
       </Box>
     </Sidebar>
   );
