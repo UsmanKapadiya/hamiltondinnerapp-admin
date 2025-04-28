@@ -23,6 +23,10 @@ import Category from "./scenes/category";
 import CategoryDetailsView from "./scenes/category/caregoryDetails-view";
 import CategoryDetailsForm from "./scenes/category/caregoryDetails-form";
 import CategoryDetailsOrder from "./scenes/category/caregoryDetailsOrder";
+import Item from "./scenes/item";
+import ItemDetailsView from "./scenes/item/itemDetails-view";
+import ItemDetailsForm from "./scenes/item/itemDetails-form";
+import ItemDetailsOrder from "./scenes/item/itemDetailsOrder";
 import Login from "./scenes/login";
 
 const AppRouter = () => {
@@ -41,7 +45,12 @@ const AppRouter = () => {
           <Route path="/category-details/:id" element={<CategoryDetailsView />} />
           <Route path="/category-details/:id/edit" element={<CategoryDetailsForm />} />
           <Route path="/category-details/create" element={<CategoryDetailsForm />} />
-          <Route path="/category-details/order" element={<CategoryDetailsOrder/>} />        
+          <Route path="/category-details/order" element={<CategoryDetailsOrder/>} />     
+          <Route path="/item-details" element={<Item />} />  
+          <Route path="/item-details/:id" element={<ItemDetailsView />} />
+          <Route path="/item-details/:id/edit" element={<ItemDetailsForm />} />
+          <Route path="/item-details/create" element={<ItemDetailsForm />} />
+          <Route path="/item-details/order" element={<ItemDetailsOrder/>} />        
           <Route path="/team" element={<Team />} />
           <Route path="/contacts" element={<Contacts />} />
           <Route path="/invoices" element={<Invoices />} />

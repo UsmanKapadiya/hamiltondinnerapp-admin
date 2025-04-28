@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { Avatar, Box, IconButton, Typography, useTheme } from "@mui/material";
+import { Avatar, Box, IconButton, Typography, useTheme, Collapse, List, ListItemButton, ListItemText } from "@mui/material";
 import { useContext, useState } from "react";
 import { tokens } from "../../../theme";
 import { Menu, MenuItem, Sidebar } from "react-pro-sidebar";
@@ -9,6 +9,8 @@ import {
   ContactsOutlined,
   DashboardOutlined,
   DonutLargeOutlined,
+  ExpandLessOutlined,
+  ExpandMoreOutlined,
   HelpOutlineOutlined,
   Home,
   HomeMaxOutlined,
@@ -16,6 +18,7 @@ import {
   MenuOutlined,
   PeopleAltOutlined,
   PersonOutlined,
+  PlaylistAddOutlined,
   ReceiptOutlined,
   TimelineOutlined,
   WavesOutlined,
@@ -32,6 +35,11 @@ const SideBar = () => {
   const { toggled, setToggled } = useContext(ToggledContext);
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const handleDropdownToggle = () => {
+    setDropdownOpen(!dropdownOpen);
+  };
   return (
     <Sidebar
       backgroundColor={colors.primary[400]}
@@ -169,6 +177,40 @@ const SideBar = () => {
             colors={colors}
             icon={<Home />}
           />
+           <List>
+            <ListItemButton onClick={handleDropdownToggle}>
+              <ListItemText
+                primary="Manage Items"
+                primaryTypographyProps={{
+                  color: colors.gray[100],
+                  fontWeight: "bold",
+                }}
+              />
+              {dropdownOpen ? <ExpandLessOutlined /> : <ExpandMoreOutlined />}
+            </ListItemButton>
+            <Collapse in={dropdownOpen} timeout="auto" unmountOnExit>
+              <List component="div" disablePadding>
+                <Item
+                  title="Item Details"
+                  path="/item-details"
+                  colors={colors}
+                  icon={<PlaylistAddOutlined />}
+                />
+                <Item
+                  title="Item Options"
+                  path="/sub-item-2"
+                  colors={colors}
+                  icon={<ContactsOutlined />}
+                />
+                <Item
+                  title="Item Preferences"
+                  path="/sub-item-3"
+                  colors={colors}
+                  icon={<ReceiptOutlined />}
+                />
+              </List>
+            </Collapse>
+          </List>
           <Item
             title="Manage Team"
             path="/team"
