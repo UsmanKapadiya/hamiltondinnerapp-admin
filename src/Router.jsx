@@ -23,11 +23,13 @@ import Category from "./scenes/category";
 import CategoryDetailsView from "./scenes/category/caregoryDetails-view";
 import CategoryDetailsForm from "./scenes/category/caregoryDetails-form";
 import CategoryDetailsOrder from "./scenes/category/caregoryDetailsOrder";
+import Login from "./scenes/login";
 
 const AppRouter = () => {
   return (
     <Router>
       <Routes>
+        <Route path="/login" element={<Login/>}/>
         <Route path="/" element={<App />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/room-details" element={<Room />} />
