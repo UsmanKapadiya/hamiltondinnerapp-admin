@@ -1,6 +1,7 @@
 import React from "react";
 import { Box, TextField, Button, Typography, Link } from "@mui/material";
 import shipImage from "../../assets/images/ship.jpg";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 const Login = () => {
   const handleSubmit = (event) => {
@@ -26,7 +27,7 @@ const Login = () => {
       <div className="row h-100">
         {/* Left side (8 columns) */}
         <div
-          className="col-md-8 d-none d-md-block p-0 position-relative"
+          className="col-8 p-0 position-relative"
           style={{
             backgroundImage: `url(${shipImage})`,
             backgroundSize: "cover",
@@ -35,12 +36,14 @@ const Login = () => {
         >
           <div className="position-absolute bottom-0 start-0 text-white p-4">
             <h2>🍽 DINNING APP</h2>
-            <p className="mb-0">Welcome to Voyager. The Missing Admin for Laravel</p>
+            <p className="mb-0">
+              Welcome to Voyager. The Missing Admin for Laravel
+            </p>
           </div>
         </div>
 
         {/* Right side (4 columns) */}
-        <div className="col-md-4 d-flex align-items-center justify-content-center bg-white">
+        <div className="col-4 d-flex align-items-center justify-content-center bg-white">
           <div className="w-75">
             <Typography variant="h4" className="mb-4 text-dark" gutterBottom>
               SIGN IN BELOW:
@@ -91,6 +94,13 @@ const Login = () => {
                 <Link href="/forgot-password" variant="body2" color="secondary">
                   Forgot Password?
                 </Link>
+              </Box>
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+                mt="20px"
+              >
                 <Button type="submit" color="secondary" variant="contained">
                   Login
                 </Button>
