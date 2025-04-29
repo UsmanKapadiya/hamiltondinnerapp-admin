@@ -8,20 +8,23 @@ import { useLocation } from "react-router-dom";
 
 
 const validationSchema = yup.object().shape({
-    formTypeName: yup.string().required("FormType Name is required"),
+  formTypeName: yup.string().required("FormType Name is required"),
 });
 
 
 const fromTypeDetailsForm = () => {
   const location = useLocation();
   const formTypeDetails = location.state;
+  console.log("formTypeDetails",formTypeDetails)
   const isNonMobile = useMediaQuery("(min-width:600px)");
 
   const initialValues = {
     formTypeName: formTypeDetails?.formTypeName || "",
+    allowPrint: formTypeDetails?.allowPrint || false,
+    allowMail: formTypeDetails?.allowMail || false,
   };
 
-  
+
   const handleFormSubmit = (values, actions) => {
     console.log("Form Submitted:", values);
     actions.resetForm({
@@ -80,6 +83,7 @@ const fromTypeDetailsForm = () => {
             <Box
               display="grid"
               gap="30px"
+              mt="15px"
               gridTemplateColumns="repeat(4, minmax(0, 1fr))"
               sx={{
                 "& > div": {
@@ -87,23 +91,24 @@ const fromTypeDetailsForm = () => {
                 },
               }}
             >
-              <TextField
-                fullWidth
-                variant="filled"
-                type="number"
-                label="Allow Print"
-                onBlur={handleBlur}
-                onChange={handleChange}
-                value={values.AllowPrint}
-                name="AllowPrint"
-                error={touched.AllowPrint && Boolean(errors.AllowPrint)}
-                helperText={touched.AllowPrint && errors.AllowPrint}
-                sx={{ gridColumn: "span 4" }}
-              />
+              <FormGroup>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      color="secondary"
+                      checked={values.allowPrint}
+                      onChange={(e) => setFieldValue("allowPrint", e.target.checked)}
+                      name="allowPrint"
+                    />
+                  }
+                  label="Allow Print"
+                />
+              </FormGroup>
             </Box>
             <Box
               display="grid"
               gap="30px"
+              mt="15px"
               gridTemplateColumns="repeat(4, minmax(0, 1fr))"
               sx={{
                 "& > div": {
@@ -111,19 +116,20 @@ const fromTypeDetailsForm = () => {
                 },
               }}
             >
-              <TextField
-                fullWidth
-                variant="filled"
-                type="number"
-                label="Allow Mail"
-                onBlur={handleBlur}
-                onChange={handleChange}
-                value={values.AllowMail}
-                name="AllowMail"
-                error={touched.AllowMail && Boolean(errors.AllowMail)}
-                helperText={touched.AllowMail && errors.AllowMail}
-                sx={{ gridColumn: "span 4" }}
-              />
+              <FormGroup>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      color="secondary"
+                      checked={values.allowMail}
+                      onChange={(e) => setFieldValue("allowMail", e.target.checked)}
+                      name="allowMail"
+                    />
+                  }
+                  label="Allow Mail"
+                />
+              </FormGroup>
+            
             </Box>
             <Box
               display="flex"

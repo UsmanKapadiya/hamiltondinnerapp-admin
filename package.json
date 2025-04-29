@@ -30,7 +30,6 @@
     "@nivo/line": "^0.84.0",
     "@nivo/pie": "^0.84.0",
     "@nivo/stream": "^0.84.0",
-    "bootstrap": "^5.3.5",
     "formik": "^2.4.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

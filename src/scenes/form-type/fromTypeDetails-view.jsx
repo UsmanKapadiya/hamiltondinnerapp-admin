@@ -45,7 +45,7 @@ const FormTypeDetailsView = () => {
             fontWeight="600"
             mt="10px"
           >
-            {fromTypeDetails?.FormTypeName}
+            {fromTypeDetails?.formTypeName}
           </Typography>
         </Box>
         <Divider sx={{ bgcolor: colors.gray[300] }} />
@@ -59,7 +59,7 @@ const FormTypeDetailsView = () => {
             fontWeight="600"
             mt="10px"
           >
-            {fromTypeDetails?.AllowPrint}
+            {fromTypeDetails?.allowPrint}
           </Typography>
         </Box>
         <Divider sx={{ bgcolor: colors.gray[300] }} />
@@ -73,7 +73,7 @@ const FormTypeDetailsView = () => {
             fontWeight="600"
             mt="10px"
           >
-            {fromTypeDetails?.AllowMail}
+            {fromTypeDetails?.allowMail}
           </Typography>
         </Box>
         <Divider sx={{ bgcolor: colors.gray[300] }} />

@@ -104,6 +104,10 @@ const AppRouter = () => {
             path="/formType-details/:id"
             element={<FormTypeDetailsView />}
           />
+            <Route
+            path="/formType-details/:id/edit"
+            element={<FromTypeDetailsForm />}
+          />
 
           <Route path="/team" element={<Team />} />
           <Route path="/contacts" element={<Contacts />} />

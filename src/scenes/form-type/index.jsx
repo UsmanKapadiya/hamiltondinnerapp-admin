@@ -42,10 +42,10 @@ const FormType = () => {
     navigate(`/formType-details/${id}`, { state: selectedRow });
   };
 
-  // const handleEdit = (id) => {
-  //   const selectedRow = mockDataFormType.find((row) => row.id === id);
-  //   navigate(`/category-details/${id}/edit`, { state: selectedRow });
-  // };
+  const handleEdit = (id) => {
+    const selectedRow = mockDataFormType.find((row) => row.id === id);
+    navigate(`/formType-details/${id}/edit`, { state: selectedRow });
+  };
   const handleToggle = () => {
     setShowDeleted((prev) => !prev);
   };
@@ -53,16 +53,17 @@ const FormType = () => {
     navigate("/formType-details/create");
   };
   const handleOrderClick = () => {
-    navigate("/category-details/order");
+    // navigate("/category-details/order");
   };
 
   const columns = [
-    { field: "FormTypeName", headerName: "Name" },
+    { field: "formTypeName", headerName: "Name",flex: 1, },
     {
-      field: "AllowPrint",
+      field: "allowPrint",
       headerName: "Allow Print",
+      flex: 1,
     },
-    { field: "AllowMail", headerName: "Allow Mail"},
+    { field: "allowMail", headerName: "Allow Mail", flex: 1,},
     // {
     //   field: "active",
     //   headerName: "Active",
