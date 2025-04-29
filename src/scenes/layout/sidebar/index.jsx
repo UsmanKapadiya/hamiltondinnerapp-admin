@@ -7,6 +7,7 @@ import {
   BarChartOutlined,
   CalendarTodayOutlined,
   ContactsOutlined,
+  CreateOutlined,
   DashboardOutlined,
   DonutLargeOutlined,
   ExpandLessOutlined,
@@ -211,12 +212,12 @@ const SideBar = () => {
               </List>
             </Collapse>
           </List>
-          {/* <Item
-            title="Manage Team"
-            path="/team"
+          <Item
+            title="Menu Details"
+            path="/menu-details"
             colors={colors}
-            icon={<PeopleAltOutlined />}
-          /> */}
+            icon={<CreateOutlined />}
+          />
           {/* <Item
             title="Contacts Information"
             path="/contacts"
