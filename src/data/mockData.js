@@ -709,6 +709,26 @@ export const mockDataItems =  [
   }
 ];
 
+export const mockDataFormType = [
+  {
+    id: 1,
+    FormTypeName: "Incident Form",
+    AllowPrint: "1",
+    AllowMail: "1",
+  },
+  {
+    id: 2,
+    FormTypeName: "Log Form",
+    AllowPrint: "1",
+    AllowMail: "0",
+  },
+  {
+    id: 3,
+    FormTypeName: "Moveln Summary Form",
+    AllowPrint: "1",
+    AllowMail: "1",
+  }
+];
 
 export const mockOptions = [
 

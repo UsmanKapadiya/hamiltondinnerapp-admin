@@ -177,7 +177,13 @@ const SideBar = () => {
             colors={colors}
             icon={<Home />}
           />
-           <List>
+          <Item
+            title="Form-Type"
+            path="/form-type"
+            colors={colors}
+            icon={<Home />}
+          />
+          <List>
             <ListItemButton onClick={handleDropdownToggle}>
               <ListItemText
                 primary="Manage Items"
