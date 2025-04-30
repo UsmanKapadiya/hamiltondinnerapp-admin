@@ -15,6 +15,7 @@ import {
   HelpOutlineOutlined,
   Home,
   HomeMaxOutlined,
+  LocalPizzaOutlined,
   MapOutlined,
   MenuOutlined,
   PeopleAltOutlined,
@@ -37,9 +38,14 @@ const SideBar = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [reportsDropdownOpen, setReportsDropdownOpen] = useState(false);
+
 
   const handleDropdownToggle = () => {
     setDropdownOpen(!dropdownOpen);
+  };
+  const handleReportsDropdownToggle = () => {
+    setReportsDropdownOpen(!reportsDropdownOpen);
   };
   return (
     <Sidebar
@@ -218,6 +224,28 @@ const SideBar = () => {
             colors={colors}
             icon={<CreateOutlined />}
           />
+          <List>
+            <ListItemButton onClick={handleReportsDropdownToggle}>
+              <ListItemText
+                primary="Reports"
+                primaryTypographyProps={{
+                  color: colors.gray[100],
+                  fontWeight: "bold",
+                }}
+              />
+              {reportsDropdownOpen ? <ExpandLessOutlined /> : <ExpandMoreOutlined />}
+            </ListItemButton>
+            <Collapse in={reportsDropdownOpen} timeout="auto" unmountOnExit>
+              <List component="div" disablePadding>
+                <Item
+                  title="Order Details"
+                  path="/order-details"
+                  colors={colors}
+                  icon={<LocalPizzaOutlined />}
+                />
+              </List>
+            </Collapse>
+          </List>
           {/* <Item
             title="Contacts Information"
             path="/contacts"
