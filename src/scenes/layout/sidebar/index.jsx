@@ -22,6 +22,7 @@ import {
   PersonOutlined,
   PlaylistAddOutlined,
   ReceiptOutlined,
+  SettingsOutlined,
   TimelineOutlined,
   WavesOutlined,
   
@@ -246,6 +247,12 @@ const SideBar = () => {
               </List>
             </Collapse>
           </List>
+          <Item
+            title="Settings"
+            path="/settings"
+            colors={colors}
+            icon={<SettingsOutlined />}
+          />
           {/* <Item
             title="Contacts Information"
             path="/contacts"

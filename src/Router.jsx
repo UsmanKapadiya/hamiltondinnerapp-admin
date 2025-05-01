@@ -39,6 +39,7 @@ import MenuDetailsForm from "./scenes/menuDetails/menuDetails-form";
 import MenuDetailsView from "./scenes/menuDetails/menuDetails-view";
 import OrderDetails from "./scenes/orderDetails";
 import OrderDetailsForm from "./scenes/orderDetails/orderDetails-form";
+import Setting from "./scenes/settings";
 
 const AppRouter = () => {
   return (
@@ -84,7 +85,11 @@ const AppRouter = () => {
           <Route path="/order-details" element={<OrderDetails />} />
           <Route path="/order-details/create" element={<OrderDetailsForm />} />
 
-          
+          {/*Menu Details */}
+          <Route path="/settings" element={<Setting />} />
+
+
+
 
 
 
