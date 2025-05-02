@@ -40,7 +40,7 @@ const MenuDetailsView = () => {
                         Menu Name
                     </Typography>
                     <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                        {menuDetails?.menuName}
+                        {menuDetails?.menu_name}
                     </Typography>
                 </Box>
                 <Divider sx={{ bgcolor: colors.gray[300] }} />
@@ -49,7 +49,13 @@ const MenuDetailsView = () => {
                         Date
                     </Typography>
                     <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                        {menuDetails?.date}
+                        {menuDetails?.date
+                            ? new Date(menuDetails.date).toLocaleDateString("en-US", {
+                                month: "2-digit",
+                                day: "2-digit",
+                                year: "numeric",
+                            })
+                            : ""}
                     </Typography>
                 </Box>
                 <Divider sx={{ bgcolor: colors.gray[300] }} />

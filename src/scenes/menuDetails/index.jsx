@@ -13,16 +13,45 @@ import {
   SecurityOutlined,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
+import MenuServices from "../../services/menuServices";
 
 const MenuDetails = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
-
+  const perPageRecords = (10)
+  const [currentPage, setCurrentPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
+  const [menuList, setMenuList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    pageSize: 10,
+    total: 0,
+  });
+  useEffect(() => {
+    fetchMenuList();
+    setLoading(true)
+  }, [pagination.page, pagination.pageSize]);
+
+  const fetchMenuList = async () => {
+    try {
+      const response = await MenuServices.getMenuList({ currentPage, perPageRecords });
+      // console.log("response", response)
+      setMenuList(response.data);
+      setPagination((prev) => ({
+        ...prev,
+        total: response.pagination.total,
+      }));
+    } catch (error) {
+      console.error("Error fetching menu list:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleDelete = (id) => {
     setSelectedId(id);
@@ -41,7 +70,7 @@ const MenuDetails = () => {
   };
 
   const handleView = (id) => {
-    const selectedRow = mockMenuDetailsData.find((row) => row.id === id);
+    const selectedRow = menuList.find((row) => row.id === id);
     navigate(`/menu-details/${id}`, { state: selectedRow });
   };
 
@@ -60,11 +89,17 @@ const MenuDetails = () => {
   };
 
   const columns = [
-    { field: "menuName", headerName: "Menu Name",  flex: 1, },
+    { field: "menu_name", headerName: "Menu Name", flex: 1, },
     {
       field: "date",
       headerName: "Date",
       flex: 1,
+      valueFormatter: (params) => {
+        const date = new Date(params.value);
+        return `${date.getDate().toString().padStart(2, "0")}-${(date.getMonth() + 1)
+          .toString()
+          .padStart(2, "0")}-${date.getFullYear()}`;
+      },
       // cellClassName: "name-column--cell",
     },
     {
@@ -104,6 +139,16 @@ const MenuDetails = () => {
       },
     },
   ];
+
+  const handlePaginationChange = (newPaginationModel) => {
+    setPagination((prev) => ({
+      ...prev,
+      page: newPaginationModel.page + 1, // DataGrid uses 0-based indexing for pages
+      pageSize: newPaginationModel.pageSize,
+    }));
+    setCurrentPage(newPaginationModel.page + 1,)
+
+  };
 
   return (
     <Box m="20px">
@@ -149,15 +194,17 @@ const MenuDetails = () => {
         }}
       >
         <DataGrid
-          rows={mockMenuDetailsData}
+          rows={menuList}
           columns={columns}
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 10,
-              },
-            },
+          loading={loading}
+          pagination
+          paginationMode="server"
+          rowCount={pagination.total} 
+          paginationModel={{
+            page: pagination.page - 1,
+            pageSize: pagination.pageSize,
           }}
+          onPaginationModelChange={handlePaginationChange}
           checkboxSelection
         />
         <ConfirmationDialog

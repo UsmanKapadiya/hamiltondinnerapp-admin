@@ -23,6 +23,8 @@ import {
 } from "@mui/icons-material";
 import { tokens } from "../../theme";
 import { mockTransactions } from "../../data/mockData";
+import { useEffect, useState } from "react";
+import ItemServices from "../../services/itemServices";
 
 function Dashboard() {
   const theme = useTheme();
@@ -30,6 +32,25 @@ function Dashboard() {
   const isXlDevices = useMediaQuery("(min-width: 1260px)");
   const isMdDevices = useMediaQuery("(min-width: 724px)");
   const isXsDevices = useMediaQuery("(max-width: 436px)");
+  const [itemList, setItemList] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchItemsList();
+    setLoading(true)
+  }, []);
+
+  const fetchItemsList = async () => {
+    try {
+      const response = await ItemServices.getItemList();
+      console.log("response", response)
+      setItemList(response.data);
+    } catch (error) {
+      console.error("Error fetching menu list:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <Box m="20px">
       <Box display="flex" justifyContent="space-between">
@@ -65,8 +86,8 @@ function Dashboard() {
           isXlDevices
             ? "repeat(12, 1fr)"
             : isMdDevices
-            ? "repeat(6, 1fr)"
-            : "repeat(3, 1fr)"
+              ? "repeat(6, 1fr)"
+              : "repeat(3, 1fr)"
         }
         gridAutoRows="140px"
         gap="20px"
