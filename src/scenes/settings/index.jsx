@@ -31,26 +31,41 @@ const CustomTabPanel = ({ children, value, index }) => {
 const validationSchema = yup.object().shape({
   siteTitle: yup.string().required("Site Title is required"),
   siteOptions: yup.string().required("Site Options is required"),
+
   siteDescription: yup.string().required("Site Description is required"),
   siteDescriptionOptions: yup.string().required("Site Description Options is required"),
+
   siteLogo: yup.string().nullable(), // Optional field
+  siteLogoOptions: yup.string().required("Site Logo Options is required"),
+
+
   siteGoogleAnalyticId: yup.string().nullable(), // Optional field
+  siteGoogleAnalyticIdOptions: yup.string().required("Site Googlea Analytics Options is required"),
+
   siteGuidelines: yup.string().required("Site Guidelines are required"),
   siteGuidelinesOptions: yup.string().required("Site Guidelines Options are required"),
+
   siteGuidelinesChinese: yup.string().required("Site Guidelines (Chinese) are required"),
   siteGuidelinesChineseOptions: yup.string().required("Site Guidelines (Chinese) Options are required"),
 });
 const adminValidationSchema = yup.object().shape({
   adminTitle: yup.string().required("admin Title is required"),
   adminOptions: yup.string().required("admin Options is required"),
+
+  adminGoogleAnalyticId: yup.string().nullable(),
+  adminGoogleAnalyticIdOptions: yup.string().required("Admin Googlea Analytics Options is required"),
+
   adminDescription: yup.string().required("admin Description is required"),
   adminDescriptionOptions: yup.string().required("admin Description Options is required"),
-  adminLogo: yup.string().nullable(), // Optional field
-  adminGoogleAnalyticId: yup.string().nullable(), // Optional field
-  adminGuidelines: yup.string().required("admin Guidelines are required"),
-  adminGuidelinesOptions: yup.string().required("admin Guidelines Options are required"),
-  adminGuidelinesChinese: yup.string().required("admin Guidelines (Chinese) are required"),
-  adminGuidelinesChineseOptions: yup.string().required("admin Guidelines (Chinese) Options are required"),
+
+  adminLoader: yup.string().nullable(),
+  adminLoaderOptions: yup.string().required("admin Loader Options is required"),
+
+  adminLogo: yup.string().nullable(),
+  adminLogoOptions: yup.string().required("admin Logo Options is required"),
+
+  adminBgImage: yup.string().nullable(),
+  adminBgImageOptions: yup.string().required("Admin Background Image Options is required")
 });
 const Setting = () => {
   const theme = useTheme();
@@ -68,14 +83,16 @@ const Setting = () => {
 
     siteDescription: roomDetails?.siteDescription || "Dinning app",
     siteDescriptionOptions: roomDetails?.siteDescriptionOptions || "Site",
-    
+
     siteLogo: roomDetails?.siteLogo || "",
     siteLogoOptions: roomDetails?.siteLogoOptions || "Site",
-    
+
     siteGoogleAnalyticId: roomDetails?.siteGoogleAnalyticId || "",
     siteGoogleAnalyticIdOptions: roomDetails?.siteGoogleAnalyticIdOptions || "Site",
+
     siteGuidelines: roomDetails?.siteGuidelines || "Chocolate Chip Cookies can served as snacks.",
     siteGuidelinesOptions: roomDetails?.siteGuidelinesOptions || "Site",
+
     siteGuidelinesChinese: roomDetails?.siteGuidelinesChinese || "巧克力曲奇可以当零食吃。",
     siteGuidelinesChineseOptions: roomDetails?.siteGuidelinesChineseOptions || "Site",
   };
@@ -97,7 +114,7 @@ const Setting = () => {
 
     adminBgImage: roomDetails?.adminBgImage || "",
     adminBgImageOptions: roomDetails?.adminBgImageOptions || "Admin",
-   
+
   };
 
   const handleFormSubmit = (values, actions) => {
@@ -113,7 +130,7 @@ const Setting = () => {
     });
   };
 
-  
+
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -289,29 +306,22 @@ const Setting = () => {
                     <Box
                       display="flex"
                       flexDirection="column"
-                      alignItems="flex-start" // Align content to the left
-                      justifyContent="center"
+                      alignItems="flex-end" // Align content to the left
+                      justifyContent="flex-end"
                       sx={{ gridColumn: "span 2" }}
                       flex={1}
                     >
                       {/* Icons Right-Aligned */}
                       <Box
                         display="flex"
-                        justifyContent="flex-end"
-                        alignItems="center"
-                        gap="10px"
+                        justifyContent="flex-end" // Align buttons to the right
+                        alignItems="flex-end"
+                        gap="10px" // Small gap between buttons
                         mb="10px"
-                        width="100%" // Ensure icons are aligned properly
                       >
-                        <Button>
-                          <ArrowUpwardOutlined sx={{ color: colors.gray[100] }} />
-                        </Button>
-                        <Button>
-                          <ArrowDownwardOutlined sx={{ color: colors.gray[100] }} />
-                        </Button>
-                        <Button>
-                          <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
-                        </Button>
+                        <ArrowUpwardOutlined sx={{ color: colors.gray[100] }} />
+                        <ArrowDownwardOutlined sx={{ color: colors.gray[100] }} />
+                        <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
                       </Box>
 
                       {/* Dropdown */}
@@ -383,29 +393,22 @@ const Setting = () => {
                     <Box
                       display="flex"
                       flexDirection="column"
-                      alignItems="flex-start" // Align content to the left
-                      justifyContent="center"
+                      alignItems="flex-end" // Align content to the left
+                      justifyContent="flex-end"
                       sx={{ gridColumn: "span 2" }}
                       flex={1}
                     >
                       {/* Icons Right-Aligned */}
                       <Box
                         display="flex"
-                        justifyContent="flex-end"
-                        alignItems="center"
-                        gap="10px"
+                        justifyContent="flex-end" // Align buttons to the right
+                        alignItems="flex-end"
+                        gap="10px" // Small gap between buttons
                         mb="10px"
-                        width="100%" // Ensure icons are aligned properly
                       >
-                        <Button>
-                          <ArrowUpwardOutlined sx={{ color: colors.gray[100] }} />
-                        </Button>
-                        <Button>
-                          <ArrowDownwardOutlined sx={{ color: colors.gray[100] }} />
-                        </Button>
-                        <Button>
-                          <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
-                        </Button>
+                        <ArrowUpwardOutlined sx={{ color: colors.gray[100] }} />
+                        <ArrowDownwardOutlined sx={{ color: colors.gray[100] }} />
+                        <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
                       </Box>
 
                       {/* Dropdown */}
@@ -511,29 +514,22 @@ const Setting = () => {
                     <Box
                       display="flex"
                       flexDirection="column"
-                      alignItems="flex-start" // Align content to the left
-                      justifyContent="flex-start"
+                      alignItems="flex-end" // Align content to the left
+                      justifyContent="flex-end"
                       sx={{ gridColumn: "span 2" }}
                       flex={1}
                     >
                       {/* Icons Right-Aligned */}
                       <Box
                         display="flex"
-                        justifyContent="flex-end"
-                        alignItems="center"
-                        gap="10px"
+                        justifyContent="flex-end" // Align buttons to the right
+                        alignItems="flex-end"
+                        gap="10px" // Small gap between buttons
                         mb="10px"
-                        width="100%" // Ensure icons are aligned properly
                       >
-                        <Button>
-                          <ArrowUpwardOutlined sx={{ color: colors.gray[100] }} />
-                        </Button>
-                        <Button>
-                          <ArrowDownwardOutlined sx={{ color: colors.gray[100] }} />
-                        </Button>
-                        <Button>
-                          <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
-                        </Button>
+                        <ArrowUpwardOutlined sx={{ color: colors.gray[100] }} />
+                        <ArrowDownwardOutlined sx={{ color: colors.gray[100] }} />
+                        <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
                       </Box>
 
                       {/* Dropdown */}
@@ -605,29 +601,22 @@ const Setting = () => {
                     <Box
                       display="flex"
                       flexDirection="column"
-                      alignItems="flex-start" // Align content to the left
-                      justifyContent="center"
+                      alignItems="flex-end" // Align content to the left
+                      justifyContent="flex-end"
                       sx={{ gridColumn: "span 2" }}
                       flex={1}
                     >
                       {/* Icons Right-Aligned */}
                       <Box
                         display="flex"
-                        justifyContent="flex-end"
-                        alignItems="center"
-                        gap="10px"
+                        justifyContent="flex-end" // Align buttons to the right
+                        alignItems="flex-end"
+                        gap="10px" // Small gap between buttons
                         mb="10px"
-                        width="100%" // Ensure icons are aligned properly
                       >
-                        <Button>
-                          <ArrowUpwardOutlined sx={{ color: colors.gray[100] }} />
-                        </Button>
-                        <Button>
-                          <ArrowDownwardOutlined sx={{ color: colors.gray[100] }} />
-                        </Button>
-                        <Button>
-                          <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
-                        </Button>
+                        <ArrowUpwardOutlined sx={{ color: colors.gray[100] }} />
+                        <ArrowDownwardOutlined sx={{ color: colors.gray[100] }} />
+                        <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
                       </Box>
 
                       {/* Dropdown */}
@@ -701,7 +690,7 @@ const Setting = () => {
                     <Box
                       display="flex"
                       flexDirection="column"
-                      alignItems="flex-start" // Align content to the left
+                      alignItems="flex-end" // Align content to the left
                       justifyContent="flex-start"
                       sx={{ gridColumn: "span 2" }}
                       flex={1}
@@ -709,21 +698,15 @@ const Setting = () => {
                       {/* Icons Right-Aligned */}
                       <Box
                         display="flex"
-                        justifyContent="flex-end"
-                        alignItems="center"
-                        gap="10px"
+                        justifyContent="flex-end" // Align buttons to the right
+                        alignItems="flex-end"
+                        gap="10px" // Small gap between buttons
                         mb="10px"
-                        width="100%" // Ensure icons are aligned properly
+                        mt="10px"
                       >
-                        <Button>
-                          <ArrowUpwardOutlined sx={{ color: colors.gray[100] }} />
-                        </Button>
-                        <Button>
-                          <ArrowDownwardOutlined sx={{ color: colors.gray[100] }} />
-                        </Button>
-                        <Button>
-                          <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
-                        </Button>
+                        <ArrowUpwardOutlined sx={{ color: colors.gray[100] }} />
+                        <ArrowDownwardOutlined sx={{ color: colors.gray[100] }} />
+                        <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
                       </Box>
 
                       {/* Dropdown */}
@@ -797,7 +780,7 @@ const Setting = () => {
                     <Box
                       display="flex"
                       flexDirection="column"
-                      alignItems="flex-start" // Align content to the left
+                      alignItems="flex-end" // Align content to the left
                       justifyContent="flex-start"
                       sx={{ gridColumn: "span 2" }}
                       flex={1}
@@ -805,27 +788,22 @@ const Setting = () => {
                       {/* Icons Right-Aligned */}
                       <Box
                         display="flex"
-                        justifyContent="flex-end"
-                        alignItems="center"
-                        gap="10px"
+                        justifyContent="flex-end" // Align buttons to the right
+                        alignItems="flex-end"
+                        gap="10px" // Small gap between buttons
                         mb="10px"
-                        width="100%" // Ensure icons are aligned properly
+                        mt="10px"
                       >
-                        <Button>
-                          <ArrowUpwardOutlined sx={{ color: colors.gray[100] }} />
-                        </Button>
-                        <Button>
-                          <ArrowDownwardOutlined sx={{ color: colors.gray[100] }} />
-                        </Button>
-                        <Button>
-                          <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
-                        </Button>
+                        <ArrowUpwardOutlined sx={{ color: colors.gray[100] }} />
+                        <ArrowDownwardOutlined sx={{ color: colors.gray[100] }} />
+                        <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
                       </Box>
 
                       {/* Dropdown */}
                       <Autocomplete
                         fullWidth // Makes the dropdown full width
                         options={mockDataSiteRole}
+
                         getOptionLabel={(option) => option.label} // Ensure proper label rendering
                         value={mockDataSiteRole.find((option) => option.label === values.siteGuidelinesChineseOptions) || null}
                         onChange={(event, newValue) => {
@@ -859,7 +837,7 @@ const Setting = () => {
           </Box>
         </CustomTabPanel>
         <CustomTabPanel value={value} index={1}>
-        <Box>
+          <Box>
             <Formik
               onSubmit={handleAdminFormSubmit}
               initialValues={adminInitialValues}
@@ -923,29 +901,22 @@ const Setting = () => {
                     <Box
                       display="flex"
                       flexDirection="column"
-                      alignItems="flex-start" // Align content to the left
-                      justifyContent="center"
+                      alignItems="flex-end" // Align content to the left
+                      justifyContent="end"
                       sx={{ gridColumn: "span 2" }}
                       flex={1}
                     >
                       {/* Icons Right-Aligned */}
                       <Box
                         display="flex"
-                        justifyContent="flex-end"
-                        alignItems="center"
-                        gap="10px"
+                        justifyContent="flex-end" // Align buttons to the right
+                        alignItems="flex-end"
+                        gap="10px" // Small gap between buttons
                         mb="10px"
-                        width="100%" // Ensure icons are aligned properly
                       >
-                        <Button>
-                          <ArrowUpwardOutlined sx={{ color: colors.gray[100] }} />
-                        </Button>
-                        <Button>
-                          <ArrowDownwardOutlined sx={{ color: colors.gray[100] }} />
-                        </Button>
-                        <Button>
-                          <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
-                        </Button>
+                        <ArrowUpwardOutlined sx={{ color: colors.gray[100] }} />
+                        <ArrowDownwardOutlined sx={{ color: colors.gray[100] }} />
+                        <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
                       </Box>
 
                       {/* Dropdown */}
@@ -969,8 +940,8 @@ const Setting = () => {
                       />
                     </Box>
                   </Box>
-                    {/* Admin google Analytic  */}
-                    <Box
+                  {/* Admin google Analytic  */}
+                  <Box
                     display="grid"
                     gap="20px"
                     mt="20px"
@@ -985,8 +956,8 @@ const Setting = () => {
                       justifyContent="center"
                       flex={1}
                     >
-                      <Typography color={colors.gray[100]} mb="20px" fontWeight="500">
-                        Google Analytics Client ID (used for admin dashboard) 
+                      <Typography color={colors.gray[100]} mb="10px" fontWeight="500">
+                        Google Analytics Client ID (used for admin dashboard)
                         <Box
                           component="span"
                           ml="5px"
@@ -1017,7 +988,7 @@ const Setting = () => {
                     <Box
                       display="flex"
                       flexDirection="column"
-                      alignItems="flex-start" // Align content to the left
+                      alignItems="flex-end" // Align content to the left
                       justifyContent="center"
                       sx={{ gridColumn: "span 2" }}
                       flex={1}
@@ -1025,21 +996,14 @@ const Setting = () => {
                       {/* Icons Right-Aligned */}
                       <Box
                         display="flex"
-                        justifyContent="flex-end"
-                        alignItems="center"
-                        gap="10px"
+                        justifyContent="flex-end" // Align buttons to the right
+                        alignItems="flex-end"
+                        gap="10px" // Small gap between buttons
                         mb="10px"
-                        width="100%" // Ensure icons are aligned properly
                       >
-                        <Button>
-                          <ArrowUpwardOutlined sx={{ color: colors.gray[100] }} />
-                        </Button>
-                        <Button>
-                          <ArrowDownwardOutlined sx={{ color: colors.gray[100] }} />
-                        </Button>
-                        <Button>
-                          <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
-                        </Button>
+                        <ArrowUpwardOutlined sx={{ color: colors.gray[100] }} />
+                        <ArrowDownwardOutlined sx={{ color: colors.gray[100] }} />
+                        <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
                       </Box>
 
                       {/* Dropdown */}
@@ -1079,7 +1043,7 @@ const Setting = () => {
                       justifyContent="center"
                       flex={1}
                     >
-                      <Typography color={colors.gray[100]} mb="20px" fontWeight="500">
+                      <Typography color={colors.gray[100]} mb="10px" fontWeight="500">
                         Admin Description
                         <Box
                           component="span"
@@ -1111,29 +1075,28 @@ const Setting = () => {
                     <Box
                       display="flex"
                       flexDirection="column"
-                      alignItems="flex-start" // Align content to the left
-                      justifyContent="center"
+                      alignItems="flex-end" // Align content to the left
+                      justifyContent="flex-ends"
                       sx={{ gridColumn: "span 2" }}
                       flex={1}
                     >
                       {/* Icons Right-Aligned */}
                       <Box
                         display="flex"
-                        justifyContent="flex-end"
-                        alignItems="center"
-                        gap="10px"
+                        justifyContent="flex-end" // Align buttons to the right
+                        alignItems="flex-end"
+                        gap="10px" // Small gap between buttons
                         mb="10px"
-                        width="100%" // Ensure icons are aligned properly
                       >
-                        <Button>
-                          <ArrowUpwardOutlined sx={{ color: colors.gray[100] }} />
-                        </Button>
-                        <Button>
-                          <ArrowDownwardOutlined sx={{ color: colors.gray[100] }} />
-                        </Button>
-                        <Button>
-                          <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
-                        </Button>
+
+                        <ArrowUpwardOutlined sx={{ color: colors.gray[100] }} />
+
+
+                        <ArrowDownwardOutlined sx={{ color: colors.gray[100] }} />
+
+
+                        <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
+
                       </Box>
 
                       {/* Dropdown */}
@@ -1157,8 +1120,8 @@ const Setting = () => {
                       />
                     </Box>
                   </Box>
-                     {/* Admin Loader Logo */}
-                     <Box
+                  {/* Admin Loader Logo */}
+                  <Box
                     display="grid"
                     gap="20px"
                     mt="20px"
@@ -1239,7 +1202,7 @@ const Setting = () => {
                     <Box
                       display="flex"
                       flexDirection="column"
-                      alignItems="flex-start" // Align content to the left
+                      alignItems="flex-end" // Align content to the left
                       justifyContent="flex-start"
                       sx={{ gridColumn: "span 2" }}
                       flex={1}
@@ -1247,21 +1210,20 @@ const Setting = () => {
                       {/* Icons Right-Aligned */}
                       <Box
                         display="flex"
-                        justifyContent="flex-end"
-                        alignItems="center"
-                        gap="10px"
+                        justifyContent="flex-end" // Align buttons to the right
+                        alignItems="flex-end"
+                        gap="10px" // Small gap between buttons
                         mb="10px"
-                        width="100%" // Ensure icons are aligned properly
                       >
-                        <Button>
-                          <ArrowUpwardOutlined sx={{ color: colors.gray[100] }} />
-                        </Button>
-                        <Button>
-                          <ArrowDownwardOutlined sx={{ color: colors.gray[100] }} />
-                        </Button>
-                        <Button>
-                          <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
-                        </Button>
+
+                        <ArrowUpwardOutlined sx={{ color: colors.gray[100] }} />
+
+
+                        <ArrowDownwardOutlined sx={{ color: colors.gray[100] }} />
+
+
+                        <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
+
                       </Box>
 
                       {/* Dropdown */}
@@ -1367,29 +1329,22 @@ const Setting = () => {
                     <Box
                       display="flex"
                       flexDirection="column"
-                      alignItems="flex-start" // Align content to the left
-                      justifyContent="flex-start"
+                      alignItems="flex-end" // Align content to the left
+                      justifyContent="flex-ss"
                       sx={{ gridColumn: "span 2" }}
                       flex={1}
                     >
                       {/* Icons Right-Aligned */}
                       <Box
                         display="flex"
-                        justifyContent="flex-end"
-                        alignItems="center"
-                        gap="10px"
+                        justifyContent="flex-end" // Align buttons to the right
+                        alignItems="flex-end"
+                        gap="10px" // Small gap between buttons
                         mb="10px"
-                        width="100%" // Ensure icons are aligned properly
                       >
-                        <Button>
-                          <ArrowUpwardOutlined sx={{ color: colors.gray[100] }} />
-                        </Button>
-                        <Button>
-                          <ArrowDownwardOutlined sx={{ color: colors.gray[100] }} />
-                        </Button>
-                        <Button>
-                          <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
-                        </Button>
+                        <ArrowUpwardOutlined sx={{ color: colors.gray[100] }} />
+                        <ArrowDownwardOutlined sx={{ color: colors.gray[100] }} />
+                        <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
                       </Box>
 
                       {/* Dropdown */}
@@ -1397,24 +1352,24 @@ const Setting = () => {
                         fullWidth // Makes the dropdown full width
                         options={mockDataAdminRole}
                         getOptionLabel={(option) => option.label} // Ensure proper label rendering
-                        value={mockDataAdminRole.find((option) => option.label === values.adminDescriptionOptions) || null}
+                        value={mockDataAdminRole.find((option) => option.label === values.adminLogoOptions) || null}
                         onChange={(event, newValue) => {
-                          setFieldValue("adminDescriptionOptions", newValue ? newValue.label : ""); // Fix selection issue
+                          setFieldValue("adminLogoOptions", newValue ? newValue.label : ""); // Fix selection issue
                         }}
                         renderInput={(params) => (
                           <TextField
                             {...params}
                             variant="filled"
-                            error={touched.adminDescriptionOptions && Boolean(errors.adminDescriptionOptions)}
-                            helperText={touched.adminDescriptionOptions && errors.adminDescriptionOptions}
+                            error={touched.adminLogoOptions && Boolean(errors.adminLogoOptions)}
+                            helperText={touched.adminLogoOptions && errors.adminLogoOptions}
                           />
                         )}
                         sx={{ gridColumn: "span 4" }}
                       />
                     </Box>
                   </Box>
-                {/* Admin Background Image */}
-                <Box
+                  {/* Admin Background Image */}
+                  <Box
                     display="grid"
                     gap="20px"
                     mt="20px"
@@ -1430,7 +1385,7 @@ const Setting = () => {
                       flex={1}
                     >
                       <Typography color={colors.gray[100]} mb="20px" fontWeight="500">
-                      Admin Background Image
+                        Admin Background Image
                         <Box
                           component="span"
                           ml="5px"
@@ -1495,29 +1450,22 @@ const Setting = () => {
                     <Box
                       display="flex"
                       flexDirection="column"
-                      alignItems="flex-start" // Align content to the left
-                      justifyContent="flex-start"
+                      alignItems="flex-end" // Align content to the left
+                      justifyContent="flex-end"
                       sx={{ gridColumn: "span 2" }}
                       flex={1}
                     >
                       {/* Icons Right-Aligned */}
                       <Box
                         display="flex"
-                        justifyContent="flex-end"
-                        alignItems="center"
-                        gap="10px"
+                        justifyContent="flex-end" // Align buttons to the right
+                        alignItems="flex-end"
+                        gap="10px" // Small gap between buttons
                         mb="10px"
-                        width="100%" // Ensure icons are aligned properly
                       >
-                        <Button>
-                          <ArrowUpwardOutlined sx={{ color: colors.gray[100] }} />
-                        </Button>
-                        <Button>
-                          <ArrowDownwardOutlined sx={{ color: colors.gray[100] }} />
-                        </Button>
-                        <Button>
-                          <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
-                        </Button>
+                        <ArrowUpwardOutlined sx={{ color: colors.gray[100] }} />
+                        <ArrowDownwardOutlined sx={{ color: colors.gray[100] }} />
+                        <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
                       </Box>
 
                       {/* Dropdown */}
@@ -1541,8 +1489,8 @@ const Setting = () => {
                       />
                     </Box>
                   </Box>
-                 
-              
+
+
                   <Box
                     display="flex"
                     alignItems="center"
