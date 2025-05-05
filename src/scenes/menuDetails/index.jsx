@@ -40,7 +40,6 @@ const MenuDetails = () => {
   const fetchMenuList = async () => {
     try {
       const response = await MenuServices.getMenuList({ currentPage, perPageRecords });
-      // console.log("response", response)
       setMenuList(response.data);
       setPagination((prev) => ({
         ...prev,
@@ -48,6 +47,18 @@ const MenuDetails = () => {
       }));
     } catch (error) {
       console.error("Error fetching menu list:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const deleteMenu = async (id) => {
+    try {
+      const response = await MenuServices.deleteMenus(id);
+      console.log(response)
+      toast.success("Menu Deleted successfully!");
+    } catch (error) {
+      console.error("Error fetching menu list:", error);
+      toast.error("Failed to process menu. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -60,6 +71,8 @@ const MenuDetails = () => {
 
   const confirmDelete = () => {
     console.log(`Delete confirmed for ID: ${selectedId}`);
+    console.log(selectedId)
+    deleteMenu(selectedId)
     setDialogOpen(false); // Close the dialog
     // Add your delete logic here
   };
@@ -75,7 +88,7 @@ const MenuDetails = () => {
   };
 
   const handleEdit = (id) => {
-    const selectedRow = mockMenuDetailsData.find((row) => row.id === id);
+    const selectedRow = menuList.find((row) => row.id === id);
     navigate(`/menu-details/${id}/edit`, { state: selectedRow });
   };
   const handleToggle = () => {

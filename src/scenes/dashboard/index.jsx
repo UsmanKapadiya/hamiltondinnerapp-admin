@@ -25,14 +25,17 @@ import { tokens } from "../../theme";
 import { mockTransactions } from "../../data/mockData";
 import { useEffect, useState } from "react";
 import ItemServices from "../../services/itemServices";
+import { useDispatch } from "react-redux";
+import { setItemList } from "../../redux/action/itemAction";
 
 function Dashboard() {
+  const dispatch = useDispatch();
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const isXlDevices = useMediaQuery("(min-width: 1260px)");
   const isMdDevices = useMediaQuery("(min-width: 724px)");
   const isXsDevices = useMediaQuery("(max-width: 436px)");
-  const [itemList, setItemList] = useState([]);
+  const [itemListData, setItemListData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -44,7 +47,8 @@ function Dashboard() {
     try {
       const response = await ItemServices.getItemList();
       console.log("response", response)
-      setItemList(response.data);
+      dispatch(setItemList(response.data)); // Store in Redux
+      setItemListData(response.data);
     } catch (error) {
       console.error("Error fetching menu list:", error);
     } finally {

@@ -4,7 +4,7 @@ import { Formik } from "formik";
 import * as yup from "yup";
 import { ClearAllOutlined, CreateOutlined, DvrOutlined, Home } from "@mui/icons-material";
 import { useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { mockBreakFastAlternatives, mockBreakFastDailySpecial, mockDinnerAlternatives, mockDinnerDessert, mockDinnerEntree, mocklunchAlternatives, mocklunchDessert, mocklunchEntree, mockLunchSoups } from "../../data/mockData";
 import { useTheme } from "@emotion/react";
 import { tokens } from "../../theme";
@@ -12,10 +12,14 @@ import { tokens } from "../../theme";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { useSelector } from "react-redux";
+import CategoryServices from "../../services/categoryServices";
+import MenuServices from "../../services/menuServices";
+import { toast } from "react-toastify";
 
 
 const validationSchema = yup.object().shape({
-    menuName: yup.string().required("Menu  Name is required"),
+    menu_name: yup.string().required("Menu  Name is required"),
     date: yup.string().required("Date is required"),
 
 
@@ -27,36 +31,84 @@ const MenuDetailsForm = () => {
     const colors = tokens(theme.palette.mode);
     const location = useLocation();
     const optionsDetails = location.state;
-    console.log("optionsDetails", optionsDetails);
+    // console.log(optionsDetails)
+    // const itemList = useSelector((state) => state.itemState.item);
+    // console.log("fetch Redux Data", itemList)
     const isNonMobile = useMediaQuery("(min-width:600px)");
 
-    // Prepopulate states with optionsDetails data for editing
-    const [selected, setSelected] = useState("dailySpecial");
-    const [selectedItems, setSelectedItems] = useState(
-        optionsDetails?.selectedBreakfastItems?.dailySpecial.concat(
-            optionsDetails?.selectedBreakfastItems?.alternatives
-        ) || []
-    );
+    const [categoryListData, setCategoryListData] = useState([])
+
+    const BreakFastOptions = categoryListData.filter((category) => category.type === 1);
+    const LunchOptions = categoryListData.filter((category) => category.type === 2);
+    const DinnerOptions = categoryListData.filter((category) => category.type === 3);
+
+    const [selected, setSelected] = useState("");
+    const [selectedItems, setSelectedItems] = useState(optionsDetails?.items?.breakfast || []);
     const [searchTerm, setSearchTerm] = useState("");
 
-    const [selectedLunch, setSelectedLunch] = useState("lunchSoup");
-    const [selectedLunchItems, setSelectedLunchItems] = useState(
-        optionsDetails?.selectedLunchItems?.lunchSoup.concat(
-            optionsDetails?.selectedLunchItems?.lunchEntree,
-            optionsDetails?.selectedLunchItems?.lunchDessert,
-            optionsDetails?.selectedLunchItems?.lunchAlternatives
-        ) || []
-    );
+    const [selectedLunch, setSelectedLunch] = useState("");
+    const [selectedLunchItems, setSelectedLunchItems] = useState(optionsDetails?.items?.lunch || []);
     const [lunchSearchTerm, setLunchSearchTerm] = useState("");
 
-    const [selectedDinner, setSelectedDinner] = useState("dinnerEntree");
-    const [selectedDinnerItems, setSelectedDinnerItems] = useState(
-        optionsDetails?.selectedDinnerItems?.dinnerEntree.concat(
-            optionsDetails?.selectedDinnerItems?.dinnerAlternatives,
-            optionsDetails?.selectedDinnerItems?.dinnerDessert
-        ) || []
-    );
+    const [selectedDinner, setSelectedDinner] = useState("");
+    const [selectedDinnerItems, setSelectedDinnerItems] = useState(optionsDetails?.items?.dinner || []);
     const [dinnerSearchTerm, setDinnerSearchTerm] = useState("");
+
+    const initialValues = {
+        id: optionsDetails?.id && optionsDetails?.id,
+        menu_name: optionsDetails?.menu_name || "",
+        date: optionsDetails?.date || "",
+        breakfast: optionsDetails?.items?.breakfast?.length > 0 ? true : false,
+        lunch: optionsDetails?.items?.lunch?.length > 0 ? true : false,
+        dinner: optionsDetails?.items?.dinner?.length > 0 ? true : false,
+        BreakfastItems: optionsDetails?.items?.breakfast || [],
+        lunchItems: optionsDetails?.items?.lunch || [],
+        dinnerItems: optionsDetails?.items?.dinner || [],
+    };
+
+    useEffect(() => {
+        getCategoryListData()
+    }, [])
+
+    useEffect(() => {
+        if (categoryListData.length > 0) {
+            if (BreakFastOptions.length > 0 && !selected) {
+                setSelected(BreakFastOptions[0]?.cat_name);
+            }
+            if (LunchOptions.length > 0 && !selectedLunch) {
+                setSelectedLunch(LunchOptions[0]?.cat_name);
+            }
+            if (DinnerOptions.length > 0 && !selectedDinner) {
+                setSelectedDinner(DinnerOptions[0]?.cat_name);
+            }
+        }
+    }, [categoryListData, selected, selectedLunch, selectedDinner]);
+
+    const getCategoryListData = async () => {
+        try {
+            const response = await CategoryServices.getCategoryList();
+            // console.log(" getCategoryListData response", response)
+            setCategoryListData(response?.data)
+
+        } catch (error) {
+            console.error("Error fetching menu list:", error);
+        } finally {
+            //   setLoading(false);
+        }
+    };
+
+    const itemList = useSelector((state) => state.itemState.item);
+    // console.log("fetch Redux Data", itemList);
+
+    // Separate items by category
+    const categorizedItems = categoryListData.reduce((acc, category) => {
+        acc[category.cat_name] = itemList.filter((item) => item.cat_id === category.id);
+        return acc;
+    }, {});
+
+    // console.log("Categorized Items:", categorizedItems);
+
+
 
     const handleSelectCategory = (category) => {
         setSelected(category);
@@ -74,120 +126,77 @@ const MenuDetailsForm = () => {
     };
 
     const handleSelectItem = (item) => {
-        if (selectedItems.includes(item)) {
-            setSelectedItems(selectedItems.filter((i) => i !== item));
+        if (selectedItems.includes(item.id)) {
+            setSelectedItems(selectedItems.filter((id) => id !== item.id));
         } else {
-            setSelectedItems([...selectedItems, item]);
+            setSelectedItems([...selectedItems, item.id]);
         }
     };
-
     const handleSelectLunchItem = (item) => {
-        if (selectedLunchItems.includes(item)) {
-            setSelectedLunchItems(selectedLunchItems.filter((i) => i !== item));
+        if (selectedLunchItems.includes(item.id)) {
+            setSelectedLunchItems(selectedLunchItems.filter((id) => id !== item.id));
         } else {
-            setSelectedLunchItems([...selectedLunchItems, item]);
+            setSelectedLunchItems([...selectedLunchItems, item.id]);
         }
     };
-
     const handleSelectDinnerItem = (item) => {
-        if (selectedDinnerItems.includes(item)) {
-            setSelectedDinnerItems(selectedDinnerItems.filter((i) => i !== item));
+        if (selectedDinnerItems.includes(item.id)) {
+            setSelectedDinnerItems(selectedDinnerItems.filter((id) => id !== item.id));
         } else {
-            setSelectedDinnerItems([...selectedDinnerItems, item]);
+            setSelectedDinnerItems([...selectedDinnerItems, item.id]);
         }
     };
 
-    const renderData = selected === "dailySpecial" ? mockBreakFastDailySpecial : mockBreakFastAlternatives;
+    // SET BREAK FAST DATA
+    const renderData = categorizedItems[selected] || [];
     const filteredData = renderData.filter((item) =>
-        item.label.toLowerCase().includes(searchTerm.toLowerCase())
+        item?.item_name?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const renderLunchData =
-        selectedLunch === "lunchSoup"
-            ? mockLunchSoups
-            : selectedLunch === "lunchEntree"
-            ? mocklunchEntree
-            : selectedLunch === "lunchDessert"
-            ? mocklunchDessert
-            : mocklunchAlternatives;
+    // SET LUNCH DATA
+    const renderLunchData = categorizedItems[selectedLunch] || [];
     const filtereLunchdData = renderLunchData.filter((item) =>
-        item.label.toLowerCase().includes(lunchSearchTerm.toLowerCase())
+        item.item_name.toLowerCase().includes(lunchSearchTerm.toLowerCase())
     );
 
-    const renderDinnerData =
-        selectedDinner === "dinnerEntree"
-            ? mockDinnerEntree
-            : selectedDinner === "dinnerDessert"
-            ? mockDinnerDessert
-            : mockDinnerAlternatives;
+    // SET DINNER DATA
+    const renderDinnerData = categorizedItems[selectedDinner] || [];
     const filtereDinnerData = renderDinnerData.filter((item) =>
-        item.label.toLowerCase().includes(dinnerSearchTerm.toLowerCase())
+        item.item_name.toLowerCase().includes(dinnerSearchTerm.toLowerCase())
     );
-
-    const initialValues = {
-        menuName: optionsDetails?.menuName || "",
-        date: optionsDetails?.date || "",
-        breakfast: optionsDetails?.breakfast || false,
-        lunch: optionsDetails?.lunch || false,
-        dinner: optionsDetails?.dinner || false,
-        selectedBreakfastItems: {
-            dailySpecial: optionsDetails?.selectedBreakfastItems?.dailySpecial || [],
-            alternatives: optionsDetails?.selectedBreakfastItems?.alternatives || [],
-        },
-        selectedLunchItems: {
-            lunchSoup: optionsDetails?.selectedLunchItems?.lunchSoup || [],
-            lunchEntree: optionsDetails?.selectedLunchItems?.lunchEntree || [],
-            lunchDessert: optionsDetails?.selectedLunchItems?.lunchDessert || [],
-            lunchAlternatives: optionsDetails?.selectedLunchItems?.lunchAlternatives || [],
-        },
-        selectedDinnerItems: {
-            dinnerEntree: optionsDetails?.selectedDinnerItems?.dinnerEntree || [],
-            dinnerAlternatives: optionsDetails?.selectedDinnerItems?.dinnerAlternatives || [],
-            dinnerDessert: optionsDetails?.selectedDinnerItems?.dinnerDessert || [],
-        },
-    };
-
-    const handleFormSubmit = (values) => {
+    const handleFormSubmit = async (values) => {
+        const { BreakfastItems, dinnerItems, lunchItems, breakfast, dinner, lunch, ...restValues } = values;
         const formData = {
-            ...values,
-            selectedBreakfastItems: {
-                dailySpecial: selectedItems.filter((item) =>
-                    mockBreakFastDailySpecial.some((special) => special.id === item.id)
-                ),
-                alternatives: selectedItems.filter((item) =>
-                    mockBreakFastAlternatives.some((alternative) => alternative.id === item.id)
-                ),
+            ...restValues,
+            items: {
+                breakfast: selectedItems,
+                lunch: selectedLunchItems,
+                dinner: selectedDinnerItems,
             },
-            selectedLunchItems: {
-                lunchSoup: selectedLunchItems.filter((item) =>
-                    mockLunchSoups.some((soup) => soup.id === item.id)
-                ),
-                lunchEntree: selectedLunchItems.filter((item) =>
-                    mocklunchEntree.some((entree) => entree.id === item.id)
-                ),
-                lunchDessert: selectedLunchItems.filter((item) =>
-                    mocklunchDessert.some((dessert) => dessert.id === item.id)
-                ),
-                lunchAlternatives: selectedLunchItems.filter((item) =>
-                    mocklunchAlternatives.some((alternative) => alternative.id === item.id)
-                ),
-            },
-            selectedDinnerItems: {
-                dinnerEntree: selectedDinnerItems.filter((item) =>
-                    mockDinnerEntree.some((entree) => entree.id === item.id)
-                ),
-                dinnerAlternatives: selectedDinnerItems.filter((item) =>
-                    mockDinnerAlternatives.some((alternative) => alternative.id === item.id)
-                ),
-                dinnerDessert: selectedDinnerItems.filter((item) =>
-                    mockDinnerDessert.some((dessert) => dessert.id === item.id)
-                ),
-            },
+            is_allday: false,
         };
 
-        console.log("Form Submitted:", formData);
-    };
 
+        try {
+            let response;
+            if (formData?.id) {
+                // Update menu if ID is available
+                response = await MenuServices.updateMenus(formData.id, formData);
+                toast.success("Menu updated successfully!");
+            } else {
+                // Create menu if ID is not available
+                response = await MenuServices.createMenu(formData);
+                toast.success("Menu created successfully!");
+            }
+
+            console.log("response", response);
+        } catch (error) {
+            console.error("Error processing menu:", error);
+            toast.error("Failed to process menu. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <Box m="20px">
@@ -226,10 +235,10 @@ const MenuDetailsForm = () => {
                                 label="Menu Name"
                                 onBlur={handleBlur}
                                 onChange={handleChange}
-                                value={values.menuName}
-                                name="menuName"
-                                error={touched.menuName && Boolean(errors.menuName)}
-                                helperText={touched.menuName && errors.menuName}
+                                value={values.menu_name}
+                                name="menu_name"
+                                error={touched.menu_name && Boolean(errors.menu_name)}
+                                helperText={touched.menu_name && errors.menu_name}
                                 sx={{ gridColumn: "span 1" }}
                             />
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -292,34 +301,26 @@ const MenuDetailsForm = () => {
                                         height={350}
                                     >
                                         <Box p="15px">
-                                            <Box
-                                                onClick={() => handleSelectCategory("dailySpecial")}
-                                                sx={{
-                                                    cursor: "pointer",
-                                                    bgcolor: selected === "dailySpecial" ? colors.gray[800] : "transparent",
-                                                    p: "10px",
-                                                    borderRadius: "8px",
-                                                    transition: "background-color 0.3s",
-                                                }}
-                                            >
-                                                <Typography variant="h5" fontWeight="600" color={colors.primary[100]}>
-                                                    BreakFast Daily Special
-                                                </Typography>
-                                            </Box>
-                                            <Box
-                                                onClick={() => handleSelectCategory("alternatives")}
-                                                sx={{
-                                                    cursor: "pointer",
-                                                    bgcolor: selected === "alternatives" ? colors.gray[800] : "transparent",
-                                                    p: "10px",
-                                                    borderRadius: "8px",
-                                                    transition: "background-color 0.3s",
-                                                }}
-                                            >
-                                                <Typography variant="h5" fontWeight="600" color={colors.primary[100]}>
-                                                    BreakFast Alternatives
-                                                </Typography>
-                                            </Box>
+                                            {/* Dynamically display categories with type 1 (BREAKFAST) */}
+                                            {categoryListData
+                                                .filter((category) => category.type === 1) // Filter categories with type 2
+                                                .map((category) => (
+                                                    <Box
+                                                        key={category.id}
+                                                        onClick={() => handleSelectCategory(category.cat_name)} // Use category name for selection
+                                                        sx={{
+                                                            cursor: "pointer",
+                                                            bgcolor: selected === category.cat_name ? colors.gray[800] : "transparent",
+                                                            p: "10px",
+                                                            borderRadius: "8px",
+                                                            transition: "background-color 0.3s",
+                                                        }}
+                                                    >
+                                                        <Typography variant="h5" fontWeight="600" color={colors.primary[100]}>
+                                                            {category.cat_name}
+                                                        </Typography>
+                                                    </Box>
+                                                ))}
                                         </Box>
                                     </Box>
                                     <Box
@@ -339,25 +340,21 @@ const MenuDetailsForm = () => {
                                                 display="flex"
                                                 alignItems="center"
                                                 justifyContent="center"
-                                                bgcolor={selectedItems.includes(item) ? "lightblue" : "lightgray"}
+                                                bgcolor={selectedItems.includes(item.id) ? colors?.primary[500] : "lightgray"} // Check if item.id is in selectedItems
                                                 p="10px"
                                                 borderRadius="8px"
-                                                color="black"
+                                                color={selectedItems.includes(item.id) ? "white" : "black"} // Adjust color based on selection
                                                 sx={{
                                                     cursor: "pointer",
                                                     transition: "background-color 0.3s",
                                                     height: "100px",
-                                                    "&:hover": {
-                                                        bgcolor: "lightblue",
-                                                    },
                                                 }}
-                                                onClick={() => handleSelectItem(item)}
+                                                onClick={() => handleSelectItem(item)} // Handle item selection
                                             >
-                                                {item.label}
+                                                {item.item_name}
                                             </Box>
                                         ))}
                                     </Box>
-
                                 </Box>
                             </>
                         )}
@@ -405,62 +402,26 @@ const MenuDetailsForm = () => {
                                         sx={{ gridColumn: "span 2" }}
                                     >
                                         <Box p="15px">
-                                            <Box
-                                                onClick={() => handleSelectLunch("lunchSoup")}
-                                                sx={{
-                                                    cursor: "pointer",
-                                                    bgcolor: selectedLunch === "lunchSoup" ? colors.gray[800] : "transparent",
-                                                    p: "10px",
-                                                    borderRadius: "8px",
-                                                    transition: "background-color 0.3s",
-                                                }}
-                                            >
-                                                <Typography variant="h5" fontWeight="600" color={colors.primary[100]}>
-                                                    LUNCH SOUP
-                                                </Typography>
-                                            </Box>
-                                            <Box
-                                                onClick={() => handleSelectLunch("lunchEntree")}
-                                                sx={{
-                                                    cursor: "pointer",
-                                                    bgcolor: selectedLunch === "lunchEntree" ? colors.gray[800] : "transparent",
-                                                    p: "10px",
-                                                    borderRadius: "8px",
-                                                    transition: "background-color 0.3s",
-                                                }}
-                                            >
-                                                <Typography variant="h5" fontWeight="600" color={colors.primary[100]}>
-                                                    LUNCH ENTREE
-                                                </Typography>
-                                            </Box>
-                                            <Box
-                                                onClick={() => handleSelectLunch("lunchDessert")}
-                                                sx={{
-                                                    cursor: "pointer",
-                                                    bgcolor: selectedLunch === "lunchDessert" ? colors.gray[800] : "transparent",
-                                                    p: "10px",
-                                                    borderRadius: "8px",
-                                                    transition: "background-color 0.3s",
-                                                }}
-                                            >
-                                                <Typography variant="h5" fontWeight="600" color={colors.primary[100]}>
-                                                    LUNCH DESSERT
-                                                </Typography>
-                                            </Box>
-                                            <Box
-                                                onClick={() => handleSelectLunch("lunchAlternatives")}
-                                                sx={{
-                                                    cursor: "pointer",
-                                                    bgcolor: selectedLunch === "lunchAlternatives" ? colors.gray[800] : "transparent",
-                                                    p: "10px",
-                                                    borderRadius: "8px",
-                                                    transition: "background-color 0.3s",
-                                                }}
-                                            >
-                                                <Typography variant="h5" fontWeight="600" color={colors.primary[100]}>
-                                                    LUNCH ALTERNATIVES
-                                                </Typography>
-                                            </Box>
+                                            {/* Dynamically display categories with type 2 (BREAKFAST) */}
+                                            {categoryListData
+                                                .filter((category) => category.type === 2) // Filter categories with type 2
+                                                .map((category) => (
+                                                    <Box
+                                                        key={category.id}
+                                                        onClick={() => handleSelectLunch(category.cat_name)} // Use category name for selection
+                                                        sx={{
+                                                            cursor: "pointer",
+                                                            bgcolor: selectedLunch === category.cat_name ? colors.gray[800] : "transparent",
+                                                            p: "10px",
+                                                            borderRadius: "8px",
+                                                            transition: "background-color 0.3s",
+                                                        }}
+                                                    >
+                                                        <Typography variant="h5" fontWeight="600" color={colors.primary[100]}>
+                                                            {category.cat_name}
+                                                        </Typography>
+                                                    </Box>
+                                                ))}
                                         </Box>
                                     </Box>
                                     <Box
@@ -474,30 +435,28 @@ const MenuDetailsForm = () => {
                                         borderRadius="8px"
                                         sx={{ gridColumn: "span 6" }}
                                     >
+
                                         {filtereLunchdData.map((item) => (
                                             <Box
                                                 key={item.id}
                                                 display="flex"
                                                 alignItems="center"
                                                 justifyContent="center"
-                                                bgcolor={selectedLunchItems.includes(item) ? "lightblue" : "lightgray"}
+                                                bgcolor={selectedLunchItems.includes(item.id) ? colors?.primary[500] : "lightgray"} // Check if item.id is in selectedItems
                                                 p="10px"
                                                 borderRadius="8px"
-
-                                                color="black"
-                                                s sx={{
+                                                color={selectedLunchItems.includes(item.id) ? "white" : "black"} // Adjust color based on selection
+                                                sx={{
                                                     cursor: "pointer",
                                                     transition: "background-color 0.3s",
                                                     height: "100px",
-                                                    "&:hover": {
-                                                        bgcolor: "lightblue",
-                                                    },
                                                 }}
-                                                onClick={() => handleSelectLunchItem(item)}
+                                                onClick={() => handleSelectLunchItem(item)} // Handle item selection
                                             >
-                                                {item.label}
+                                                {item.item_name}
                                             </Box>
                                         ))}
+
                                     </Box>
 
                                 </Box>
@@ -547,49 +506,26 @@ const MenuDetailsForm = () => {
                                         sx={{ gridColumn: "span 2" }}
                                     >
                                         <Box p="15px">
-                                            <Box
-                                                onClick={() => handleSelectDinner("dinnerEntree")}
-                                                sx={{
-                                                    cursor: "pointer",
-                                                    bgcolor: selectedDinner === "dinnerEntree" ? colors.gray[800] : "transparent",
-                                                    p: "10px",
-                                                    borderRadius: "8px",
-                                                    transition: "background-color 0.3s",
-                                                }}
-                                            >
-                                                <Typography variant="h5" fontWeight="600" color={colors.primary[100]}>
-                                                    DINNER ENTREE
-                                                </Typography>
-                                            </Box>
-
-                                            <Box
-                                                onClick={() => handleSelectDinner("dinnerAlternatives")}
-                                                sx={{
-                                                    cursor: "pointer",
-                                                    bgcolor: selectedDinner === "dinnerAlternatives" ? colors.gray[800] : "transparent",
-                                                    p: "10px",
-                                                    borderRadius: "8px",
-                                                    transition: "background-color 0.3s",
-                                                }}
-                                            >
-                                                <Typography variant="h5" fontWeight="600" color={colors.primary[100]}>
-                                                    DINNER ALTERNATIVES
-                                                </Typography>
-                                            </Box>
-                                            <Box
-                                                onClick={() => handleSelectDinner("dinnerDessert")}
-                                                sx={{
-                                                    cursor: "pointer",
-                                                    bgcolor: selectedDinner === "dinnerDessert" ? colors.gray[800] : "transparent",
-                                                    p: "10px",
-                                                    borderRadius: "8px",
-                                                    transition: "background-color 0.3s",
-                                                }}
-                                            >
-                                                <Typography variant="h5" fontWeight="600" color={colors.primary[100]}>
-                                                    DINNER DESSERT
-                                                </Typography>
-                                            </Box>
+                                            {/* Dynamically display categories with type 3 (Dinner) */}
+                                            {categoryListData
+                                                .filter((category) => category.type === 3) // Filter categories with type 2
+                                                .map((category) => (
+                                                    <Box
+                                                        key={category.id}
+                                                        onClick={() => handleSelectDinner(category.cat_name)} // Use category name for selection
+                                                        sx={{
+                                                            cursor: "pointer",
+                                                            bgcolor: selectedDinner === category.cat_name ? colors.gray[800] : "transparent",
+                                                            p: "10px",
+                                                            borderRadius: "8px",
+                                                            transition: "background-color 0.3s",
+                                                        }}
+                                                    >
+                                                        <Typography variant="h5" fontWeight="600" color={colors.primary[100]}>
+                                                            {category.cat_name}
+                                                        </Typography>
+                                                    </Box>
+                                                ))}
                                         </Box>
                                     </Box>
                                     <Box
@@ -609,24 +545,44 @@ const MenuDetailsForm = () => {
                                                 display="flex"
                                                 alignItems="center"
                                                 justifyContent="center"
-                                                bgcolor={selectedDinnerItems.includes(item) ? "lightblue" : "lightgray"}
+                                                bgcolor={selectedDinnerItems.includes(item.id) ? colors?.primary[500] : "lightgray"} // Check if item.id is in selectedItems
                                                 p="10px"
                                                 borderRadius="8px"
+                                                color={selectedDinnerItems.includes(item.id) ? "white" : "black"} // Adjust color based on selection
+                                                sx={{
+                                                    cursor: "pointer",
+                                                    transition: "background-color 0.3s",
+                                                    height: "100px",
+                                                }}
+                                                onClick={() => handleSelectDinnerItem(item)} // Handle item selection
+                                            >
+                                                {item.item_name}
+                                            </Box>
+                                        ))}
+                                        {/* {filtereDinnerData.map((item) => (
+                                            <Box
+                                                key={item.id}
+                                                display="flex"
+                                                alignItems="center"
+                                                justifyContent="center"
+                                                bgcolor={selectedDinnerItems.some((selected) => selected.id === item.id) ? colors?.primary[500] : "lightgray"}
+                                                p="10px"
+                                                borderRadius="8px"
+                                                color={selectedItems.some((selected) => selected.id === item.id) ? "white" : "black"}
 
-                                                color="black"
                                                 s sx={{
                                                     cursor: "pointer",
                                                     transition: "background-color 0.3s",
                                                     height: "100px",
-                                                    "&:hover": {
-                                                        bgcolor: "lightblue",
-                                                    },
+                                                    // "&:hover": {
+                                                    //     bgcolor: "lightblue",
+                                                    // },
                                                 }}
                                                 onClick={() => handleSelectDinnerItem(item)}
                                             >
-                                                {item.label}
+                                                {item.item_name}
                                             </Box>
-                                        ))}
+                                        ))} */}
                                     </Box>
 
                                 </Box>

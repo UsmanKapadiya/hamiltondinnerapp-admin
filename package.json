@@ -9,6 +9,7 @@
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
+  "proxy": "https://hamiltondinnerapp.intellidt.com",
   "dependencies": {
     "@date-io/date-fns": "^3.2.1",
     "@dnd-kit/core": "^6.3.1",
@@ -42,6 +43,10 @@
     "react-pro-sidebar": "^1.1.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^6.22.1",
+    "react-toastify": "^11.0.5",
+    "redux": "^5.0.1",
+    "redux-persist": "^6.0.0",
+    "redux-thunk": "^3.1.0",
     "yup": "^1.3.3"
   },
   "devDependencies": {

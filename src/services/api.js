@@ -8,6 +8,7 @@ const instance = axios.create({
     Accept: 'application/json',
     'Content-Type': 'application/json',
   },
+  
 });
 
 
@@ -64,7 +65,7 @@ const requests = {
     return instance.post(url, body, {
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
+        // 'Authorization': `Bearer ${token}`,
       }
     }).then(responseBody);
   },

@@ -11,12 +11,16 @@ import { Header } from "../../components";
 import { ListAltOutlined } from "@mui/icons-material";
 import { tokens } from "../../theme";
 import { useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const MenuDetailsView = () => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
     const isXlDevices = useMediaQuery("(min-width: 1260px)");
 
+    // const dispatch = useDispatch();
+    const itemList = useSelector((state) => state.itemState.item);
+    console.log("fetch Redux Data", itemList)
     const location = useLocation();
     const menuDetails = location.state;
     console.log("menuDetails", menuDetails)
@@ -65,13 +69,23 @@ const MenuDetailsView = () => {
                     </Typography>
 
                     {/* Breakfast Section */}
-                    {(menuDetails?.selectedBreakfastItems?.dailySpecial?.length > 0 ||
-                        menuDetails?.selectedBreakfastItems?.alternatives?.length > 0) && (
-                            <Box ml="10px" mt="15px">
-                                <Typography color={colors.gray[100]} variant="h4" fontWeight="600">
-                                    Breakfast:
-                                </Typography>
-                                <Box ml="20px">
+                    {menuDetails?.items?.breakfast?.length > 0 && (
+                        <Box ml="10px" mt="15px">
+                            <Typography color={colors.gray[100]} variant="h4" fontWeight="600">
+                                Breakfast:
+                            </Typography>
+                            <Box ml="20px" mt="10px">
+                                {menuDetails.items.breakfast.map((id) => {
+                                    const item = itemList.find((item) => item.id === id); // Find the item in itemList by ID
+                                    console.log("item", item)
+                                    return (
+                                        <Typography key={id} color={colors.gray[100]} variant="body1">
+                                            - {item ? item?.item_name : "Item not found"} {/* Display item name or fallback */}
+                                        </Typography>
+                                    );
+                                })}
+                            </Box>
+                            {/* <Box ml="20px">
                                     {menuDetails?.selectedBreakfastItems?.dailySpecial?.length > 0 && (
                                         <Box mt="10px">
                                             <Typography color={colors.gray[100]} variant="h5" fontWeight="600">
@@ -100,10 +114,45 @@ const MenuDetailsView = () => {
                                             </Box>
                                         </Box>
                                     )}
-                                </Box>
+                                </Box> */}
+                        </Box>
+                    )}
+                    {menuDetails?.items?.lunch?.length > 0 && (
+                        <Box ml="10px" mt="15px">
+                            <Typography color={colors.gray[100]} variant="h4" fontWeight="600">
+                                Lunch:
+                            </Typography>
+                            <Box ml="20px" mt="10px">
+                                {menuDetails.items.lunch.map((id) => {
+                                    const item = itemList.find((item) => item.id === id); // Find the item in itemList by ID
+                                    console.log("item", item)
+                                    return (
+                                        <Typography key={id} color={colors.gray[100]} variant="body1">
+                                            - {item ? item?.item_name : "Item not found"} {/* Display item name or fallback */}
+                                        </Typography>
+                                    );
+                                })}
                             </Box>
-                        )}
-
+                        </Box>
+                    )}
+                      {menuDetails?.items?.dinner?.length > 0 && (
+                        <Box ml="10px" mt="15px">
+                            <Typography color={colors.gray[100]} variant="h4" fontWeight="600">
+                                Dinner:
+                            </Typography>
+                            <Box ml="20px" mt="10px">
+                                {menuDetails.items.dinner.map((id) => {
+                                    const item = itemList.find((item) => item.id === id); // Find the item in itemList by ID
+                                    console.log("item", item)
+                                    return (
+                                        <Typography key={id} color={colors.gray[100]} variant="body1">
+                                            - {item ? item?.item_name : "Item not found"} {/* Display item name or fallback */}
+                                        </Typography>
+                                    );
+                                })}
+                            </Box>
+                        </Box>
+                    )}
                     {/* Lunch Section */}
                     {(menuDetails?.selectedLunchItems?.lunchSoup?.length > 0 ||
                         menuDetails?.selectedLunchItems?.lunchEntree?.length > 0 ||
@@ -175,7 +224,7 @@ const MenuDetailsView = () => {
                         )}
 
                     {/* Dinner Section */}
-                    {(menuDetails?.selectedDinnerItems?.dinnerEntree?.length > 0 ||
+                    {/* {(menuDetails?.selectedDinnerItems?.dinnerEntree?.length > 0 ||
                         menuDetails?.selectedDinnerItems?.dinnerAlternatives?.length > 0 ||
                         menuDetails?.selectedDinnerItems?.dinnerDessert?.length > 0) && (
                             <Box ml="10px" mt="15px">
@@ -227,7 +276,7 @@ const MenuDetailsView = () => {
                                     )}
                                 </Box>
                             </Box>
-                        )}
+                        )} */}
                 </Box>
             </Box>
         </Box>
