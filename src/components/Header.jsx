@@ -14,7 +14,7 @@ import { useNavigate } from "react-router-dom";
 
 
 
-const Header = ({ title, icon, Buttons, addNewClick,  orderClick, showToggleClick }) => {
+const Header = ({ title, icon, Buttons, addNewClick, addBulkDelete, orderClick, showToggleClick }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const isMdDevices = useMediaQuery("(min-width: 724px)");
@@ -67,6 +67,7 @@ const Header = ({ title, icon, Buttons, addNewClick,  orderClick, showToggleClic
               color: colors.redAccent[700],
               hoverColor: colors.redAccent[800],
               icon: <DeleteOutline />,
+              onClick: addBulkDelete,
             },
             {
               label: "Order",

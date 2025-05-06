@@ -26,6 +26,7 @@ const MenuDetails = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
+  const [selectedIds, setSelectedIds] = useState([]);
   const [selectedMenuName, setSelectedMenuName] = useState("");
   const [menuList, setMenuList] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -53,6 +54,23 @@ const MenuDetails = () => {
       setLoading(false);
     }
   };
+  const bulkDeleteMenu = async (ids) => {
+    try {
+      let data = JSON.stringify({
+        "ids":ids
+      });
+      const response = await MenuServices.bulkdeleteMenus(data);
+      // console.log(response)
+      setLoading(true)
+      toast.success("Multiple Menus Deleted successfully!");
+      fetchMenuList();
+    } catch (error) {
+      console.error("Error fetching menu list:", error);
+      toast.error("Failed to process menu. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
   const deleteMenu = async (id) => {
     try {
       const response = await MenuServices.deleteMenus(id);
@@ -75,8 +93,9 @@ const MenuDetails = () => {
   };
 
   const confirmDelete = () => {
-    deleteMenu(selectedId);
+    selectedIds.length > 1 ?  bulkDeleteMenu(selectedIds) : deleteMenu(selectedId) ;
     setDialogOpen(false);
+    setLoading(true)
   };
 
   const cancelDelete = () => {
@@ -99,6 +118,14 @@ const MenuDetails = () => {
   const handleAddNewClick = () => {
     navigate("/menu-details/create");
   };
+  const handleBulkDelete = () => {
+    setDialogOpen(true);
+    // console.log("BulkDelete call",selectedIds)
+  };
+  const handleRowSelection = (ids) => {
+    setSelectedIds(ids);
+  };
+  
   const handleOrderClick = () => {
     // navigate("/item-details/order");
   };
@@ -172,6 +199,7 @@ const MenuDetails = () => {
         icon={<CreateOutlined />}
         Buttons={true}
         addNewClick={handleAddNewClick}
+        addBulkDelete={handleBulkDelete}
         orderClick={handleOrderClick}
         showToggleClick={handleToggle}
       />
@@ -221,11 +249,16 @@ const MenuDetails = () => {
           }}
           onPaginationModelChange={handlePaginationChange}
           checkboxSelection
+          onRowSelectionModelChange={(ids) => handleRowSelection(ids)}
         />
         <ConfirmationDialog
           open={dialogOpen}
           title="Confirm Delete"
-          message={`Are you sure you want to delete the ${selectedMenuName} item?`}
+          message={
+            selectedIds.length > 1
+              ? `Are you sure you want to delete ${selectedIds.length} items?`
+              : `Are you sure you want to delete the menu "${selectedMenuName}"?`
+          }
           onConfirm={confirmDelete}
           onCancel={cancelDelete}
         />
