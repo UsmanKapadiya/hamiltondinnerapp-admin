@@ -17,6 +17,7 @@ import { useEffect, useState } from "react";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
 import MenuServices from "../../services/menuServices";
 import { toast } from "react-toastify";
+import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
 
 const MenuDetails = () => {
   const theme = useTheme();
@@ -57,7 +58,7 @@ const MenuDetails = () => {
   const bulkDeleteMenu = async (ids) => {
     try {
       let data = JSON.stringify({
-        "ids":ids
+        "ids": ids
       });
       const response = await MenuServices.bulkdeleteMenus(data);
       // console.log(response)
@@ -93,7 +94,8 @@ const MenuDetails = () => {
   };
 
   const confirmDelete = () => {
-    selectedIds.length > 1 ?  bulkDeleteMenu(selectedIds) : deleteMenu(selectedId) ;
+    selectedIds.length > 0 && !selectedMenuName
+      ? bulkDeleteMenu(selectedIds) : deleteMenu(selectedId);
     setDialogOpen(false);
     setLoading(true)
   };
@@ -125,7 +127,7 @@ const MenuDetails = () => {
   const handleRowSelection = (ids) => {
     setSelectedIds(ids);
   };
-  
+
   const handleOrderClick = () => {
     // navigate("/item-details/order");
   };
@@ -242,7 +244,7 @@ const MenuDetails = () => {
           loading={loading}
           pagination
           paginationMode="server"
-          rowCount={pagination.total} 
+          rowCount={pagination.total}
           paginationModel={{
             page: pagination.page - 1,
             pageSize: pagination.pageSize,
@@ -250,12 +252,15 @@ const MenuDetails = () => {
           onPaginationModelChange={handlePaginationChange}
           checkboxSelection
           onRowSelectionModelChange={(ids) => handleRowSelection(ids)}
+          components={{
+            LoadingOverlay: CustomLoadingOverlay,
+          }}
         />
         <ConfirmationDialog
           open={dialogOpen}
           title="Confirm Delete"
           message={
-            selectedIds.length > 1
+            selectedIds.length > 0 && !selectedMenuName
               ? `Are you sure you want to delete ${selectedIds.length} items?`
               : `Are you sure you want to delete the menu "${selectedMenuName}"?`
           }

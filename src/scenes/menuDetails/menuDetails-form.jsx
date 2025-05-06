@@ -16,6 +16,7 @@ import { useSelector } from "react-redux";
 import CategoryServices from "../../services/categoryServices";
 import MenuServices from "../../services/menuServices";
 import { toast } from "react-toastify";
+import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
 
 
 const validationSchema = yup.object().shape({
@@ -31,10 +32,8 @@ const MenuDetailsForm = () => {
     const colors = tokens(theme.palette.mode);
     const location = useLocation();
     const optionsDetails = location.state;
-    // console.log(optionsDetails)
-    // const itemList = useSelector((state) => state.itemState.item);
-    // console.log("fetch Redux Data", itemList)
     const isNonMobile = useMediaQuery("(min-width:600px)");
+    const [loading, setLoading] = useState(false);
 
     const [categoryListData, setCategoryListData] = useState([])
 
@@ -87,7 +86,6 @@ const MenuDetailsForm = () => {
     const getCategoryListData = async () => {
         try {
             const response = await CategoryServices.getCategoryList();
-            // console.log(" getCategoryListData response", response)
             setCategoryListData(response?.data)
 
         } catch (error) {
@@ -165,6 +163,7 @@ const MenuDetailsForm = () => {
         item.item_name.toLowerCase().includes(dinnerSearchTerm.toLowerCase())
     );
     const handleFormSubmit = async (values) => {
+        setLoading(true)
         const { BreakfastItems, dinnerItems, lunchItems, breakfast, dinner, lunch, ...restValues } = values;
         const formData = {
             ...restValues,
@@ -200,6 +199,21 @@ const MenuDetailsForm = () => {
 
     return (
         <Box m="20px">
+            {loading && (
+                <Box
+                    position="fixed"
+                    top={0}
+                    left={0}
+                    width="100%"
+                    height="100%"
+                    display="flex"
+                    justifyContent="center"
+                    alignItems="center"
+                    zIndex={9999}
+                >
+                    <CustomLoadingOverlay />
+                </Box>
+            )}
             <Header title="Add Menu Detail" icon={<CreateOutlined />} Buttons={false} />
             <Formik
                 onSubmit={handleFormSubmit}
