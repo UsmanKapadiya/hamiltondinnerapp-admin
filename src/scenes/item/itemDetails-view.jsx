@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
     Box,
     Button,
@@ -11,6 +11,8 @@ import { Header } from "../../components";
 import { ListAltOutlined } from "@mui/icons-material";
 import { tokens } from "../../theme";
 import { useLocation } from "react-router-dom";
+import ItemServices from "../../services/itemServices";
+import { type } from "../../data/mockData";
 
 const ItemDetailsView = () => {
     const theme = useTheme();
@@ -18,8 +20,30 @@ const ItemDetailsView = () => {
     const isXlDevices = useMediaQuery("(min-width: 1260px)");
 
     const location = useLocation();
-    const categoryDetails = location.state;
-    console.log("categoryDetails",categoryDetails   )
+    // const itemDetails = location.state;
+    const [itemDetails, setItemDetails] = useState('')
+    const [loading, setLoading] = useState(false);
+
+
+    const itemId = location.state.id
+
+    useEffect(() => {
+        getItemsDetails(itemId)
+    }, [itemId])
+
+    const getItemsDetails = async (id) => {
+        try {
+            setLoading(true);
+            const response = await ItemServices.getItemsDetails(id);
+            console.log(response?.data)
+            setItemDetails(response?.data);
+
+        } catch (error) {
+            console.error("Error fetching menu list:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const Categorys = [
         { label: "Breakfast Daily Special", value: "breakfastDailySpecial" },
@@ -61,7 +85,7 @@ const ItemDetailsView = () => {
                         Item Name
                     </Typography>
                     <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                        {categoryDetails?.itemName}
+                        {itemDetails?.item_name}
                     </Typography>
                 </Box>
                 <Divider sx={{ bgcolor: colors.gray[300] }} />
@@ -70,16 +94,20 @@ const ItemDetailsView = () => {
                         Item Chinese Name
                     </Typography>
                     <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                        {categoryDetails?.itemChineseName}
+                        {itemDetails?.item_chinese_name}
                     </Typography>
                 </Box>
                 <Divider sx={{ bgcolor: colors.gray[300] }} />
                 <Box p="10px">
                     <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
-                    Category
+                        Category
                     </Typography>
                     <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                        {Categorys.find((option) => option.value === categoryDetails?.category)?.label || "N/A"}
+                        {(() => {
+                            const typeId = itemDetails?.cat_id;
+                            const typeObj = type.find((t) => t.id === typeId);
+                            return typeObj ? typeObj.type_name : "N/A";
+                        })()}
                     </Typography>
                 </Box>
                 <Divider sx={{ bgcolor: colors.gray[300] }} />
@@ -88,7 +116,7 @@ const ItemDetailsView = () => {
                         Is Allday
                     </Typography>
                     <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                        {categoryDetails?.isAllDay}
+                        {itemDetails?.isAllDay}
                     </Typography>
                 </Box>
                 <Divider sx={{ bgcolor: colors.gray[300] }} />
@@ -97,28 +125,28 @@ const ItemDetailsView = () => {
                         Item Image
                     </Typography>
                     <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                        {categoryDetails?.image}
+                        {itemDetails?.image}
                     </Typography>
                 </Box>
                 <Divider sx={{ bgcolor: colors.gray[300] }} />
                 <Box p="10px">
                     <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
-                    Options
+                        Options
                     </Typography>
                     <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                        {Options.find((option) => option.value === categoryDetails?.options)?.label || "N/A"}
+                        {Options.find((option) => option.value === itemDetails?.options)?.label || "N/A"}
                     </Typography>
                 </Box>
                 <Divider sx={{ bgcolor: colors.gray[300] }} />
                 <Box p="10px">
                     <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
-                    Preference
+                        Preference
                     </Typography>
                     <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                        {Preferences.find((option) => option.value === categoryDetails?.preference)?.label || "N/A"}
+                        {Preferences.find((option) => option.value === itemDetails?.preference)?.label || "N/A"}
                     </Typography>
                 </Box>
-              
+
             </Box>
         </Box>
     );

@@ -1,7 +1,7 @@
 import { Box, Typography, useTheme, Button } from "@mui/material";
 import { Header } from "../../components";
 import { DataGrid } from "@mui/x-data-grid";
-import { mockDataItems } from "../../data/mockData";
+import { mockDataItems, type } from "../../data/mockData";
 import { tokens } from "../../theme";
 import {
   AdminPanelSettingsOutlined,
@@ -10,17 +10,48 @@ import {
   SecurityOutlined,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
+import { useSelector } from "react-redux";
+import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
+import ItemServices from "../../services/itemServices";
 
 const Item = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
-
+  const perPageRecords = (10)
+  const [currentPage, setCurrentPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
+  const itemList = useSelector((state) => state.itemState.item);
+  const [itemListData, setItemListData] = useState([])
+  const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    pageSize: 10,
+    total: 0,
+  });
 
+  useEffect(() => {
+    fetchALLItemsList()
+  }, [itemList]);
+
+  const fetchALLItemsList = async () => {
+    try {
+      const response = await ItemServices.getItemList();
+      console.log(response)
+      setItemListData(response.data);
+      setPagination((prev) => ({
+        ...prev,
+        total: response.count,
+      }));
+    } catch (error) {
+      console.error("Error fetching menu list:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
   const handleDelete = (id) => {
     setSelectedId(id);
     setDialogOpen(true);
@@ -39,7 +70,7 @@ const Item = () => {
 
   const handleView = (id) => {
     const selectedRow = mockDataItems.find((row) => row.id === id);
-    navigate(`/item-details/${id}`, { state: selectedRow });
+    navigate(`/item-details/${id}`,  { state: { id }});
   };
 
   const handleEdit = (id) => {
@@ -56,16 +87,36 @@ const Item = () => {
     navigate("/item-details/order");
   };
 
+  const handlePaginationChange = (newPaginationModel) => {
+    setPagination((prev) => ({
+      ...prev,
+      page: newPaginationModel.page + 1, // DataGrid uses 0-based indexing for pages
+      pageSize: newPaginationModel.pageSize,
+    }));
+    setCurrentPage(newPaginationModel.page + 1,)
+
+  };
+
+
   const columns = [
-    { field: "itemName", headerName: "item Name" },
+    { field: "item_name", headerName: "item Name",flex: 1, },
     {
-      field: "itemChineseName",
+      field: "item_chinese_name",
       headerName: "item Chinese Name",
-      // // flex: 1,
+      flex: 1,
       // cellClassName: "name-column--cell",
     },
-    { field: "category", headerName: "Category", flex: 1 },
-    { field: "isAllDay", headerName: "Is Allday", flex: 1 },
+    {
+      field: "category", headerName: "Category",
+      valueGetter: (params) => {
+        const typeId = params.row.cat_id;
+        const typeObj = type.find((t) => t.id === typeId);
+        return typeObj ? typeObj.type_name : "N/A";
+      },
+      flex: 1
+    },
+    // Temperory Comments
+    // { field: "isAllDay", headerName: "Is Allday", flex: 1 },
     {
       field: "actions",
       headerName: "Actions",
@@ -148,16 +199,19 @@ const Item = () => {
         }}
       >
         <DataGrid
-          rows={mockDataItems}
+          rows={itemListData}
           columns={columns}
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 10,
-              },
-            },
+          loading={loading}
+          rowCount={pagination.total}
+          paginationModel={{
+            page: pagination.page - 1,
+            pageSize: pagination.pageSize,
           }}
+          onPaginationModelChange={handlePaginationChange}
           checkboxSelection
+          components={{
+            LoadingOverlay: CustomLoadingOverlay,
+          }}
         />
         <ConfirmationDialog
           open={dialogOpen}
