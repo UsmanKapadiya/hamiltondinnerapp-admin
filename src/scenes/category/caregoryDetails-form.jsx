@@ -1,51 +1,102 @@
-import { Box, Button, TextField, useMediaQuery, MenuItem, Switch, FormGroup, FormControlLabel, Autocomplete } from "@mui/material";
+import { Box, Button, TextField, useMediaQuery, MenuItem, Autocomplete } from "@mui/material";
 import { Header } from "../../components";
 import { Formik } from "formik";
 import * as yup from "yup";
 import { DvrOutlined, Home } from "@mui/icons-material";
 import { useLocation } from "react-router-dom";
+import { type } from "../../data/mockData";
+import CategoryServices from "../../services/categoryServices";
+import { toast } from "react-toastify";
+import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
+import { useState } from "react";
 
 
 
 const validationSchema = yup.object().shape({
-    categoryName: yup.string().required("Category Name is required"),
-    categoryChineseName: yup.string().required("Category Chinese Name is required"),
-    categoryType: yup.string().required("Category Type is required"),
-    parentId: yup.string().required("Parent Id is required"),
+    cat_name: yup.string().required("Category Name is required"),
+    category_chinese_name: yup.string().required("Category Chinese Name is required"),
+    type: yup.string().required("Category Type is required"),
+    // parent_id: yup.string().required("Parent Id is required"),
 });
 
 
 const CategoryDetailsForm = () => {
     const location = useLocation();
-    const categoryDetails = location.state;
+    const categoryDetails = location.state?.selectedCategory;
+    const categoryListData = location.state?.categoryListData;
     const isNonMobile = useMediaQuery("(min-width:600px)");
-
+    const [loading, setLoading] = useState(false);
 
     const initialValues = {
-        categoryName: categoryDetails?.categoryName || "",
-        categoryChineseName: categoryDetails?.categoryChineseName || "",
-        categoryType: categoryDetails?.categoryType || "",
-        parentId: categoryDetails?.parentId || "",
+        id: categoryDetails?.id || "",
+        cat_name: categoryDetails?.cat_name || "",
+        category_chinese_name: categoryDetails?.category_chinese_name || "",
+        type: (() => {
+            if (!categoryDetails) return "";
+            const typeId = categoryDetails?.type;
+            const typeObj = type.find((t) => t.id === typeId);
+            return typeObj ? typeObj.id : "";
+        })(),
+        parent_id: (() => {
+            if (!categoryDetails) return 0;
+            const parentId = categoryDetails?.parent_id;
+            const parentObj = categoryListData.find((t) => t.id === parentId);
+            return parentObj ? parentObj.id : 0;
+        })(),
     };
+    const parent_id = categoryListData
+        ?.filter((category) => category.id !== categoryDetails?.id)
+        .map((category) => ({
+            label: category.cat_name,
+            value: category.id,
+        })) || [];
+    const handleFormSubmit = async (values, actions) => {
+        setLoading(true)
+        const { ...restValues } = values;
+        const formData = {
+            ...restValues,
+        }
 
-    const parentId = [
-        { label: "Breakfast Daily Special", value: "breakfastDailySpecial" },
-        { label: "Lunch Soup", value: "lunchSoup" },
-        { label: "Dinner Entree", value: "dinnerEntree" },
-        { label: "Lunch Entree", value: "LunchEntree" },
-        { label: "Lunch Alternative", value: "LunchAlternative" },
-        { label: "Dinner Alternative", value: "dinnerAlternative" },
-        { label: "Dinner Dessert", value: "dinnerDessert" },
-    ];
-    const handleFormSubmit = (values, actions) => {
-        console.log("Form Submitted:", values);
-        actions.resetForm({
-            values: initialValues,
-        });
+        try {
+            let response;
+            if (formData?.id) {
+                // Update menu if ID is available
+                response = await CategoryServices.updateCategoryDetails(formData.id, formData);
+                console.log(response)
+                toast.success("Category updated successfully!");
+            } else {
+                // Create menu if ID is not available
+                response = await CategoryServices.createCategoryDetails(formData);
+                toast.success("Category created successfully!");
+                actions.resetForm({
+                    values: initialValues,
+                });
+            }
+        } catch (error) {
+            console.error("Error processing menu:", error);
+            toast.error("Failed to process menu. Please try again.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
         <Box m="20px">
+            {loading && (
+                <Box
+                    position="fixed"
+                    top={0}
+                    left={0}
+                    width="100%"
+                    height="100%"
+                    display="flex"
+                    justifyContent="center"
+                    alignItems="center"
+                    zIndex={9999} 
+                >
+                    <CustomLoadingOverlay />
+                </Box>
+            )}
             <Header title="Add Category Detail" icon={<DvrOutlined />} Buttons={false} />
             <Formik
                 onSubmit={handleFormSubmit}
@@ -63,6 +114,7 @@ const CategoryDetailsForm = () => {
                     handleSubmit,
                     setFieldValue,
                 }) => (
+
                     <form onSubmit={handleSubmit}>
                         <Box
                             display="grid"
@@ -81,10 +133,10 @@ const CategoryDetailsForm = () => {
                                 label="Category Name"
                                 onBlur={handleBlur}
                                 onChange={handleChange}
-                                value={values.categoryName}
-                                name="categoryName"
-                                error={touched.categoryName && Boolean(errors.categoryName)}
-                                helperText={touched.categoryName && errors.categoryName}
+                                value={values.cat_name}
+                                name="cat_name"
+                                error={touched.cat_name && Boolean(errors.cat_name)}
+                                helperText={touched.cat_name && errors.cat_name}
                                 sx={{ gridColumn: "span 4" }}
                             />
                             <TextField
@@ -94,10 +146,10 @@ const CategoryDetailsForm = () => {
                                 label="Category Chinese Name"
                                 onBlur={handleBlur}
                                 onChange={handleChange}
-                                value={values.categoryChineseName}
-                                name="categoryChineseName"
-                                error={touched.categoryChineseName && Boolean(errors.categoryChineseName)}
-                                helperText={touched.categoryChineseName && errors.categoryChineseName}
+                                value={values.category_chinese_name}
+                                name="category_chinese_name"
+                                error={touched.category_chinese_name && Boolean(errors.category_chinese_name)}
+                                helperText={touched.category_chinese_name && errors.category_chinese_name}
                                 sx={{ gridColumn: "span 4" }}
                             />
                             <TextField
@@ -107,30 +159,32 @@ const CategoryDetailsForm = () => {
                                 label="Select category type"
                                 onBlur={handleBlur}
                                 onChange={handleChange}
-                                value={values.categoryType}
-                                name="categoryType"
-                                error={touched.categoryType && Boolean(errors.categoryType)}
-                                helperText={touched.categoryType && errors.categoryType}
+                                value={values.type}
+                                name="type"
+                                error={touched.type && Boolean(errors.type)}
+                                helperText={touched.type && errors.type}
                                 sx={{ gridColumn: "span 4" }}
                             >
-                                <MenuItem value="breakfast">Breakfast</MenuItem>
-                                <MenuItem value="lunch">Lunch</MenuItem>
-                                <MenuItem value="dinner">Dinner</MenuItem>
+                                {type.map((option) => (
+                                    <MenuItem key={option.id} value={option.id}>
+                                        {option.type_name}
+                                    </MenuItem>
+                                ))}
                             </TextField>
                             <Autocomplete
-                                options={parentId}
+                                options={parent_id}
                                 getOptionLabel={(option) => option.label}
-                                value={parentId.find((option) => option.value === values.parentId) || null}
+                                value={parent_id?.find((option) => option.value === values.parent_id) || null}
                                 onChange={(event, newValue) => {
-                                    setFieldValue("parentId", newValue ? newValue.value : ""); // Update parentId correctly
+                                    setFieldValue("parent_id", newValue ? newValue.value : ""); // Update parent_id correctly
                                 }}
                                 renderInput={(params) => (
                                     <TextField
                                         {...params}
                                         label="Parent Id"
                                         variant="filled"
-                                        error={touched.parentId && Boolean(errors.parentId)}
-                                        helperText={touched.parentId && errors.parentId}
+                                        error={touched.parent_id && Boolean(errors.parent_id)}
+                                        helperText={touched.parent_id && errors.parent_id}
                                     />
                                 )}
                                 sx={{ gridColumn: "span 4" }}
@@ -147,6 +201,7 @@ const CategoryDetailsForm = () => {
                             </Button>
                         </Box>
                     </form>
+
                 )}
             </Formik>
         </Box>

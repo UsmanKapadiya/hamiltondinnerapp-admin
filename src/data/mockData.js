@@ -1,5 +1,11 @@
 import { tokens } from "../theme";
 
+export const type=[
+  {id:1, type_name:"Breakfast"},
+  {id:2, type_name:"Lunch"},
+  {id:3, type_name:"Dinner"}] 
+
+
 export const mockDataTeam = [
   {
     id: 1,
