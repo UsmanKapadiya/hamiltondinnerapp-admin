@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
 import MenuServices from "../../services/menuServices";
+import { toast } from "react-toastify";
 
 const MenuDetails = () => {
   const theme = useTheme();
@@ -25,6 +26,7 @@ const MenuDetails = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
+  const [selectedMenuName, setSelectedMenuName] = useState("");
   const [menuList, setMenuList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({
@@ -55,7 +57,9 @@ const MenuDetails = () => {
     try {
       const response = await MenuServices.deleteMenus(id);
       console.log(response)
+      setLoading(true)
       toast.success("Menu Deleted successfully!");
+      fetchMenuList();
     } catch (error) {
       console.error("Error fetching menu list:", error);
       toast.error("Failed to process menu. Please try again.");
@@ -64,21 +68,19 @@ const MenuDetails = () => {
     }
   };
 
-  const handleDelete = (id) => {
-    setSelectedId(id);
+  const handleDelete = (data) => {
+    setSelectedId(data?.id);
+    setSelectedMenuName(data?.menu_name);
     setDialogOpen(true);
   };
 
   const confirmDelete = () => {
-    console.log(`Delete confirmed for ID: ${selectedId}`);
-    console.log(selectedId)
-    deleteMenu(selectedId)
-    setDialogOpen(false); // Close the dialog
-    // Add your delete logic here
+    deleteMenu(selectedId);
+    setDialogOpen(false);
   };
 
   const cancelDelete = () => {
-    setDialogOpen(false); // Close the dialog
+    setDialogOpen(false);
     setSelectedId(null);
   };
 
@@ -142,7 +144,7 @@ const MenuDetails = () => {
               variant="contained"
               color="secondary"
               size="small"
-              onClick={() => handleDelete(row.id)}
+              onClick={() => handleDelete(row)}
             >
               Delete
             </Button>
@@ -223,7 +225,7 @@ const MenuDetails = () => {
         <ConfirmationDialog
           open={dialogOpen}
           title="Confirm Delete"
-          message={`Are you sure you want to delete the "${mockMenuDetailsData.find((row) => row.id === selectedId)?.menuName || "selected"}" item?`}
+          message={`Are you sure you want to delete the ${selectedMenuName} item?`}
           onConfirm={confirmDelete}
           onCancel={cancelDelete}
         />
