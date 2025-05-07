@@ -29,8 +29,8 @@ import ItemDetailsForm from "./scenes/item/itemDetails-form";
 import ItemDetailsOrder from "./scenes/item/itemDetailsOrder";
 import Login from "./scenes/login";
 import ItemOptions from "./scenes/options";
-import ItemoptionsForm from "./scenes/options/itemDetails-form";
-import ItemOptionsView from "./scenes/options/itemDetails-view";
+import ItemoptionsForm from "./scenes/options/itemOptions-form";
+import ItemOptionsView from "./scenes/options/itemOptions-view";
 import ItemPreferences from "./scenes/preferences";
 import ItemPreferencesView from "./scenes/preferences/itemPreferences-view";
 import ItemPreferencesForm from "./scenes/preferences/itemPreferences-form";
@@ -70,7 +70,7 @@ const AppRouter = () => {
           <Route path="/item-options" element={<ItemOptions />} />
           <Route path="/item-options/create" element={<ItemoptionsForm />} />
           <Route path="/item-options/:id/edit" element={<ItemoptionsForm />} />
-          <Route path="/item-options/:id" element={<ItemOptionsView />} />
+          <Route path="/item-options/:id" element={<ItemOptionsView/>} />
           {/*Item Preferences */}
           <Route path="/item-preferences" element={<ItemPreferences />} />
           <Route path="/item-preferences/create" element={<ItemPreferencesForm />} />

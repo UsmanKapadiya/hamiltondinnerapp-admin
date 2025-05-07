@@ -11,8 +11,11 @@ import {
   SecurityOutlined,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
+import ItemServices from "../../services/itemServices";
+import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
+import { toast } from "react-toastify";
 
 const ItemOptions = () => {
   const theme = useTheme();
@@ -21,30 +24,67 @@ const ItemOptions = () => {
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [selectedOptionName, setSelectedOptionName] = useState("");
 
-  const handleDelete = (id) => {
-    setSelectedId(id);
+  const [optionsListData, setpOptionsListData] = useState([])
+  const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    pageSize: 10,
+    total: 0,
+  });
+
+
+  useEffect(() => {
+    fetchALLOptionsList()
+  }, []);
+
+  const fetchALLOptionsList = async () => {
+    try {
+      const response = await ItemServices.getOptionList();
+      console.log(response)
+      setpOptionsListData(response.data);
+      setPagination((prev) => ({
+        ...prev,
+        total: response.count,
+      }));
+    } catch (error) {
+      console.error("Error fetching menu list:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const handleRowSelection = (ids) => {
+    setSelectedIds(ids);
+  };
+
+  const handleDelete = (data) => {
+    console.log(data)
+    setSelectedIds([])
+    setSelectedId(data?.id);
+    setSelectedOptionName(data?.option_name);
     setDialogOpen(true);
   };
 
   const confirmDelete = () => {
-    console.log(`Delete confirmed for ID: ${selectedId}`);
-    setDialogOpen(false); // Close the dialog
-    // Add your delete logic here
+    selectedIds.length > 0 && !selectedOptionName
+      ? bulkDeleteOptions(selectedIds) : deleteOptions(selectedId);
+    setDialogOpen(false);
   };
 
   const cancelDelete = () => {
-    setDialogOpen(false); // Close the dialog
+    setDialogOpen(false);
     setSelectedId(null);
+    setSelectedOptionName()
   };
 
   const handleView = (id) => {
-    const selectedRow = mockOptions.find((row) => row.id === id);
-    navigate(`/item-options/${id}`, { state: selectedRow });
+    navigate(`/item-options/${id}`,  { state: { id }});
   };
 
   const handleEdit = (id) => {
-    const selectedRow = mockOptions.find((row) => row.id === id);
+    const selectedRow = optionsListData.find((row) => row.id === id);
     navigate(`/item-options/${id}/edit`, { state: selectedRow });
   };
   const handleToggle = () => {
@@ -53,19 +93,62 @@ const ItemOptions = () => {
   const handleAddNewClick = () => {
     navigate("/item-options/create");
   };
+  const handleBulkDelete = () => {
+    setDialogOpen(true);
+  };
   const handleOrderClick = () => {
     // navigate("/item-details/order");
   };
 
+  const handlePaginationChange = (newPaginationModel) => {
+    setPagination((prev) => ({
+      ...prev,
+      page: newPaginationModel.page + 1, // DataGrid uses 0-based indexing for pages
+      pageSize: newPaginationModel.pageSize,
+    }));
+    setCurrentPage(newPaginationModel.page + 1,)
+  };
+
+    const bulkDeleteOptions = async (ids) => {
+      try {
+        let data = JSON.stringify({
+          "ids": ids
+        });
+        const response = await ItemServices.bulkdeleteOptions(data);
+        setLoading(true)
+        toast.success("Multiple Options Deleted successfully!");
+        fetchALLOptionsList();
+      } catch (error) {
+        console.error("Error fetching menu list:", error);
+        toast.error("Failed to process menu. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    const deleteOptions = async (id) => {
+      try {
+        const response = await ItemServices.deleteOptions(id);
+        console.log(response)
+        setLoading(true)
+        toast.success("Options Deleted successfully!");
+        fetchALLOptionsList();
+      } catch (error) {
+        console.error("Error fetching menu list:", error);
+        toast.error("Failed to process menu. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
   const columns = [
-    { field: "optionsName", headerName: "Option Name",  flex: 1, },
+    { field: "option_name", headerName: "Option Name", flex: 1, },
     {
-      field: "optionsChineseName",
+      field: "option_name_cn",
       headerName: "Option Chinese Name",
       flex: 1,
       // cellClassName: "name-column--cell",
     },
-    { field: "isPaidItem", headerName: "Is Paid Item", },
+    { field: "is_paid_item", headerName: "Is Paid Item", },
     {
       field: "actions",
       headerName: "Actions",
@@ -93,7 +176,7 @@ const ItemOptions = () => {
               variant="contained"
               color="secondary"
               size="small"
-              onClick={() => handleDelete(row.id)}
+              onClick={() => handleDelete(row)}
             >
               Delete
             </Button>
@@ -111,6 +194,7 @@ const ItemOptions = () => {
         icon={<FormatListBulletedOutlined />}
         Buttons={true}
         addNewClick={handleAddNewClick}
+        addBulkDelete={handleBulkDelete}
         orderClick={handleOrderClick}
         showToggleClick={handleToggle}
       />
@@ -148,21 +232,29 @@ const ItemOptions = () => {
         }}
       >
         <DataGrid
-          rows={mockOptions}
+          rows={optionsListData}
           columns={columns}
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 10,
-              },
-            },
+          loading={loading}
+          rowCount={pagination.total}
+          paginationModel={{
+            page: pagination.page - 1,
+            pageSize: pagination.pageSize,
           }}
+          onPaginationModelChange={handlePaginationChange}
           checkboxSelection
+          onRowSelectionModelChange={(ids) => handleRowSelection(ids)}
+          components={{
+            LoadingOverlay: CustomLoadingOverlay,
+          }}
         />
         <ConfirmationDialog
           open={dialogOpen}
           title="Confirm Delete"
-          message={`Are you sure you want to delete the "${mockOptions.find((row) => row.id === selectedId)?.optionsName || "selected"}" item?`}
+          message={
+            selectedIds.length > 0 && !selectedOptionName
+              ? `Are you sure you want to delete ${selectedIds.length} Option items?`
+              : `Are you sure you want to delete the Option "${selectedOptionName}"?`
+          }
           onConfirm={confirmDelete}
           onCancel={cancelDelete}
         />

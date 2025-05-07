@@ -12,40 +12,79 @@ import {
   SecurityOutlined,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
+import ItemServices from "../../services/itemServices";
+import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
+import { toast } from "react-toastify";
 
 const ItemPreferences = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
-
+  const [currentPage, setCurrentPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [selectedPreferenceName, setSelectedPreferenceName] = useState("");
+  const [preferencesListData, setpPeferencesListData] = useState([])
+  const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    pageSize: 10,
+    total: 0,
+  });
 
-  const handleDelete = (id) => {
-    setSelectedId(id);
+  useEffect(() => {
+    fetchALLPreferenceList()
+  }, []);
+
+  const fetchALLPreferenceList = async () => {
+    try {
+      const response = await ItemServices.getPreferencesList();
+      console.log(response)
+      setpPeferencesListData(response.data);
+      setPagination((prev) => ({
+        ...prev,
+        total: response.count,
+      }));
+    } catch (error) {
+      console.error("Error fetching menu list:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRowSelection = (ids) => {
+    setSelectedIds(ids);
+  };
+
+  const handleDelete = (data) => {
+    console.log(data)
+    setSelectedIds([])
+    setSelectedId(data?.id);
+    setSelectedPreferenceName(data?.pname);
     setDialogOpen(true);
   };
 
   const confirmDelete = () => {
-    console.log(`Delete confirmed for ID: ${selectedId}`);
-    setDialogOpen(false); // Close the dialog
-    // Add your delete logic here
+    selectedIds.length > 0 && !selectedPreferenceName
+      ? bulkDeletePreference(selectedIds) : deletePreference(selectedId);
+    setDialogOpen(false);
   };
 
   const cancelDelete = () => {
-    setDialogOpen(false); // Close the dialog
+    setDialogOpen(false);
     setSelectedId(null);
+    setSelectedPreferenceName()
   };
 
   const handleView = (id) => {
-    const selectedRow = mockPreferences.find((row) => row.id === id);
-    navigate(`/item-preferences/${id}`, { state: selectedRow });
+    navigate(`/item-preferences/${id}`, { state: { id } });
   };
 
   const handleEdit = (id) => {
-    const selectedRow = mockPreferences.find((row) => row.id === id);
+    const selectedRow = preferencesListData.find((row) => row.id === id);
     navigate(`/item-preferences/${id}/edit`, { state: selectedRow });
   };
   const handleToggle = () => {
@@ -54,14 +93,58 @@ const ItemPreferences = () => {
   const handleAddNewClick = () => {
     navigate("/item-preferences/create");
   };
+  const handleBulkDelete = () => {
+    setDialogOpen(true);
+  };
   const handleOrderClick = () => {
     // navigate("/item-details/order");
   };
 
+  const handlePaginationChange = (newPaginationModel) => {
+    setPagination((prev) => ({
+      ...prev,
+      page: newPaginationModel.page + 1, // DataGrid uses 0-based indexing for pages
+      pageSize: newPaginationModel.pageSize,
+    }));
+    setCurrentPage(newPaginationModel.page + 1,)
+  };
+
+  const bulkDeletePreference = async (ids) => {
+    try {
+      let data = JSON.stringify({
+        "ids": ids
+      });
+      const response = await ItemServices.bulkdeletePreferences(data);
+      setLoading(true)
+      toast.success("Multiple Preferences Deleted successfully!");
+      fetchALLPreferenceList();
+    } catch (error) {
+      console.error("Error fetching menu list:", error);
+      toast.error("Failed to process menu. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  const deletePreference = async (id) => {
+    try {
+      const response = await ItemServices.deletePreferences(id);
+      console.log(response)
+      setLoading(true)
+      toast.success("Preference Deleted successfully!");
+      fetchALLPreferenceList();
+    } catch (error) {
+      console.error("Error fetching menu list:", error);
+      toast.error("Failed to process menu. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
   const columns = [
-    { field: "preferencesName", headerName: "Preferences Name",  flex: 1, },
+    { field: "pname", headerName: "Preferences Name", flex: 1, },
     {
-      field: "preferencesChineseName",
+      field: "pname_cn",
       headerName: "Preferences Chinese Name",
       flex: 1,
       // cellClassName: "name-column--cell",
@@ -93,7 +176,7 @@ const ItemPreferences = () => {
               variant="contained"
               color="secondary"
               size="small"
-              onClick={() => handleDelete(row.id)}
+              onClick={() => handleDelete(row)}
             >
               Delete
             </Button>
@@ -111,6 +194,7 @@ const ItemPreferences = () => {
         icon={<ClearAllOutlined />}
         Buttons={true}
         addNewClick={handleAddNewClick}
+        addBulkDelete={handleBulkDelete}
         orderClick={handleOrderClick}
         showToggleClick={handleToggle}
       />
@@ -148,21 +232,29 @@ const ItemPreferences = () => {
         }}
       >
         <DataGrid
-          rows={mockPreferences}
+          rows={preferencesListData}
           columns={columns}
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 10,
-              },
-            },
+          loading={loading}
+          rowCount={pagination.total}
+          paginationModel={{
+            page: pagination.page - 1,
+            pageSize: pagination.pageSize,
           }}
+          onPaginationModelChange={handlePaginationChange}
+          onRowSelectionModelChange={(ids) => handleRowSelection(ids)}
           checkboxSelection
+          components={{
+            LoadingOverlay: CustomLoadingOverlay,
+          }}
         />
         <ConfirmationDialog
           open={dialogOpen}
           title="Confirm Delete"
-          message={`Are you sure you want to delete the "${mockPreferences.find((row) => row.id === selectedId)?.preferencesName || "selected"}" item?`}
+          message={
+            selectedIds.length > 0 && !selectedPreferenceName
+              ? `Are you sure you want to Preference ${selectedIds.length}  items?`
+              : `Are you sure you want to delete the Preference "${selectedPreferenceName}"?`
+          } 
           onConfirm={confirmDelete}
           onCancel={cancelDelete}
         />

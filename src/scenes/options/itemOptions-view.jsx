@@ -13,26 +13,26 @@ import { useLocation } from "react-router-dom";
 import ItemServices from "../../services/itemServices";
 import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
 
-const ItemPreferencesView = () => {
+const ItemOptionsView = () => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
     const isXlDevices = useMediaQuery("(min-width: 1260px)");
-    const [preferencesDetails, setPreferencesDetails] = useState('')
+    const [optionsDetails, setOptionsDetails] = useState('')
     const [loading, setLoading] = useState(false);
-
     const location = useLocation();
-    const ItemPreferencesDetails = location.state.id
+    const ItemoptionsDetails = location.state;
+
 
     useEffect(() => {
-        getPreferencesDetails(ItemPreferencesDetails)
-    }, [ItemPreferencesDetails])
+        getOptionsDetails(ItemoptionsDetails?.id)
+    }, [location.state])
 
-    const getPreferencesDetails = async (id) => {
+    const getOptionsDetails = async (id) => {
         try {
             setLoading(true);
-            const response = await ItemServices.getPreferencesDetails(id);
+            const response = await ItemServices.getOptionDetails(id);
             // console.log(response?.data)
-            setPreferencesDetails(response?.data);
+            setOptionsDetails(response?.data);
         } catch (error) {
             console.error("Error fetching menu list:", error);
         } finally {
@@ -66,10 +66,10 @@ const ItemPreferencesView = () => {
                 >
                     <Box p="10px">
                         <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
-                            Preference name
+                            Item Name
                         </Typography>
                         <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                            {preferencesDetails?.pname}
+                            {optionsDetails?.option_name}
                         </Typography>
                     </Box>
                     <Divider sx={{ bgcolor: colors.gray[300] }} />
@@ -78,7 +78,17 @@ const ItemPreferencesView = () => {
                             Item Chinese Name
                         </Typography>
                         <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                            {preferencesDetails?.pname_cn}
+                            {optionsDetails?.option_name_cn}
+                        </Typography>
+                    </Box>
+                    <Divider sx={{ bgcolor: colors.gray[300] }} />
+
+                    <Box p="10px">
+                        <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
+                            Is Paid Item
+                        </Typography>
+                        <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
+                            {optionsDetails?.is_paid_item}
                         </Typography>
                     </Box>
                 </Box>
@@ -87,4 +97,4 @@ const ItemPreferencesView = () => {
     );
 };
 
-export default ItemPreferencesView;
+export default ItemOptionsView;

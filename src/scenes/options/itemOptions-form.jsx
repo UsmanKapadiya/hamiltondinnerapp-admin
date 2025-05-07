@@ -12,52 +12,49 @@ import { toast } from "react-toastify";
 
 
 const validationSchema = yup.object().shape({
-    pname: yup.string().required("Preference  Name is required"),
-    pname_cn: yup.string().required("Preference  Chinese Name is required"),
-
+    option_name: yup.string().required("Option  Name is required"),
+    option_name_cn: yup.string().required("Option  Chinese Name is required"),
+    is_paid_item: yup.string().required("Is Paid Item is required"),
 });
 
 
-const ItemPreferencesForm = () => {
+const ItemoptionsForm = () => {
     const location = useLocation();
-    // const preferencesDetails = location.state;
     const isNonMobile = useMediaQuery("(min-width:600px)");
+    const [optionsDetails, setOptionsDetails] = useState('')
     const [loading, setLoading] = useState(true);
-    const [preferencesDetails, setPreferencesDetails] = useState('')
-
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            const fetchedPreferencesDetails = location.state;
-            console.log(fetchedPreferencesDetails)
-            setPreferencesDetails(fetchedPreferencesDetails);
+            const fetchedOptionsDetails = location.state;
+            setOptionsDetails(fetchedOptionsDetails);
             setLoading(false);
         }, 1500);
         return () => clearTimeout(timer);
     }, [location.state])
 
     const initialValues = {
-        id: preferencesDetails?.id || "",
-        pname: preferencesDetails?.pname || "",
-        pname_cn: preferencesDetails?.pname_cn || "",
+        id: optionsDetails?.id || "",
+        option_name: optionsDetails?.option_name || "",
+        option_name_cn: optionsDetails?.option_name_cn || "",
+        is_paid_item: optionsDetails?.is_paid_item || false,
     };
 
+
     const handleFormSubmit = async (values, actions) => {
-        // console.log("Form Submitted:", values);
         setLoading(true)
         const formData = { ...values };
         try {
             let response;
             if (formData?.id) {
-                // Update Preference if ID is available
-                response = await ItemServices.updatetPreferencesDetails(formData.id, formData);
-                console.log(response)
-                setPreferencesDetails(response?.data)
-                toast.success("Item preference updated successfully!");
+                // Update Options if ID is available
+                response = await ItemServices.updatetOptionsDetails(formData.id, formData);
+                setOptionsDetails(response?.data)
+                toast.success("Item Options updated successfully!");
             } else {
-                // Create Preference if ID is not available
-                response = await ItemServices.createPreferencesDetails(formData);
-                toast.success("Item preference created successfully!");
+                // Create Options if ID is not available
+                response = await ItemServices.createOptionsDetails(formData);
+                toast.success("Item Options created successfully!");
                 actions.resetForm({
                     values: initialValues,
                 });
@@ -71,7 +68,7 @@ const ItemPreferencesForm = () => {
 
     return (
         <Box m="20px">
-            <Header title="Add Item Preference" icon={<DvrOutlined />} Buttons={false} />
+            <Header title="Add Item Option" icon={<DvrOutlined />} Buttons={false} />
             {loading ? (
                 <Box
                     display="flex"
@@ -86,8 +83,8 @@ const ItemPreferencesForm = () => {
                     onSubmit={handleFormSubmit}
                     initialValues={initialValues}
                     validationSchema={validationSchema}
-                    validateOnBlur={true} // Enable validation on blur
-                    validateOnChange={true} // Enable validation on change
+                    validateOnBlur={true}
+                    validateOnChange={true}
                 >
                     {({
                         values,
@@ -113,28 +110,41 @@ const ItemPreferencesForm = () => {
                                     fullWidth
                                     variant="filled"
                                     type="text"
-                                    label="Preference name"
+                                    label="Option Name"
                                     onBlur={handleBlur}
                                     onChange={handleChange}
-                                    value={values.pname}
-                                    name="pname"
-                                    error={touched.pname && Boolean(errors.pname)}
-                                    helperText={touched.pname && errors.pname}
+                                    value={values.option_name}
+                                    name="option_name"
+                                    error={touched.option_name && Boolean(errors.option_name)}
+                                    helperText={touched.option_name && errors.option_name}
                                     sx={{ gridColumn: "span 4" }}
                                 />
                                 <TextField
                                     fullWidth
                                     variant="filled"
                                     type="text"
-                                    label="Preference Chinese Name"
+                                    label="Option Chinese Name"
                                     onBlur={handleBlur}
                                     onChange={handleChange}
-                                    value={values.pname_cn}
-                                    name="pname_cn"
-                                    error={touched.pname_cn && Boolean(errors.pname_cn)}
-                                    helperText={touched.pname_cn && errors.pname_cn}
+                                    value={values.option_name_cn}
+                                    name="option_name_cn"
+                                    error={touched.option_name_cn && Boolean(errors.option_name_cn)}
+                                    helperText={touched.option_name_cn && errors.option_name_cn}
                                     sx={{ gridColumn: "span 4" }}
                                 />
+                                <FormGroup>
+                                    <FormControlLabel
+                                        control={
+                                            <Switch
+                                                color="secondary"
+                                                checked={values.is_paid_item}
+                                                onChange={(e) => setFieldValue("is_paid_item", e.target.checked)}
+                                                name="is_paid_item"
+                                            />
+                                        }
+                                        label="Is Paid Item"
+                                    />
+                                </FormGroup>
                             </Box>
                             <Box
                                 display="flex"
@@ -154,4 +164,4 @@ const ItemPreferencesForm = () => {
     );
 };
 
-export default ItemPreferencesForm;
+export default ItemoptionsForm;
