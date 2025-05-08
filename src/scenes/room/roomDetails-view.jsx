@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
     Box,
     Button,
@@ -11,15 +11,34 @@ import { Header } from "../../components";
 import { ListAltOutlined } from "@mui/icons-material";
 import { tokens } from "../../theme";
 import { useLocation } from "react-router-dom";
+import RoomServices from "../../services/roomServices";
+import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
 
 const RoomDetailsView = () => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
     const isXlDevices = useMediaQuery("(min-width: 1260px)");
-
+    const [loading, setLoading] = useState(false);
     const location = useLocation();
-    const roomDetails = location.state;
+    const [roomDetails, setRoomDetails] = useState('')
+    
 
+    useEffect(() => {
+        getRoomsDetails(location.state?.id)
+    }, [location.state])
+
+    const getRoomsDetails = async (id) => {
+        try {
+            setLoading(true);
+            const response = await RoomServices.getRoomDetails(id);
+            // console.log(response?.data)
+            setRoomDetails(response?.data);
+        } catch (error) {
+            console.error("Error fetching menu list:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <Box m="20px">
@@ -29,6 +48,16 @@ const RoomDetailsView = () => {
                 Buttons={false}
                 ActionButton={true}
             />
+             {loading ? (
+                <Box
+                    display="flex"
+                    justifyContent="center"
+                    alignItems="center"
+                    height="calc(100vh - 100px)"
+                >
+                    <CustomLoadingOverlay />
+                </Box>
+            ) : (
             <Box
                 gridColumn={isXlDevices ? "span 4" : "span 3"}
                 gridRow="span 2"
@@ -40,7 +69,7 @@ const RoomDetailsView = () => {
                         Unit Number
                     </Typography>
                     <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                        {roomDetails?.unitNumber}
+                        {roomDetails?.room_name}
                     </Typography>
                 </Box>
                 <Divider sx={{ bgcolor: colors.gray[300] }} />
@@ -67,7 +96,7 @@ const RoomDetailsView = () => {
                         Language Preference
                     </Typography>
                     <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                        {roomDetails?.language_preference === "eng" ? "English" : "Chinese"}
+                        {roomDetails?.language === 1 ? "English" : "Chinese"}
                     </Typography>
                 </Box>
                 <Divider sx={{ bgcolor: colors.gray[300] }} />
@@ -85,7 +114,7 @@ const RoomDetailsView = () => {
                         Special Instructions
                     </Typography>
                     <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                        {roomDetails?.special_instruction}
+                        {roomDetails?.special_instrucations}
                     </Typography>
                 </Box>
                 <Divider sx={{ bgcolor: colors.gray[300] }} />
@@ -99,10 +128,11 @@ const RoomDetailsView = () => {
                         size="small"
                         mt='10px'
                     >
-                        {roomDetails?.active === true ? "Active" : "Inactive"}
+                        {roomDetails?.is_active === 1 ? "Active" : "Inactive"}
                     </Button>
                 </Box>
             </Box>
+            )}
         </Box>
     );
 };

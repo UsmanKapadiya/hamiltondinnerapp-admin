@@ -1,16 +1,16 @@
 import { Box, Typography, useTheme, Button } from "@mui/material";
 import { Header } from "../../components";
 import { DataGrid } from "@mui/x-data-grid";
-import { mockDataRomm } from "../../data/mockData";
 import { tokens } from "../../theme";
 import {
-  AdminPanelSettingsOutlined,
   Home,
-  SecurityOutlined,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
+import RoomServices from "../../services/roomServices";
+import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
+import { toast } from "react-toastify";
 
 const Room = () => {
   const theme = useTheme();
@@ -19,48 +19,88 @@ const Room = () => {
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
-  
-  const handleDelete = (id) => {
-    setSelectedId(id);
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [selectedRoomName, setSelectedRoomName] = useState("");
+  const [roomListData, setroomListData] = useState([])
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    pageSize: 10,
+    total: 0,
+  });
+
+
+  useEffect(() => {
+    fetchALLRoomList()
+  }, []);
+
+  const fetchALLRoomList = async () => {
+    try {
+      const response = await RoomServices.getRoomList();
+      setroomListData(response.data);
+      setPagination((prev) => ({
+        ...prev,
+        total: response.count,
+      }));
+    } catch (error) {
+      console.error("Error fetching menu list:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const handleRowSelection = (ids) => {
+    setSelectedIds(ids);
+  };
+  const handleDelete = (data) => {
+    setSelectedIds([])
+    setSelectedId(data?.id);
+    setSelectedRoomName(data?.room_name);
     setDialogOpen(true);
   };
-
   const confirmDelete = () => {
-    console.log(`Delete confirmed for ID: ${selectedId}`);
-    setDialogOpen(false); // Close the dialog
-    // Add your delete logic here
+    selectedIds.length > 0 && !selectedRoomName
+      ? bulkDeleteRoom(selectedIds) : deleteRoom(selectedId);
+    setDialogOpen(false);
   };
-
   const cancelDelete = () => {
-    setDialogOpen(false); // Close the dialog
+    setDialogOpen(false);
     setSelectedId(null);
+    setSelectedRoomName()
   };
-
   const handleView = (id) => {
-    const selectedRow = mockDataRomm.find((row) => row.id === id);
-    navigate(`/room-details/${id}`, { state: selectedRow }); 
+    navigate(`/room-details/${id}`,  { state: { id }});
   };
-
   const handleEdit = (id) => {
-    const selectedRow = mockDataRomm.find((row) => row.id === id);
+    const selectedRow = roomListData.find((row) => row.id === id);
     navigate(`/room-details/${id}/edit`, { state: selectedRow });
   };
-
   const handleToggle = () => {
     setShowDeleted((prev) => !prev);
   };
   const handleAddNewClick = () => {
     navigate("/room-details/create");
   };
+  const handleBulkDelete = () => {
+    setDialogOpen(true);
+  };
   const handleOrderClick = () => {
     navigate("/room-details/order");
   };
+  const handlePaginationChange = (newPaginationModel) => {
+    setPagination((prev) => ({
+      ...prev,
+      page: newPaginationModel.page + 1,
+      pageSize: newPaginationModel.pageSize,
+    }));
+    setCurrentPage(newPaginationModel.page + 1,)
+  };
   const columns = [
-    { field: "unitNumber", headerName: "Unit Number" },
+    { field: "room_name", headerName: "Unit Number" },
     {
       field: "resident_name",
       headerName: "Resident Name",
-      // // flex: 1,
+      flex: 1,
       // cellClassName: "name-column--cell",
     },
     {
@@ -70,12 +110,20 @@ const Room = () => {
       headerAlign: "left",
       align: "left",
     },
-    { field: "language_preference", headerName: "Language Preference", flex: 1 },
+    { field: "language", headerName: "Language Preference", 
+      renderCell: ({ value }) => {
+        return (
+            <Typography>
+                {value === "0" || value === 0 ? "Chinese" : "English"}
+            </Typography>
+        );
+    },
+    },
     {
-      field: "active",
+      field: "is_active",
       headerName: "Active",
       flex: 1,
-      renderCell: ({ row: { active } }) => {
+      renderCell: ({ row: { is_active } }) => {
         return (
           <Box
             width="120px"
@@ -85,16 +133,16 @@ const Room = () => {
             justifyContent="center"
             gap={1}
             bgcolor={
-              active === true
+              is_active === 1
                 ? colors.greenAccent[600]
                 : colors.greenAccent[700]
             }
             borderRadius={1}
           >
-            {active === true && <AdminPanelSettingsOutlined />}
-            {active === false && <SecurityOutlined />}
+            {/* {is_active === 1 && <AdminPanelSettingsOutlined />}
+            {is_active === 0 && <SecurityOutlined />} */}
             <Typography textTransform="capitalize">
-              {active === true ? "active" : "Inactive"}
+              {is_active === 1 ? "active" : "Inactive"}
             </Typography>
           </Box>
         );
@@ -127,7 +175,7 @@ const Room = () => {
               variant="contained"
               color="secondary"
               size="small"
-              onClick={() => handleDelete(row.id)}
+              onClick={() => handleDelete(row)}
             >
               Delete
             </Button>
@@ -138,16 +186,47 @@ const Room = () => {
     },
   ];
 
+  const bulkDeleteRoom = async (ids) => {
+    try {
+      let data = JSON.stringify({
+        "ids": ids
+      });
+      const response = await RoomServices.bulkdeleteRooms(data);
+      setLoading(true)
+      toast.success("Multiple Rooms Deleted successfully!");
+      fetchALLRoomList();
+    } catch (error) {
+      console.error("Error fetching menu list:", error);
+      toast.error("Failed to process menu. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  const deleteRoom = async (id) => {
+    try {
+      const response = await RoomServices.deleteRooms(id);
+      // console.log(response)
+      setLoading(true)
+      toast.success("Rooms Deleted successfully!");
+      fetchALLRoomList();
+    } catch (error) {
+      console.error("Error fetching menu list:", error);
+      toast.error("Failed to process menu. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <Box m="20px">
-      <Header 
-        title="Room Details" 
+      <Header
+        title="Room Details"
         icon={<Home />}
-        Buttons={true} 
+        Buttons={true}
         addNewClick={handleAddNewClick}
+        addBulkDelete={handleBulkDelete}
         orderClick={handleOrderClick}
         showToggleClick={handleToggle}
-        />
+      />
       <Box
         mt="40px"
         height="75vh"
@@ -182,25 +261,33 @@ const Room = () => {
         }}
       >
         <DataGrid
-          rows={mockDataRomm}
+          rows={roomListData}
           columns={columns}
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 10,
-              },
-            },
+          loading={loading}
+          rowCount={pagination.total}
+          paginationModel={{
+            page: pagination.page - 1,
+            pageSize: pagination.pageSize,
           }}
+          onPaginationModelChange={handlePaginationChange}
           checkboxSelection
+          onRowSelectionModelChange={(ids) => handleRowSelection(ids)}
+          components={{
+            LoadingOverlay: CustomLoadingOverlay,
+          }}
         />
-        
+
         <ConfirmationDialog
-        open={dialogOpen}
-        title="Confirm Delete"
-        message="Are you sure you want to delete this room?"
-        onConfirm={confirmDelete}
-        onCancel={cancelDelete}
-      />
+          open={dialogOpen}
+          title="Confirm Delete"
+          message={
+            selectedIds.length > 0 && !selectedRoomName
+              ? `Are you sure you want to delete ${selectedIds.length} Rooms items? `
+              : `Are you sure you want to delete the Rooms "${selectedRoomName}"?`
+          }
+          onConfirm={confirmDelete}
+          onCancel={cancelDelete}
+        />
 
       </Box>
     </Box>

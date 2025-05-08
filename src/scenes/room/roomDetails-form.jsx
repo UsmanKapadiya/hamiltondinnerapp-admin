@@ -4,200 +4,248 @@ import { Formik } from "formik";
 import * as yup from "yup";
 import { Home } from "@mui/icons-material";
 import { useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
+import RoomServices from "../../services/roomServices";
+import { toast } from "react-toastify";
 
 
 
 const validationSchema = yup.object().shape({
-    unitNumber: yup.string().required("Unit Number is required"),
-    residentName: yup.string().required("Resident Name is required"),
+    room_name: yup.string().required("Unit Number is required"),
+    resident_name: yup.string().required("Resident Name is required"),
     occupancy: yup
         .number()
         .typeError("Occupancy must be a number")
         .required("Occupancy is required"),
-    languagePreference: yup.string().required("Language Preference is required"),
-    foodTexture: yup.string().required("Food Texture is required"),
-    specialInstructions: yup.string(),
-    active: yup.boolean(),
+    language: yup.string().required("Language Preference is required"),
+    // food_texture: yup.string().required("Food Texture is required"),
+    // special_instrucations: yup.string(),
+    // is_active: yup.boolean(),
 });
 
 const RoomDetailsForm = () => {
     const location = useLocation();
-    const roomDetails = location.state;
+    // const roomDetails = location.state;
+    const [roomDetails, setRoomDetails] = useState('')
+    const [loading, setLoading] = useState(true);
     const isNonMobile = useMediaQuery("(min-width:600px)");
 
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            const fetchedRoomDetails = location.state;
+            setRoomDetails(fetchedRoomDetails);
+            setLoading(false);
+        }, 1500);
+        return () => clearTimeout(timer);
+    }, [location.state])
 
     const initialValues = {
-        unitNumber: roomDetails?.unitNumber || "",
-        residentName: roomDetails?.resident_name || "",
+        id:roomDetails?.id ? roomDetails?.id :'',
+        room_name: roomDetails?.room_name || "",
+        resident_name: roomDetails?.resident_name || "",
         occupancy: roomDetails?.occupancy || "",
-        languagePreference: roomDetails?.language_preference || "",
-        foodTexture: roomDetails?.food_texture || "",
-        specialInstructions: roomDetails?.special_instruction || "",
-        active: roomDetails?.active || false,
-      };
+        language: roomDetails?.language?.toString() || "",
+        food_texture: roomDetails?.food_texture || "",
+        special_instrucations: roomDetails?.special_instrucations || "",
+        is_active: roomDetails?.is_active || 0,
+    };
 
-    const handleFormSubmit = (values, actions) => {
-        console.log("Form Submitted:", values);
-        actions.resetForm({
-            values: initialValues,
-        });
+    const handleFormSubmit =async (values, actions) => {
+        // console.log("Form Submitted:", values);
+        const payload = {
+            ...values,
+            is_active: values.is_active ? 1 : 0,
+        };
+        try {
+            let response;
+            if (payload?.id) {
+                // Update Preference if ID is available
+                response = await RoomServices.updateRoomDetails(payload.id, payload);
+                console.log(response)
+                // setPreferencesDetails(response?.data)
+                toast.success("Room updated successfully!");
+            } else {
+                // Create Preference if ID is not available
+                response = await RoomServices.createRoomDetails(payload);
+                toast.success("Room created successfully!");
+                actions.resetForm({
+                    values: initialValues,
+                });
+            }
+        } catch (error) {
+            toast.error("Failed to process menu. Please try again.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
         <Box m="20px">
             <Header title="Add Room Detail" icon={<Home />} Buttons={false} />
-            <Formik
-                onSubmit={handleFormSubmit}
-                initialValues={initialValues}
-                validationSchema={validationSchema}
-            >
-                {({
-                    values,
-                    errors,
-                    touched,
-                    handleBlur,
-                    handleChange,
-                    handleSubmit,
-                    setFieldValue,
-                }) => (
-                    <form onSubmit={handleSubmit}>
-                        <Box
-                            display="grid"
-                            gap="30px"
-                            gridTemplateColumns="repeat(4, minmax(0, 1fr))"
-                            sx={{
-                                "& > div": {
-                                    gridColumn: isNonMobile ? undefined : "span 4",
-                                },
-                            }}
-                        >
-                            <TextField
-                                fullWidth
-                                variant="filled"
-                                type="text"
-                                label="Unit Number"
-                                onBlur={handleBlur}
-                                onChange={handleChange}
-                                value={values.unitNumber}
-                                name="unitNumber"
-                                error={touched.unitNumber && Boolean(errors.unitNumber)}
-                                helperText={touched.unitNumber && errors.unitNumber}
-                                sx={{ gridColumn: "span 2" }}
-                            />
-                            <TextField
-                                fullWidth
-                                variant="filled"
-                                type="text"
-                                label="Resident Name"
-                                onBlur={handleBlur}
-                                onChange={handleChange}
-                                value={values.residentName}
-                                name="residentName"
-                                error={touched.residentName && Boolean(errors.residentName)}
-                                helperText={touched.residentName && errors.residentName}
-                                sx={{ gridColumn: "span 2" }}
-                            />
-                            <TextField
-                                fullWidth
-                                variant="filled"
-                                type="number"
-                                label="Occupancy"
-                                onBlur={handleBlur}
-                                onChange={handleChange}
-                                value={values.occupancy}
-                                name="occupancy"
-                                error={touched.occupancy && Boolean(errors.occupancy)}
-                                helperText={touched.occupancy && errors.occupancy}
-                                sx={{ gridColumn: "span 2" }}
-                            />
-                            <TextField
-                                fullWidth
-                                select
-                                variant="filled"
-                                label="Language Preference"
-                                onBlur={handleBlur}
-                                onChange={handleChange}
-                                value={values.languagePreference}
-                                name="languagePreference"
-                                error={
-                                    touched.languagePreference &&
-                                    Boolean(errors.languagePreference)
-                                }
-                                helperText={
-                                    touched.languagePreference && errors.languagePreference
-                                }
-                                sx={{ gridColumn: "span 2" }}
+            {loading ? (
+                <Box
+                    display="flex"
+                    justifyContent="center"
+                    alignItems="center"
+                    height="calc(100vh - 100px)"
+                >
+                    <CustomLoadingOverlay />
+                </Box>
+            ) : (
+                <Formik
+                    onSubmit={handleFormSubmit}
+                    initialValues={initialValues}
+                    validationSchema={validationSchema}
+                >
+                    {({
+                        values,
+                        errors,
+                        touched,
+                        handleBlur,
+                        handleChange,
+                        handleSubmit,
+                        setFieldValue,
+                    }) => (
+                        <form onSubmit={handleSubmit}>
+                            <Box
+                                display="grid"
+                                gap="30px"
+                                gridTemplateColumns="repeat(4, minmax(0, 1fr))"
+                                sx={{
+                                    "& > div": {
+                                        gridColumn: isNonMobile ? undefined : "span 4",
+                                    },
+                                }}
                             >
-                                <MenuItem value="English">English</MenuItem>
-                                <MenuItem value="Chinese">Chinese</MenuItem>
-                            </TextField>
-                            <TextField
-                                fullWidth
-                                variant="filled"
-                                type="text"
-                                label="Food Texture"
-                                onBlur={handleBlur}
-                                onChange={handleChange}
-                                value={values.foodTexture}
-                                name="foodTexture"
-                                error={touched.foodTexture && Boolean(errors.foodTexture)}
-                                helperText={touched.foodTexture && errors.foodTexture}
-                                sx={{ gridColumn: "span 4" }}
-                            />
-                            <TextField
-                                fullWidth
-                                variant="filled"
-                                type="text"
-                                label="Special Instructions"
-                                multiline
-                                rows={4}
-                                onBlur={handleBlur}
-                                onChange={handleChange}
-                                value={values.specialInstructions}
-                                name="specialInstructions"
-                                error={
-                                    touched.specialInstructions &&
-                                    Boolean(errors.specialInstructions)
-                                }
-                                helperText={
-                                    touched.specialInstructions && errors.specialInstructions
-                                }
-                                sx={{ gridColumn: "span 4" }}
-                            />
+                                <TextField
+                                    fullWidth
+                                    variant="filled"
+                                    type="text"
+                                    label="Unit Number"
+                                    onBlur={handleBlur}
+                                    onChange={handleChange}
+                                    value={values.room_name}
+                                    name="room_name"
+                                    error={touched.room_name && Boolean(errors.room_name)}
+                                    helperText={touched.room_name && errors.room_name}
+                                    sx={{ gridColumn: "span 2" }}
+                                />
+                                <TextField
+                                    fullWidth
+                                    variant="filled"
+                                    type="text"
+                                    label="Resident Name"
+                                    onBlur={handleBlur}
+                                    onChange={handleChange}
+                                    value={values.resident_name}
+                                    name="resident_name"
+                                    error={touched.resident_name && Boolean(errors.resident_name)}
+                                    helperText={touched.resident_name && errors.resident_name}
+                                    sx={{ gridColumn: "span 2" }}
+                                />
+                                <TextField
+                                    fullWidth
+                                    variant="filled"
+                                    type="number"
+                                    label="Occupancy"
+                                    onBlur={handleBlur}
+                                    onChange={handleChange}
+                                    value={values.occupancy}
+                                    name="occupancy"
+                                    error={touched.occupancy && Boolean(errors.occupancy)}
+                                    helperText={touched.occupancy && errors.occupancy}
+                                    sx={{ gridColumn: "span 2" }}
+                                />
+                                <TextField
+                                    fullWidth
+                                    select
+                                    variant="filled"
+                                    label="Language Preference"
+                                    onBlur={handleBlur}
+                                    onChange={handleChange}
+                                    value={values.language}
+                                    name="language"
+                                    error={
+                                        touched.language &&
+                                        Boolean(errors.language)
+                                    }
+                                    helperText={
+                                        touched.language && errors.language
+                                    }
+                                    sx={{ gridColumn: "span 2" }}
+                                >
+                                    <MenuItem value="1">English</MenuItem>
+                                    <MenuItem value="0">Chinese</MenuItem>
+                                </TextField>
+                                <TextField
+                                    fullWidth
+                                    variant="filled"
+                                    type="text"
+                                    label="Food Texture"
+                                    onBlur={handleBlur}
+                                    onChange={handleChange}
+                                    value={values.food_texture}
+                                    name="food_texture"
+                                    error={touched.food_texture && Boolean(errors.food_texture)}
+                                    helperText={touched.food_texture && errors.food_texture}
+                                    sx={{ gridColumn: "span 4" }}
+                                />
+                                <TextField
+                                    fullWidth
+                                    variant="filled"
+                                    type="text"
+                                    label="Special Instructions"
+                                    multiline
+                                    rows={4}
+                                    onBlur={handleBlur}
+                                    onChange={handleChange}
+                                    value={values.special_instrucations}
+                                    name="special_instrucations"
+                                    error={
+                                        touched.special_instrucations &&
+                                        Boolean(errors.special_instrucations)
+                                    }
+                                    helperText={
+                                        touched.special_instrucations && errors.special_instrucations
+                                    }
+                                    sx={{ gridColumn: "span 4" }}
+                                />
+                                <Box
+                                    display="flex"
+                                    alignItems="center"
+                                    justifyContent="space-between"
+                                    sx={{ gridColumn: "span 4" }}
+                                >
+                                    <FormGroup>
+                                        <FormControlLabel
+                                            control={
+                                                <Switch
+                                                    color="secondary"
+                                                    checked={values.is_active}
+                                                    onChange={(e) => setFieldValue("is_active", e.target.checked)}
+                                                    name="is_active"
+                                                />
+                                            }
+                                            label="is Active"
+                                        />
+                                    </FormGroup>
+                                </Box>
+                            </Box>
                             <Box
                                 display="flex"
                                 alignItems="center"
-                                justifyContent="space-between"
-                                sx={{ gridColumn: "span 4" }}
+                                justifyContent="end"
+                                mt="20px"
                             >
-                                <FormGroup>
-                                    <FormControlLabel
-                                        control={
-                                            <Switch
-                                                color="secondary"
-                                                checked={values.active}
-                                                onChange={(e) => setFieldValue("active", e.target.checked)}
-                                                name="active"
-                                            />
-                                        }
-                                        label="Active"
-                                    />
-                                </FormGroup>
+                                <Button type="submit" color="secondary" variant="contained">
+                                    Save Room Details
+                                </Button>
                             </Box>
-                        </Box>
-                        <Box
-                            display="flex"
-                            alignItems="center"
-                            justifyContent="end"
-                            mt="20px"
-                        >
-                            <Button type="submit" color="secondary" variant="contained">
-                                Save Room Details
-                            </Button>
-                        </Box>
-                    </form>
-                )}
-            </Formik>
+                        </form>
+                    )}
+                </Formik>
+            )}
         </Box>
     );
 };
