@@ -8,6 +8,19 @@ const ItemServices = {
   getItemsDetails: async (id) => {
     return requests.get(`/item-details/${id}`);
   },
+  createItems: async (formData) => {
+    return requests.post(`/item-details`, formData);
+  },
+  updatetItems: async (id, formData) => {
+    return requests.put(`/item-details/${id}`, formData);
+  },
+  deleteItems: async (id) => {
+    return requests.delete(`/item-details/${id}`);
+  },
+  bulkdeleteItems: async (data) => {
+    return requests.delete(`/item-details/bulk-delete`, { data });
+  },
+
 
   // OPTIONS API's
   getOptionList: async () => {

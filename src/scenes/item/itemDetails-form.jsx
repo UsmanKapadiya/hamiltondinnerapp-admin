@@ -4,210 +4,310 @@ import { Formik } from "formik";
 import * as yup from "yup";
 import { DvrOutlined, Home } from "@mui/icons-material";
 import { useLocation } from "react-router-dom";
+import ItemServices from "../../services/itemServices";
+import { toast } from "react-toastify";
+import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
+import { useEffect, useState } from "react";
 
 
 
 const validationSchema = yup.object().shape({
-    itemName: yup.string().required("Item  Name is required"),
-    itemChineseName: yup.string().required("Item  Chinese Name is required"),
-    options: yup.string().required("Item  Type is required"),
-    category: yup.string().required("Parent Id is required"),
+    item_name: yup.string().required("Item Name is required"),
+    item_chinese_name: yup.string().required("Item Chinese Name is required"),
+    options: yup
+        .array()
+        .of(yup.string().required("Each option must be a string"))
+        .min(1, "At least one option is required")
+        .required("Options are required"),
+    cat_id: yup
+        .number()
+        .typeError("Parent Id must be a number")
+        .required("Parent Id is required"),
+    is_allday: yup.boolean().required("Is All Day is required"),
+    preference: yup
+        .array()
+        .of(yup.string().required("Each preference must be a string"))
+        .min(1, "At least one preference is required")
+        .required("preference are required"),
 });
 
 
 const ItemDetailsForm = () => {
     const location = useLocation();
-    const itemDetails = location.state;
     const isNonMobile = useMediaQuery("(min-width:600px)");
-
-
+    const [loading, setLoading] = useState(true);
+    const [itemDetails, setItemDetails] = useState()
+    const categoryListData = location.state?.categoryListData || [];
+    const optionsListData = location.state?.optionsList || [];
+    const peferencesListData = location.state?.peferencesList || [];
     const initialValues = {
-        itemName: itemDetails?.itemName || "",
-        itemChineseName: itemDetails?.itemChineseName || "",
-        category: itemDetails?.category || "",
-        isAllDay: itemDetails?.isAllDay || false,
-        options: itemDetails?.options || "",
-        preference: itemDetails?.preference || "",
-        image: null, // Added for image upload
+        id: itemDetails?.id || "",
+        item_name: itemDetails?.item_name || "",
+        item_chinese_name: itemDetails?.item_chinese_name || "",
+        cat_id: itemDetails?.cat_id || 0,
+        is_allday: itemDetails?.is_allday || false,
+        options: (() => {
+            try {
+                return itemDetails?.options
+                    ? JSON.parse(itemDetails.options).map(String)
+                    : [];
+            } catch (error) {
+                console.error("Error parsing options:", error);
+                return [];
+            }
+        })(),
+        preference: (() => {
+            try {
+                return itemDetails?.preference
+                    ? JSON.parse(itemDetails.preference).map(String)
+                    : [];
+            } catch (error) {
+                console.error("Error parsing preference:", error);
+                return [];
+            }
+        })(),
+        image: null,
     };
 
-    const Categorys = [
-        { label: "Breakfast Daily Special", value: "breakfastDailySpecial" },
-        { label: "Lunch Soup", value: "lunchSoup" },
-        { label: "Dinner Entree", value: "dinnerEntree" },
-        { label: "Lunch Entree", value: "LunchEntree" },
-        { label: "Lunch Alternative", value: "LunchAlternative" },
-        { label: "Dinner Alternative", value: "dinnerAlternative" },
-        { label: "Dinner Dessert", value: "dinnerDessert" },
-    ];
-    const Options = [
-        { label: "Rice", value: "rice" },
-        { label: "Noodles", value: "noodles" },
-        { label: "Yam Fries (extra $5)", value: "yamFries" },
-    ];
+     useEffect(() => {
+            const timer = setTimeout(() => {
+                const fetchedItemDetails = location.state?.selectedRow;
+                setItemDetails(fetchedItemDetails);
+                setLoading(false);
+            }, 1500);
+            return () => clearTimeout(timer);
+        }, [location.state])
 
-    const Preferences = [
-        { label: "Less Oil", value: "lessOil" },
-        { label: "Less Salt", value: "lessSalt" },
-        { label: "Less Sugar", value: "lessSugar" },
-        { label: "No Rice", value: "noRice" },
-    ];
-    const handleFormSubmit = (values, actions) => {
-        console.log("Form Submitted:", values);
-        actions.resetForm({
-            values: initialValues,
-        });
+    const categoryData = categoryListData.map((category) => ({
+        label: category.cat_name,
+        value: category.id,
+    }));
+
+    const optionData = optionsListData.map((opt) => ({
+        label: opt.option_name,
+        value: opt.id,
+    }));
+
+    const handleFormSubmit = async (values) => {
+
+        const payload = {
+            ...values,
+            options: JSON.stringify(values.options),
+            preference: JSON.stringify(values.preference),
+        };
+        console.log("Form Submitted:", payload);
+
+        try {
+            let response;
+            if (payload?.id) {
+                // Update Items if ID is available
+                response = await ItemServices.updatetItems(payload.id, payload);
+                toast.success("Items updated successfully!");
+            } else {
+                // Create Items if ID is not available
+                response = await ItemServices.createItems(payload);
+                toast.success("Items created successfully!");
+            }
+        } catch (error) {
+            console.error("Error processing menu:", error);
+            toast.error("Failed to process menu. Please try again.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
         <Box m="20px">
-            <Header title="Add Item  Detail" icon={<DvrOutlined />} Buttons={false} />
-            <Formik
-                onSubmit={handleFormSubmit}
-                initialValues={initialValues}
-                validationSchema={validationSchema}
-                validateOnBlur={true} // Enable validation on blur
-                validateOnChange={true} // Enable validation on change
-            >
-                {({
-                    values,
-                    errors,
-                    touched,
-                    handleBlur,
-                    handleChange,
-                    handleSubmit,
-                    setFieldValue,
-                }) => (
-                    <form onSubmit={handleSubmit}>
-                        <Box
-                            display="grid"
-                            gap="30px"
-                            gridTemplateColumns="repeat(4, minmax(0, 1fr))"
-                            sx={{
-                                "& > div": {
-                                    gridColumn: isNonMobile ? undefined : "span 4",
-                                },
-                            }}
-                        >
-                            <TextField
-                                fullWidth
-                                variant="filled"
-                                type="text"
-                                label="Item Name"
-                                onBlur={handleBlur}
-                                onChange={handleChange}
-                                value={values.itemName}
-                                name="itemName"
-                                error={touched.itemName && Boolean(errors.itemName)}
-                                helperText={touched.itemName && errors.itemName}
-                                sx={{ gridColumn: "span 4" }}
-                            />
-                            <TextField
-                                fullWidth
-                                variant="filled"
-                                type="text"
-                                label="Item Chinese Name"
-                                onBlur={handleBlur}
-                                onChange={handleChange}
-                                value={values.itemChineseName}
-                                name="itemChineseName"
-                                error={touched.itemChineseName && Boolean(errors.itemChineseName)}
-                                helperText={touched.itemChineseName && errors.itemChineseName}
-                                sx={{ gridColumn: "span 4" }}
-                            />
-                            <Autocomplete
-                                options={Categorys}
-                                getOptionLabel={(option) => option.label}
-                                value={Categorys.find((option) => option.value === values.category) || null}
-                                onChange={(event, newValue) => {
-                                    setFieldValue("category", newValue ? newValue.value : ""); // Update category correctly
+            
+            <Header title={loading ?  "":itemDetails?.id  ? "Update Item Detail":"Add Item Detail"} icon={<DvrOutlined />} Buttons={false} />
+            {loading ? (
+                <Box
+                    display="flex"
+                    justifyContent="center"
+                    alignItems="center"
+                    height="calc(100vh - 100px)"
+                >
+                    <CustomLoadingOverlay />
+                </Box>
+            ) : (
+                <Formik
+                    onSubmit={handleFormSubmit}
+                    initialValues={initialValues}
+                    validateOnBlur
+                    validateOnChange
+                >
+                    {({
+                        values,
+                        errors,
+                        touched,
+                        handleBlur,
+                        handleChange,
+                        handleSubmit,
+                        setFieldValue,
+                    }) => (
+                        <form onSubmit={handleSubmit}>
+                            <Box
+                                display="grid"
+                                gap="30px"
+                                gridTemplateColumns="repeat(4, minmax(0, 1fr))"
+                                sx={{
+                                    "& > div": {
+                                        gridColumn: isNonMobile ? undefined : "span 4",
+                                    },
                                 }}
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        label="Category"
-                                        variant="filled"
-                                        error={touched.category && Boolean(errors.category)}
-                                        helperText={touched.category && errors.category}
-                                    />
-                                )}
-                                sx={{ gridColumn: "span 4" }}
-                            />
-                            <FormGroup>
-                                <FormControlLabel
-                                    control={
-                                        <Switch
-                                            color="secondary"
-                                            checked={values.isAllDay}
-                                            onChange={(e) => setFieldValue("isAllDay", e.target.checked)}
-                                            name="isAllDay"
-                                        />
-                                    }
-                                    label="Is Allday"
+                            >
+                                {/* Item Name */}
+                                <TextField
+                                    fullWidth
+                                    variant="filled"
+                                    type="text"
+                                    label="Item Name"
+                                    onBlur={handleBlur}
+                                    onChange={handleChange}
+                                    value={values.item_name}
+                                    name="item_name"
+                                    error={touched.item_name && Boolean(errors.item_name)}
+                                    helperText={touched.item_name && errors.item_name}
+                                    sx={{ gridColumn: "span 4" }}
                                 />
-                            </FormGroup>
-                            {/* Add Image Upload */}
-                            <TextField
-                                fullWidth
-                                type="file"
-                                variant="filled"
-                                label="Upload Image"
-                                InputLabelProps={{ shrink: true }}
-                                onChange={(event) => setFieldValue("image", event.currentTarget.files[0])}
-                                sx={{ gridColumn: "span 4" }}
-                            />
-                            <Autocomplete
-                                options={Options}
-                                getOptionLabel={(option) => option.label}
-                                value={Options.find((option) => option.value === values.options) || null}
-                                onChange={(event, newValue) => {
-                                    setFieldValue("options", newValue ? newValue.value : "");
-                                }}
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        label="Options"
-                                        variant="filled"
-                                        error={touched.options && Boolean(errors.options)}
-                                        helperText={touched.options && errors.options}
+
+                                {/* Item Chinese Name */}
+                                <TextField
+                                    fullWidth
+                                    variant="filled"
+                                    type="text"
+                                    label="Item Chinese Name"
+                                    onBlur={handleBlur}
+                                    onChange={handleChange}
+                                    value={values.item_chinese_name}
+                                    name="item_chinese_name"
+                                    error={
+                                        touched.item_chinese_name && Boolean(errors.item_chinese_name)
+                                    }
+                                    helperText={touched.item_chinese_name && errors.item_chinese_name}
+                                    sx={{ gridColumn: "span 4" }}
+                                />
+
+                                {/* Category Dropdown */}
+                                <Autocomplete
+                                    options={categoryData}
+                                    getOptionLabel={(option) => option.label}
+                                    value={
+                                        categoryData.find((option) => option.value === values.cat_id) ||
+                                        null
+                                    }
+                                    onChange={(event, newValue) => {
+                                        setFieldValue("cat_id", newValue ? newValue.value : 0);
+                                    }}
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            label="Category"
+                                            variant="filled"
+                                            error={touched.cat_id && Boolean(errors.cat_id)}
+                                            helperText={touched.cat_id && errors.cat_id}
+                                        />
+                                    )}
+                                    sx={{ gridColumn: "span 4" }}
+                                />
+
+                                {/* Is All Day Switch */}
+                                <FormGroup>
+                                    <FormControlLabel
+                                        control={
+                                            <Switch
+                                                color="secondary"
+                                                checked={values.is_allday}
+                                                onChange={(e) =>
+                                                    setFieldValue("is_allday", e.target.checked)
+                                                }
+                                                name="is_allday"
+                                            />
+                                        }
+                                        label="Is All Day"
                                     />
-                                )}
-                                sx={{ gridColumn: "span 4" }}
-                            />
-                            <Autocomplete
-                                options={Preferences}
-                                getOptionLabel={(option) => option.label}
-                                value={Preferences.find((option) => option.value === values.preference) || null}
-                                onChange={(event, newValue) => {
-                                    setFieldValue("preference", newValue ? newValue.value : "");
-                                }}
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        label="Preference"
-                                        variant="filled"
-                                        error={touched.preference && Boolean(errors.preference)}
-                                        helperText={touched.preference && errors.preference}
-                                    />
-                                )}
-                                sx={{ gridColumn: "span 4" }}
-                            />
-                        </Box>
-                        <Box
-                            display="flex"
-                            alignItems="center"
-                            justifyContent="end"
-                            mt="20px"
-                        >
-                            <Button type="submit" color="secondary" variant="contained">
-                                Save Item  Details
-                            </Button>
-                        </Box>
-                    </form>
-                )}
-            </Formik>
+                                </FormGroup>
+
+                                {/* Image Upload */}
+                                <TextField
+                                    fullWidth
+                                    type="file"
+                                    variant="filled"
+                                    label="Upload Image"
+                                    InputLabelProps={{ shrink: true }}
+                                    onChange={(event) =>
+                                        setFieldValue("image", event.currentTarget.files[0])
+                                    }
+                                    sx={{ gridColumn: "span 4" }}
+                                />
+
+                                {/* Options Multi-Select */}
+                                <Autocomplete
+                                    multiple
+                                    options={optionData}
+                                    getOptionLabel={(option) => option.label}
+                                    value={optionData.filter((option) =>
+                                        values.options.includes(String(option.value))
+                                    )}
+                                    onChange={(event, newValue) => {
+                                        const selectedValues = newValue.map((item) => String(item.value));
+                                        setFieldValue("options", selectedValues);
+                                    }}
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            label="Options"
+                                            variant="filled"
+                                            error={touched.options && Boolean(errors.options)}
+                                            helperText={touched.options && errors.options}
+                                        />
+                                    )}
+                                    sx={{ gridColumn: "span 4" }}
+                                />
+
+                                {/* Preference Multi-Select */}
+                                <Autocomplete
+                                    multiple
+                                    options={peferencesListData}
+                                    getOptionLabel={(option) => option.pname}
+                                    value={peferencesListData.filter((option) =>
+                                        values.preference.includes(String(option.id))
+                                    )}
+                                    onChange={(event, newValue) => {
+                                        const selectedIds = newValue.map((item) => String(item.id));
+                                        setFieldValue("preference", selectedIds);
+                                    }}
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            label="preference"
+                                            variant="filled"
+                                            error={touched.preference && Boolean(errors.preference)}
+                                            helperText={touched.preference && errors.preference}
+                                        />
+                                    )}
+                                    sx={{ gridColumn: "span 4" }}
+                                />
+                            </Box>
+
+                            <Box
+                                display="flex"
+                                alignItems="center"
+                                justifyContent="end"
+                                mt="20px"
+                            >
+                                <Button type="submit" color="secondary" variant="contained">
+                                    Save Item Details
+                                </Button>
+                            </Box>
+                        </form>
+                    )}
+                </Formik>
+            )}
         </Box>
     );
 };
 
 export default ItemDetailsForm;
+
+

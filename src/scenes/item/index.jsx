@@ -1,13 +1,9 @@
-import { Box, Typography, useTheme, Button } from "@mui/material";
+import { Box, useTheme, Button } from "@mui/material";
 import { Header } from "../../components";
 import { DataGrid } from "@mui/x-data-grid";
-import { mockDataItems, type } from "../../data/mockData";
 import { tokens } from "../../theme";
 import {
-  AdminPanelSettingsOutlined,
   DvrOutlined,
-  Home,
-  SecurityOutlined,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -15,17 +11,22 @@ import ConfirmationDialog from "../../components/ConfirmationDialog";
 import { useSelector } from "react-redux";
 import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
 import ItemServices from "../../services/itemServices";
+import CategoryServices from "../../services/categoryServices";
+import { toast } from "react-toastify";
 
 const Item = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
-  const perPageRecords = (10)
   const [currentPage, setCurrentPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
-  const itemList = useSelector((state) => state.itemState.item);
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [selectedItemName, setselectedItemName] = useState("");
   const [itemListData, setItemListData] = useState([])
+  const [categoryListData, setCategoryListData] = useState([])
+  const [optionsListData, setpOptionsListData] = useState([])
+  const [peferencesListData, setpPeferencesListData] = useState([])
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({
     page: 1,
@@ -35,12 +36,49 @@ const Item = () => {
 
   useEffect(() => {
     fetchALLItemsList()
-  }, [itemList]);
+    getCategoryListData()
+    fetchALLOptionsList()
+    fetchALLPreferenceList()
+  }, []);
+
+  const fetchALLPreferenceList = async () => {
+    try {
+      const response = await ItemServices.getPreferencesList();
+      setpPeferencesListData(response.data);
+    } catch (error) {
+      console.error("Error fetching menu list:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+   const fetchALLOptionsList = async () => {
+      try {
+        const response = await ItemServices.getOptionList();
+        setpOptionsListData(response.data);
+      } catch (error) {
+        console.error("Error fetching menu list:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+
+  const getCategoryListData = async () => {
+    try {
+      setLoading(true);
+      const response = await CategoryServices.getCategoryList();
+      setCategoryListData(response?.data)
+    } catch (error) {
+      console.error("Error fetching menu list:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchALLItemsList = async () => {
     try {
       const response = await ItemServices.getItemList();
-      console.log(response)
       setItemListData(response.data);
       setPagination((prev) => ({
         ...prev,
@@ -52,40 +90,64 @@ const Item = () => {
       setLoading(false);
     }
   };
-  const handleDelete = (id) => {
-    setSelectedId(id);
+  const handleDelete = (data) => {
+    setSelectedIds([])
+    setSelectedId(data?.id);
+    setselectedItemName(data?.item_name);
     setDialogOpen(true);
   };
 
   const confirmDelete = () => {
-    console.log(`Delete confirmed for ID: ${selectedId}`);
-    setDialogOpen(false); // Close the dialog
-    // Add your delete logic here
+    selectedIds.length > 0 && !selectedItemName
+      ? bulkdeleteItem(selectedIds) : deleteItem(selectedId);
+    setDialogOpen(false);
   };
 
   const cancelDelete = () => {
-    setDialogOpen(false); // Close the dialog
+    setDialogOpen(false);
     setSelectedId(null);
+    setselectedItemName()
   };
 
   const handleView = (id) => {
-    const selectedRow = mockDataItems.find((row) => row.id === id);
-    navigate(`/item-details/${id}`,  { state: { id }});
+    navigate(`/item-details/${id}`,  { state: { 
+      id,
+      categoryListData: categoryListData,
+      optionsList: optionsListData,
+      peferencesList:peferencesListData 
+    }});
   };
 
   const handleEdit = (id) => {
-    const selectedRow = mockDataItems.find((row) => row.id === id);
-    navigate(`/item-details/${id}/edit`, { state: selectedRow });
+    const selectedRow = itemListData.find((row) => row.id === id);
+    navigate(`/item-details/${id}/edit`, {  state: {
+      selectedRow,
+      categoryListData,
+      optionsList: optionsListData,
+      peferencesList: peferencesListData,
+  },
+    });
   };
   const handleToggle = () => {
     setShowDeleted((prev) => !prev);
   };
   const handleAddNewClick = () => {
-    navigate("/item-details/create");
+    navigate("/item-details/create", { state: 
+      { categoryListData: categoryListData, 
+        optionsList: optionsListData,
+        peferencesList:peferencesListData } });
+  };
+  const handleBulkDelete = () => {
+    setDialogOpen(true);
   };
   const handleOrderClick = () => {
     navigate("/item-details/order");
   };
+
+  const handleRowSelection = (ids) => {
+    setSelectedIds(ids);
+  };
+
 
   const handlePaginationChange = (newPaginationModel) => {
     setPagination((prev) => ({
@@ -94,7 +156,38 @@ const Item = () => {
       pageSize: newPaginationModel.pageSize,
     }));
     setCurrentPage(newPaginationModel.page + 1,)
+  };
 
+  const bulkdeleteItem = async (ids) => {
+    try {
+      let data = JSON.stringify({
+        "ids": ids
+      });
+      const response = await ItemServices.bulkdeleteItems(data);
+      // console.log(response)
+      setLoading(true)
+      toast.success("Multiple Items Deleted successfully!");
+      fetchALLItemsList();
+    } catch (error) {
+      console.error("Error fetching menu list:", error);
+      toast.error("Failed to process menu. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  const deleteItem = async (id) => {
+    try {
+      const response = await ItemServices.deleteItems(id);
+      // console.log(response)
+      setLoading(true)
+      toast.success("Item Deleted successfully!");
+      fetchALLItemsList();
+    } catch (error) {
+      console.error("Error fetching menu list:", error);
+      toast.error("Failed to process menu. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
 
@@ -109,14 +202,15 @@ const Item = () => {
     {
       field: "category", headerName: "Category",
       valueGetter: (params) => {
-        const typeId = params.row.cat_id;
-        const typeObj = type.find((t) => t.id === typeId);
-        return typeObj ? typeObj.type_name : "N/A";
+        const typeId = params?.row?.cat_id;
+        const typeObj = categoryListData.find((t) => t.id === typeId);
+        return typeObj ? typeObj.cat_name : "N/A";
       },
-      flex: 1
+      flex: 1,
+
     },
     // Temperory Comments
-    // { field: "isAllDay", headerName: "Is Allday", flex: 1 },
+    { field: "is_allday", headerName: "Is Allday"},
     {
       field: "actions",
       headerName: "Actions",
@@ -144,7 +238,7 @@ const Item = () => {
               variant="contained"
               color="secondary"
               size="small"
-              onClick={() => handleDelete(row.id)}
+              onClick={() => handleDelete(row)}
             >
               Delete
             </Button>
@@ -162,6 +256,7 @@ const Item = () => {
         icon={<DvrOutlined />}
         Buttons={true}
         addNewClick={handleAddNewClick}
+        addBulkDelete={handleBulkDelete}
         orderClick={handleOrderClick}
         showToggleClick={handleToggle}
       />
@@ -208,6 +303,7 @@ const Item = () => {
             pageSize: pagination.pageSize,
           }}
           onPaginationModelChange={handlePaginationChange}
+          onRowSelectionModelChange={(ids) => handleRowSelection(ids)}
           checkboxSelection
           components={{
             LoadingOverlay: CustomLoadingOverlay,
@@ -216,7 +312,11 @@ const Item = () => {
         <ConfirmationDialog
           open={dialogOpen}
           title="Confirm Delete"
-          message={`Are you sure you want to delete the "${mockDataItems.find((row) => row.id === selectedId)?.itemName || "selected"}" item?`}
+          message={
+            selectedIds.length > 0 && !selectedItemName
+              ? `Are you sure you want to delete ${selectedIds.length} Option items?`
+              : `Are you sure you want to delete the Option "${selectedItemName}"?`
+          }
           onConfirm={confirmDelete}
           onCancel={cancelDelete}
         />
