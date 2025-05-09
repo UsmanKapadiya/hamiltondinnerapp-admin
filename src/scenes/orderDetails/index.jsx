@@ -9,7 +9,8 @@ import {
   Tooltip,
   IconButton,
   Menu,
-  MenuItem
+  MenuItem,
+  Typography
 
 } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
@@ -22,70 +23,20 @@ import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import ReportServices from "../../services/reportServices";
+import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
 
 const OrderDetails = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const [date, setDate] = useState(dayjs("2025-03-15")); // Default date set to 2025-03-15
+  const [date, setDate] = useState(new Date()); // Default date set to 2025-03-15
   const [menuAnchor, setMenuAnchor] = useState(null);
   const [exportAnchor, setExportAnchor] = useState(null);
-  const [loading,setLoading]= useState(false)
-  const [data, setData]=useState([])
-  const mealCategories = {
-    breakfast: [
-      { code: 'BA', name: 'Western Omelette, Oatmeal & Fruits' },
-      { code: 'B1', name: 'Egg Choice' },
-      { code: 'B2', name: 'Toast' },
-      { code: 'B3', name: 'Oat' },
-      { code: 'B4', name: 'Fruit' },
-    ],
-    lunch: [
-      { code: 'LS', name: 'Soup of the Day' },
-      { code: 'LA', name: 'Chicken/Beans' },
-      { code: 'LB', name: 'Tuna Sandwich' },
-      { code: 'L1', name: 'Egg Sandwich' },
-      { code: 'L2', name: 'Ham Sandwich' },
-      { code: 'L3', name: 'Turkey Sandwich' },
-      { code: 'L4', name: 'Cheese Omelette' },
-    ],
-    dinner: [
-      { code: 'DA', name: 'Salt Baked Chicken' },
-      { code: 'DB', name: 'Seafood Pasta' },
-      { code: 'D1', name: 'Chicken Breast' },
-      { code: 'D2', name: 'Fish' },
-      { code: 'D3', name: 'Veg Plate' },
-      { code: 'D4', name: 'Sandwich of the Day' },
-    ],
-  };
-  // const roomData = []
-  // Sample data for rooms
-  const roomData = [
-    {
-      roomNo: '101',
-      selections: {
-        BA: 1, B1: 1, B2: 0, B3: 0, B4: 1,
-        LS: 1, LA: 0, LB: 0, L1: 1, L2: 0, L3: 0, L4: 0,
-        DA: 0, DB: 1, D1: 1, D2: 0, D3: 0, D4: 1,
-      },
-    },
-    {
-      roomNo: '102',
-      selections: {
-        BA: 0, B1: 0, B2: 0, B3: 1, B4: 0,
-        LS: 0, LA: 1, LB: 0, L1: 0, L2: 1, L3: 0, L4: 0,
-        DA: 1, DB: 0, D1: 0, D2: 1, D3: 1, D4: 0,
-      },
-    },
-  ];
+  const [loading, setLoading] = useState(false)
+  const [data, setData] = useState([])
 
-  const allCodes = [
-    ...mealCategories.breakfast,
-    ...mealCategories.lunch,
-    ...mealCategories.dinner,
-  ];
-
-  console.log(allCodes)
-
+  useEffect(() => {
+    getReportsList(date)
+  }, [date])
 
   const handleMenuClick = (event) => {
     setMenuAnchor(event.currentTarget);
@@ -104,26 +55,24 @@ const OrderDetails = () => {
   };
 
   const handleExportOption = (option) => {
-    console.log(`Exporting as ${option}`);
     handleExportClose();
   };
-  
-  useEffect(()=>{
+
+  useEffect(() => {
     getReportsList()
-  },[])
+  }, [])
 
-    const getReportsList = async () => {
-      try {
-        setLoading(true)
-          const response = await ReportServices.getReportList(dayjs(date).format("YYYY-MM-DD"));
-          setData(response)
-      } catch (error) {
-        console.error("Error fetching menu list:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
+  const getReportsList = async (date) => {
+    try {
+      setLoading(true)
+      const response = await ReportServices.getReportList(dayjs(date).format("YYYY-MM-DD"));
+      setData(response)
+    } catch (error) {
+      console.error("Error fetching menu list:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Box m="20px">
@@ -171,14 +120,14 @@ const OrderDetails = () => {
             <DatePicker
               label="Date"
               value={date ? dayjs(date) : null} // Convert to dayjs if needed
-              onChange={(newValue) => setFieldValue("date", newValue ? newValue.format("YYYY-MM-DD") : "")}
+              onChange={(newValue) => setDate(newValue ? newValue.format("YYYY-MM-DD") : null)} // Use setDate to update the state
               renderInput={(params) => (
                 <TextField
                   {...params}
                   fullWidth
                   variant="filled"
-                  error={date && Boolean(errors.date)}
-                  helperText={date && errors.date}
+                  error={date && Boolean(errors?.date)} // Ensure errors is defined
+                  helperText={date && errors?.date} // Ensure errors is defined
                   sx={{ gridColumn: "span 1" }}
                 />
               )}
@@ -196,7 +145,7 @@ const OrderDetails = () => {
 
             {/* Menu Icon */}
             <Tooltip title="Show Checked Codes">
-              <IconButton onClick={handleMenuClick}>
+              <IconButton onClick={data?.result?.rows?.length > 0 && handleMenuClick}>
                 <WidgetsOutlined />
               </IconButton>
             </Tooltip>
@@ -204,12 +153,14 @@ const OrderDetails = () => {
               anchorEl={menuAnchor}
               open={Boolean(menuAnchor)}
               onClose={handleMenuClose}
+              sx={{
+                maxHeight: 600, // Set the maximum height
+                overflowY: 'auto', // Enable scrolling if content exceeds the height
+              }}
             >
-              {allCodes
-                .filter((item) => roomData.some((room) => room.selections[item.code]))
-                .map((item) => (
-                  <MenuItem key={item.code}>{item.code}</MenuItem>
-                ))}
+              {data?.columns?.length && data?.columns[data.columns.length - 1]?.map((item, key) => (
+                <MenuItem key={key}>{item.field}</MenuItem>
+              ))}
             </Menu>
 
             {/* Export Data Icon */}
@@ -231,72 +182,78 @@ const OrderDetails = () => {
           </Box>
         </Box>
         <TableContainer component={Paper}>
-          <Table sx={{ border: '1px solid rgba(224, 224, 224, 1)', borderCollapse: 'collapse' }}>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: colors.blueAccent[700] }}>
-                <TableCell
-                  rowSpan={2}
-                  align="center"
-                  sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
-                >
-                  Room No
-                </TableCell>
-                <TableCell
-                  colSpan={mealCategories.breakfast.length}
-                  align="center"
-                  sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
-                >
-                  Breakfast
-                </TableCell>
-                <TableCell
-                  colSpan={mealCategories.lunch.length}
-                  align="center"
-                  sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
-                >
-                  Lunch
-                </TableCell>
-                <TableCell
-                  colSpan={mealCategories.dinner.length}
-                  align="center"
-                  sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
-                >
-                  Dinner
-                </TableCell>
-              </TableRow>
-              <TableRow sx={{ backgroundColor: colors.blueAccent[700] }}>
-                {allCodes.map((item) => (
-                  <TableCell
-                    key={item.code}
-                    align="center"
-                    sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
-                  >
-                    {item.code}
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {roomData.map((room, index) => (
-                <TableRow key={index}>
-                  <TableCell
-                    align="center"
-                    sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
-                  >
-                    {room.roomNo}
-                  </TableCell>
-                  {allCodes.map((item) => (
+          {loading ? (
+            <CustomLoadingOverlay />
+          ) : data && data?.result?.rows?.length > 0 ? (
+            <Table sx={{ border: '1px solid rgba(224, 224, 224, 1)', borderCollapse: 'collapse' }}>
+              <TableHead>
+                <TableRow sx={{ backgroundColor: colors.blueAccent[700] }}>
+                  {data?.columns?.length && data?.columns[0]?.map((item, index) => (
                     <TableCell
-                      key={item.code}
+                      key={index}
                       align="center"
                       sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
+                      {...(index === 0
+                        ? { rowSpan: item?.rowspan } // Dynamically set rowSpan for the first cell
+                        : { colSpan: item?.colspan })} // Use colSpan otherwise
                     >
-                      {room.selections[item.code]}
+                      {item?.title}
                     </TableCell>
                   ))}
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                {/* Dynamically  columns Values Set */}
+                <TableRow sx={{ backgroundColor: colors.blueAccent[700] }}>
+                  {data?.columns?.length && data?.columns[data.columns.length - 2]?.map((item, key) => (
+                    <TableCell
+                      key={key}
+                      align="center"
+                      sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
+                    >
+                      {item.title}
+                    </TableCell>
+                  ))}
+                </TableRow>
+                {/* Dynamically  columns Set */}
+                <TableRow sx={{ backgroundColor: colors.blueAccent[700] }}>
+                  {data?.columns?.length && data?.columns[data.columns.length - 1]?.map((item, key) => (
+                    <TableCell
+                      key={key}
+                      align="center"
+                      sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
+                    >
+                      {item.field}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+
+                {data?.result?.rows.map((room, index) => (
+                  <TableRow key={index}>
+                    <TableCell
+                      align="center"
+                      sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
+                    >
+                      {room.room_id}
+                    </TableCell>
+                    {Object.keys(room).filter(key => key !== 'room_id').map((key, subIndex) => (
+                      <TableCell
+                        key={subIndex}
+                        align="center"
+                        sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
+                      >
+                        {room[key]}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <Typography variant="h6" align="center" sx={{ padding: '20px' }}>
+              No Data Available for the selected date.
+            </Typography>
+          )}
         </TableContainer>
       </Box>
     </Box>
