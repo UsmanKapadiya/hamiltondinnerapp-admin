@@ -33,6 +33,251 @@ export const type=[
     { id: 25, role_name: "business_analyst", role_display: "Business Analyst" }
   ];
 
+  export const usersMockData = [
+    {
+      id: 1,
+      name: "Alice Johnson",
+      user_name: "alicej",
+      email: "alice@example.com",
+      password: "hashed_password_1",
+      email_verified_at: "2025-05-01",
+      created_at: "2025-04-01",
+      avatar: "https://i.pravatar.cc/150?img=1",
+      role: "admin",
+      roles: ["admin", "editor"]
+    },
+    {
+      id: 2,
+      name: "Bob Smith",
+      user_name: "bobsmith",
+      email: "bob@example.com",
+      password: "hashed_password_2",
+      email_verified_at: "2025-05-01",
+      created_at: "2025-04-01",
+      avatar: "https://i.pravatar.cc/150?img=2",
+      role: "editor",
+      roles: ["editor"]
+    },
+    {
+      id: 3,
+      name: "Catherine Lee",
+      user_name: "catherine",
+      email: "catherine@example.com",
+      password: "hashed_password_3",
+      email_verified_at: null,
+      created_at: "2025-04-01",
+      avatar: "https://i.pravatar.cc/150?img=3",
+      role: "viewer",
+      roles: ["viewer"]
+    },
+    {
+      id: 4,
+      name: "Daniel Kim",
+      user_name: "danielk",
+      email: "daniel@example.com",
+      password: "hashed_password_4",
+      email_verified_at: "2025-05-02",
+      created_at: "2025-04-01",
+      avatar: "https://i.pravatar.cc/150?img=4",
+      role: "admin",
+      roles: ["admin"]
+    },
+    {
+      id: 5,
+      name: "Emily Davis",
+      user_name: "emilyd",
+      email: "emily@example.com",
+      password: "hashed_password_5",
+      email_verified_at: "2025-05-02",
+      created_at: "2025-04-02",
+      avatar: "https://i.pravatar.cc/150?img=5",
+      role: "editor",
+      roles: ["editor", "contributor"]
+    },
+    {
+      id: 6,
+      name: "Frank Harris",
+      user_name: "frankh",
+      email: "frank@example.com",
+      password: "hashed_password_6",
+      email_verified_at: null,
+      created_at: "2025-04-02",
+      avatar: "https://i.pravatar.cc/150?img=6",
+      role: "viewer",
+      roles: ["viewer"]
+    },
+    {
+      id: 7,
+      name: "Grace Park",
+      user_name: "gracep",
+      email: "grace@example.com",
+      password: "hashed_password_7",
+      email_verified_at: "2025-05-03",
+      created_at: "2025-04-03",
+      avatar: "https://i.pravatar.cc/150?img=7",
+      role: "admin",
+      roles: ["admin", "manager"]
+    },
+    {
+      id: 8,
+      name: "Henry Brown",
+      user_name: "henryb",
+      email: "henry@example.com",
+      password: "hashed_password_8",
+      email_verified_at: null,
+      created_at: "2025-04-03",
+      avatar: "https://i.pravatar.cc/150?img=8",
+      role: "viewer",
+      roles: ["viewer"]
+    },
+    {
+      id: 9,
+      name: "Isabella Moore",
+      user_name: "isabellam",
+      email: "isabella@example.com",
+      password: "hashed_password_9",
+      email_verified_at: "2025-05-03",
+      created_at: "2025-04-03",
+      avatar: "https://i.pravatar.cc/150?img=9",
+      role: "editor",
+      roles: ["editor", "moderator"]
+    },
+    {
+      id: 10,
+      name: "Jack Wilson",
+      user_name: "jackw",
+      email: "jack@example.com",
+      password: "hashed_password_10",
+      email_verified_at: "2025-05-04",
+      created_at: "2025-04-04",
+      avatar: "https://i.pravatar.cc/150?img=10",
+      role: "editor",
+      roles: ["editor"]
+    },
+    {
+      id: 11,
+      name: "Karen White",
+      user_name: "karenw",
+      email: "karen@example.com",
+      password: "hashed_password_11",
+      email_verified_at: null,
+      created_at: "2025-04-04",
+      avatar: "https://i.pravatar.cc/150?img=11",
+      role: "viewer",
+      roles: ["viewer"]
+    },
+    {
+      id: 12,
+      name: "Leo Martinez",
+      user_name: "leom",
+      email: "leo@example.com",
+      password: "hashed_password_12",
+      email_verified_at: "2025-05-04",
+      created_at: "2025-04-04",
+      avatar: "https://i.pravatar.cc/150?img=12",
+      role: "admin",
+      roles: ["admin"]
+    },
+    {
+      id: 13,
+      name: "Mia Anderson",
+      user_name: "miaa",
+      email: "mia@example.com",
+      password: "hashed_password_13",
+      email_verified_at: "2025-05-05",
+      created_at: "2025-04-05",
+      avatar: "https://i.pravatar.cc/150?img=13",
+      role: "editor",
+      roles: ["editor", "writer"]
+    },
+    {
+      id: 14,
+      name: "Nathan Scott",
+      user_name: "nathans",
+      email: "nathan@example.com",
+      password: "hashed_password_14",
+      email_verified_at: null,
+      created_at: "2025-04-05",
+      avatar: "https://i.pravatar.cc/150?img=14",
+      role: "viewer",
+      roles: ["viewer"]
+    },
+    {
+      id: 15,
+      name: "Olivia Taylor",
+      user_name: "oliviat",
+      email: "olivia@example.com",
+      password: "hashed_password_15",
+      email_verified_at: "2025-05-05",
+      created_at: "2025-04-05",
+      avatar: "https://i.pravatar.cc/150?img=15",
+      role: "editor",
+      roles: ["editor"]
+    },
+    {
+      id: 16,
+      name: "Paul Allen",
+      user_name: "paula",
+      email: "paul@example.com",
+      password: "hashed_password_16",
+      email_verified_at: "2025-05-06",
+      created_at: "2025-04-06",
+      avatar: "https://i.pravatar.cc/150?img=16",
+      role: "admin",
+      roles: ["admin"]
+    },
+    {
+      id: 17,
+      name: "Queenie Zhao",
+      user_name: "queenz",
+      email: "queenie@example.com",
+      password: "hashed_password_17",
+      email_verified_at: null,
+      created_at: "2025-04-06",
+      avatar: "https://i.pravatar.cc/150?img=17",
+      role: "viewer",
+      roles: ["viewer"]
+    },
+    {
+      id: 18,
+      name: "Ryan Evans",
+      user_name: "ryane",
+      email: "ryan@example.com",
+      password: "hashed_password_18",
+      email_verified_at: "2025-05-06",
+      created_at: "2025-04-06",
+      avatar: "https://i.pravatar.cc/150?img=18",
+      role: "editor",
+      roles: ["editor"]
+    },
+    {
+      id: 19,
+      name: "Sophie Hall",
+      user_name: "sophieh",
+      email: "sophie@example.com",
+      password: "hashed_password_19",
+      email_verified_at: "2025-05-07",
+      created_at: "2025-04-07",
+      avatar: "https://i.pravatar.cc/150?img=19",
+      role: "manager",
+      roles: ["manager"]
+    },
+    {
+      id: 20,
+      name: "Tom Green",
+      user_name: "tomg",
+      email: "tom@example.com",
+      password: "hashed_password_20",
+      email_verified_at: null,
+      created_at: "2025-04-07",
+      avatar: "https://i.pravatar.cc/150?img=20",
+      role: "viewer",
+      roles: ["viewer"]
+    }
+  ];
+  
+  
+
 
   export const PermissionsList =  {
     "data": [

@@ -261,6 +261,12 @@ const SideBar = () => {
             icon={<LockOutlined />}
           />
           <Item
+            title="Users"
+            path="/users"
+            colors={colors}
+            icon={<PersonOutlined />}
+          />
+          <Item
             title="Order Details"
             path="/order-details"
             colors={colors}

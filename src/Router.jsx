@@ -43,6 +43,9 @@ import Setting from "./scenes/settings";
 import Roles from "./scenes/Roles";
 import RolesDetailsView from "./scenes/Roles/rolesDetails-view";
 import RoleDetailsForm from "./scenes/Roles/rolesDetails-form";
+import User from "./scenes/user";
+import UserDetailsView from "./scenes/user/userDetails-view";
+import UserDetailsForm from "./scenes/user/userDetails-form";
 
 const AppRouter = () => {
   return (
@@ -95,6 +98,11 @@ const AppRouter = () => {
           <Route path="/roles-details/:id" element={<RolesDetailsView />} />
           <Route path="/roles-details/create" element={<RoleDetailsForm />} />
           <Route path="/roles-details/:id/edit" element={<RoleDetailsForm />} />
+          {/* User */}
+          <Route path="/users" element={<User />} />
+          <Route path="/users-details/:id" element={<UserDetailsView />} />
+          <Route path="/users-details/create" element={<UserDetailsForm />} />
+          <Route path="/users-details/:id/edit" element={<UserDetailsForm />} />
 
 
 
