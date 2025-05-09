@@ -1,120 +1,81 @@
-import { Box, Typography, useTheme, Button } from "@mui/material";
-import { Header } from "../../components";
-import { DataGrid } from "@mui/x-data-grid";
-import { mockMenuDetailsData } from "../../data/mockData";
-import { tokens } from "../../theme";
 import {
-  AdminPanelSettingsOutlined,
-  ClearAllOutlined,
-  CreateOutlined,
-  DvrOutlined,
-  FormatListBulletedOutlined,
-  Home,
-  LocalPizzaOutlined,
-  SecurityOutlined,
-} from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import ConfirmationDialog from "../../components/ConfirmationDialog";
+  Box, useTheme, Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  TableContainer,
+  Paper,
+} from "@mui/material";
+import { Header } from "../../components";
+import { tokens } from "../../theme";
+import {LocalPizzaOutlined,} from "@mui/icons-material";
 
 const OrderDetails = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const navigate = useNavigate();
 
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedId, setSelectedId] = useState(null);
-
-  const handleDelete = (id) => {
-    setSelectedId(id);
-    setDialogOpen(true);
+  const mealCategories = {
+    breakfast: [
+      { code: 'BA', name: 'Western Omelette, Oatmeal & Fruits' },
+      { code: 'B1', name: 'Egg Choice' },
+      { code: 'B2', name: 'Toast' },
+      { code: 'B3', name: 'Oat' },
+      { code: 'B4', name: 'Fruit' },
+    ],
+    lunch: [
+      { code: 'LS', name: 'Soup of the Day' },
+      { code: 'LA', name: 'Chicken/Beans' },
+      { code: 'LB', name: 'Tuna Sandwich' },
+      { code: 'L1', name: 'Egg Sandwich' },
+      { code: 'L2', name: 'Ham Sandwich' },
+      { code: 'L3', name: 'Turkey Sandwich' },
+      { code: 'L4', name: 'Cheese Omelette' },
+    ],
+    dinner: [
+      { code: 'DA', name: 'Salt Baked Chicken' },
+      { code: 'DB', name: 'Seafood Pasta' },
+      { code: 'D1', name: 'Chicken Breast' },
+      { code: 'D2', name: 'Fish' },
+      { code: 'D3', name: 'Veg Plate' },
+      { code: 'D4', name: 'Sandwich of the Day' },
+    ],
   };
-
-  const confirmDelete = () => {
-    console.log(`Delete confirmed for ID: ${selectedId}`);
-    setDialogOpen(false); // Close the dialog
-    // Add your delete logic here
-  };
-
-  const cancelDelete = () => {
-    setDialogOpen(false); // Close the dialog
-    setSelectedId(null);
-  };
-
-  const handleView = (id) => {
-    const selectedRow = mockMenuDetailsData.find((row) => row.id === id);
-    navigate(`/menu-details/${id}`, { state: selectedRow });
-  };
-
-  const handleEdit = (id) => {
-    const selectedRow = mockMenuDetailsData.find((row) => row.id === id);
-    navigate(`/menu-details/${id}/edit`, { state: selectedRow });
-  };
-  const handleToggle = () => {
-    setShowDeleted((prev) => !prev);
-  };
-  const handleAddNewClick = () => {
-    navigate("/order-details/create");
-  };
-  const handleOrderClick = () => {
-    // navigate("/item-details/order");
-  };
-
-  const columns = [
-    { field: "menuName", headerName: "Menu Name",  flex: 1, },
+  // const roomData = []
+  // Sample data for rooms
+  const roomData = [
     {
-      field: "date",
-      headerName: "Date",
-      flex: 1,
-      // cellClassName: "name-column--cell",
+      roomNo: '101',
+      selections: {
+        BA: 1, B1: 1, B2: 0, B3: 0, B4: 1,
+        LS: 1, LA: 0, LB: 0, L1: 1, L2: 0, L3: 0, L4: 0,
+        DA: 0, DB: 1, D1: 1, D2: 0, D3: 0, D4: 1,
+      },
     },
     {
-      field: "actions",
-      headerName: "Actions",
-      flex: 1,
-      renderCell: ({ row }) => {
-        return (
-          <Box display="flex" gap={1}>
-            <Button
-              variant="contained"
-              color="info"
-              size="small"
-              onClick={() => handleView(row.id)}
-            >
-              View
-            </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={() => handleEdit(row.id)}
-            >
-              Edit
-            </Button>
-            <Button
-              variant="contained"
-              color="secondary"
-              size="small"
-              onClick={() => handleDelete(row.id)}
-            >
-              Delete
-            </Button>
-
-          </Box>
-        );
+      roomNo: '102',
+      selections: {
+        BA: 0, B1: 0, B2: 0, B3: 1, B4: 0,
+        LS: 0, LA: 1, LB: 0, L1: 0, L2: 1, L3: 0, L4: 0,
+        DA: 1, DB: 0, D1: 0, D2: 1, D3: 1, D4: 0,
       },
     },
   ];
+
+  const allCodes = [
+    ...mealCategories.breakfast,
+    ...mealCategories.lunch,
+    ...mealCategories.dinner,
+  ];
+
+
 
   return (
     <Box m="20px">
       <Header
         title="Order Details"
         icon={<LocalPizzaOutlined />}
-        Buttons={true}
-        addNewClick={handleAddNewClick}
-        orderClick={handleOrderClick}
-        showToggleClick={handleToggle}
+        Buttons={false}
       />
       <Box
         mt="40px"
@@ -149,25 +110,74 @@ const OrderDetails = () => {
           },
         }}
       >
-        <DataGrid
-          rows={mockMenuDetailsData}
-          columns={columns}
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 10,
-              },
-            },
-          }}
-          checkboxSelection
-        />
-        <ConfirmationDialog
-          open={dialogOpen}
-          title="Confirm Delete"
-          message={`Are you sure you want to delete the "${mockMenuDetailsData.find((row) => row.id === selectedId)?.menuName || "selected"}" item?`}
-          onConfirm={confirmDelete}
-          onCancel={cancelDelete}
-        />
+        <TableContainer component={Paper}>
+          <Table sx={{ border: '1px solid rgba(224, 224, 224, 1)', borderCollapse: 'collapse' }}>
+            <TableHead>
+              <TableRow sx={{backgroundColor:colors.blueAccent[700]}}>
+                <TableCell
+                  rowSpan={2}
+                  align="center"
+                  sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
+                >
+                  Room No
+                </TableCell>
+                <TableCell
+                  colSpan={mealCategories.breakfast.length}
+                  align="center"
+                  sx={{border: '1px solid rgba(224, 224, 224, 1)' }}
+                >
+                  Breakfast
+                </TableCell>
+                <TableCell
+                  colSpan={mealCategories.lunch.length}
+                  align="center"
+                  sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
+                >
+                  Lunch
+                </TableCell>
+                <TableCell
+                  colSpan={mealCategories.dinner.length}
+                  align="center"
+                  sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
+                >
+                  Dinner
+                </TableCell>
+              </TableRow>
+              <TableRow sx={{backgroundColor:colors.blueAccent[700]}}>
+                {allCodes.map((item) => (
+                  <TableCell
+                    key={item.code}
+                    align="center"
+                    sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
+                  >
+                    {item.code}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {roomData.map((room, index) => (
+                <TableRow key={index}>
+                  <TableCell
+                    align="center"
+                    sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
+                  >
+                    {room.roomNo}
+                  </TableCell>
+                  {allCodes.map((item) => (
+                    <TableCell
+                      key={item.code}
+                      align="center"
+                      sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
+                    >
+                      {room.selections[item.code]}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </Box>
     </Box>
   );

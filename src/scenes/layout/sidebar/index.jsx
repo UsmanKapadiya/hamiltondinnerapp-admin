@@ -16,6 +16,7 @@ import {
   Home,
   HomeMaxOutlined,
   LocalPizzaOutlined,
+  LockOutlined,
   MapOutlined,
   MenuOutlined,
   PeopleAltOutlined,
@@ -25,7 +26,7 @@ import {
   SettingsOutlined,
   TimelineOutlined,
   WavesOutlined,
-  
+
 } from "@mui/icons-material";
 import avatar from "../../../assets/images/avatar.png";
 // import logo from "../../../assets/images/logo.png";
@@ -185,7 +186,7 @@ const SideBar = () => {
             colors={colors}
             icon={<Home />}
           />
-           <List>
+          <List>
             <ListItemButton onClick={handleDropdownToggle}>
               <ListItemText
                 primary="Manage Items"
@@ -225,7 +226,7 @@ const SideBar = () => {
             colors={colors}
             icon={<CreateOutlined />}
           />
-          <List>
+          {/* <List>
             <ListItemButton onClick={handleReportsDropdownToggle}>
               <ListItemText
                 primary="Reports"
@@ -246,12 +247,24 @@ const SideBar = () => {
                 />
               </List>
             </Collapse>
-          </List>
+          </List> */}
           <Item
             title="Settings"
             path="/settings"
             colors={colors}
             icon={<SettingsOutlined />}
+          />
+          <Item
+            title="Roles"
+            path="/roles"
+            colors={colors}
+            icon={<LockOutlined />}
+          />
+          <Item
+            title="Order Details"
+            path="/order-details"
+            colors={colors}
+            icon={<LocalPizzaOutlined />}
           />
           {/* <Item
             title="Contacts Information"
