@@ -40,6 +40,9 @@ import MenuDetailsView from "./scenes/menuDetails/menuDetails-view";
 import OrderDetails from "./scenes/orderDetails";
 import OrderDetailsForm from "./scenes/orderDetails/orderDetails-form";
 import Setting from "./scenes/settings";
+import Roles from "./scenes/Roles";
+import RolesDetailsView from "./scenes/Roles/rolesDetails-view";
+import RoleDetailsForm from "./scenes/Roles/rolesDetails-form";
 
 const AppRouter = () => {
   return (
@@ -88,6 +91,10 @@ const AppRouter = () => {
           {/*Menu Details */}
           <Route path="/settings" element={<Setting />} />
 
+          <Route path="/roles" element={<Roles />} />
+          <Route path="/roles-details/:id" element={<RolesDetailsView />} />
+          <Route path="/roles-details/create" element={<RoleDetailsForm />} />
+          <Route path="/roles-details/:id/edit" element={<RoleDetailsForm />} />
 
 
 

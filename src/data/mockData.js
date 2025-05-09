@@ -5,6 +5,416 @@ export const type=[
   {id:2, type_name:"Lunch"},
   {id:3, type_name:"Dinner"}] 
 
+  export const rolesData = [
+    { id: 1, role_name: "admin", role_display: "Administrator" },
+    { id: 2, role_name: "editor", role_display: "Content Editor" },
+    { id: 3, role_name: "viewer", role_display: "Content Viewer" },
+    { id: 4, role_name: "moderator", role_display: "Forum Moderator" },
+    { id: 5, role_name: "contributor", role_display: "Content Contributor" },
+    { id: 6, role_name: "analyst", role_display: "Data Analyst" },
+    { id: 7, role_name: "support", role_display: "Support Staff" },
+    { id: 8, role_name: "developer", role_display: "Software Developer" },
+    { id: 9, role_name: "designer", role_display: "UI/UX Designer" },
+    { id: 10, role_name: "qa", role_display: "Quality Assurance" },
+    { id: 11, role_name: "hr", role_display: "HR Manager" },
+    { id: 12, role_name: "finance", role_display: "Finance Officer" },
+    { id: 13, role_name: "marketing", role_display: "Marketing Specialist" },
+    { id: 14, role_name: "sales", role_display: "Sales Representative" },
+    { id: 15, role_name: "intern", role_display: "Intern" },
+    { id: 16, role_name: "trainer", role_display: "Trainer" },
+    { id: 17, role_name: "security", role_display: "Security Officer" },
+    { id: 18, role_name: "project_manager", role_display: "Project Manager" },
+    { id: 19, role_name: "product_manager", role_display: "Product Manager" },
+    { id: 20, role_name: "cto", role_display: "Chief Technology Officer" },
+    { id: 21, role_name: "ceo", role_display: "Chief Executive Officer" },
+    { id: 22, role_name: "coo", role_display: "Chief Operating Officer" },
+    { id: 23, role_name: "cfo", role_display: "Chief Financial Officer" },
+    { id: 24, role_name: "lead_developer", role_display: "Lead Developer" },
+    { id: 25, role_name: "business_analyst", role_display: "Business Analyst" }
+  ];
+
+
+  export const PermissionsList =  {
+    "data": [
+        {
+            "label": "Browse Admin",
+            "key": "browse_Admin"
+        },
+        {
+            "label": "Browse Bread",
+            "key": "browse_Bread"
+        },
+        {
+            "label": "Browse Database",
+            "key": "browse_Database"
+        },
+        {
+            "label": "Browse Media",
+            "key": "browse_Media"
+        },
+        {
+            "label": "Browse Compass",
+            "key": "browse_Compass"
+        },
+        {
+            "label": "Browse Hooks",
+            "key": "browse_Hooks"
+        }
+    ],
+    "menus": [
+        {
+            "label": "Browse Menus",
+            "key": "browse_Menus"
+        },
+        {
+            "label": "Read Menus",
+            "key": "read_Menus"
+        },
+        {
+            "label": "Edit Menus",
+            "key": "edit_Menus"
+        },
+        {
+            "label": "Add Menus",
+            "key": "add_Menus"
+        },
+        {
+            "label": "Delete Menus",
+            "key": "delete_Menus"
+        }
+    ],
+    "roles": [
+        {
+            "label": "Browse Roles",
+            "key": "browse_Roles"
+        },
+        {
+            "label": "Read Roles",
+            "key": "read_Roles"
+        },
+        {
+            "label": "Edit Roles",
+            "key": "edit_Roles"
+        },
+        {
+            "label": "Add Roles",
+            "key": "add_Roles"
+        },
+        {
+            "label": "Delete Roles",
+            "key": "delete_Roles"
+        }
+    ],
+    "users": [
+        {
+            "label": "Browse Users",
+            "key": "browse_Users"
+        },
+        {
+            "label": "Read Users",
+            "key": "read_Users"
+        },
+        {
+            "label": "Edit Users",
+            "key": "edit_Users"
+        },
+        {
+            "label": "Add Users",
+            "key": "add_Users"
+        },
+        {
+            "label": "Delete Users",
+            "key": "delete_Users"
+        }
+    ],
+    "settings": [
+        {
+            "label": "Browse Settings",
+            "key": "browse_Settings"
+        },
+        {
+            "label": "Read Settings",
+            "key": "read_Settings"
+        },
+        {
+            "label": "Edit Settings",
+            "key": "edit_Settings"
+        },
+        {
+            "label": "Add Settings",
+            "key": "add_Settings"
+        },
+        {
+            "label": "Delete Settings",
+            "key": "delete_Settings"
+        }
+    ],
+    "categories": [
+        {
+            "label": "Browse Categories",
+            "key": "browse_Categories"
+        },
+        {
+            "label": "Read Categories",
+            "key": "read_Categories"
+        },
+        {
+            "label": "Edit Categories",
+            "key": "edit_Categories"
+        },
+        {
+            "label": "Add Categories",
+            "key": "add_Categories"
+        },
+        {
+            "label": "Delete Categories",
+            "key": "delete_Categories"
+        }
+    ],
+    "posts": [
+        {
+            "label": "Browse Posts",
+            "key": "browse_Posts"
+        },
+        {
+            "label": "Read Posts",
+            "key": "read_Posts"
+        },
+        {
+            "label": "Edit Posts",
+            "key": "edit_Posts"
+        },
+        {
+            "label": "Add Posts",
+            "key": "add_Posts"
+        },
+        {
+            "label": "Delete Posts",
+            "key": "delete_Posts"
+        }
+    ],
+    "pages": [
+        {
+            "label": "Browse Pages",
+            "key": "browse_Pages"
+        },
+        {
+            "label": "Read Pages",
+            "key": "read_Pages"
+        },
+        {
+            "label": "Edit Pages",
+            "key": "edit_Pages"
+        },
+        {
+            "label": "Add Pages",
+            "key": "add_Pages"
+        },
+        {
+            "label": "Delete Pages",
+            "key": "delete_Pages"
+        }
+    ],
+    "itemDetails": [
+        {
+            "label": "Browse Item Details",
+            "key": "browse_ItemDetails"
+        },
+        {
+            "label": "Read Item Details",
+            "key": "read_ItemDetails"
+        },
+        {
+            "label": "Edit Item Details",
+            "key": "edit_ItemDetails"
+        },
+        {
+            "label": "Add Item Details",
+            "key": "add_ItemDetails"
+        },
+        {
+            "label": "Delete Item Details",
+            "key": "delete_ItemDetails"
+        }
+    ],
+    "roomDetails": [
+        {
+            "label": "Browse Room Details",
+            "key": "browse_RoomDetails"
+        },
+        {
+            "label": "Read Room Details",
+            "key": "read_RoomDetails"
+        },
+        {
+            "label": "Edit Room Details",
+            "key": "edit_RoomDetails"
+        },
+        {
+            "label": "Add Room Details",
+            "key": "add_RoomDetails"
+        },
+        {
+            "label": "Delete Room Details",
+            "key": "delete_RoomDetails"
+        }
+    ],
+    "categoryDetails": [
+        {
+            "label": "Browse Category Details",
+            "key": "browse_CategoryDetails"
+        },
+        {
+            "label": "Read Category Details",
+            "key": "read_CategoryDetails"
+        },
+        {
+            "label": "Edit Category Details",
+            "key": "edit_CategoryDetails"
+        },
+        {
+            "label": "Add Category Details",
+            "key": "add_CategoryDetails"
+        },
+        {
+            "label": "Delete Category Details",
+            "key": "delete_CategoryDetails"
+        }
+    ],
+    "menuDetails": [
+        {
+            "label": "Browse Menu Details",
+            "key": "browse_MenuDetails"
+        },
+        {
+            "label": "Read Menu Details",
+            "key": "read_MenuDetails"
+        },
+        {
+            "label": "Edit Menu Details",
+            "key": "edit_MenuDetails"
+        },
+        {
+            "label": "Add Menu Details",
+            "key": "add_MenuDetails"
+        },
+        {
+            "label": "Delete Menu Details",
+            "key": "delete_MenuDetails"
+        }
+    ],
+    "itemOptions": [
+        {
+            "label": "Browse Item Options",
+            "key": "browse_ItemOptions"
+        },
+        {
+            "label": "Read Item Options",
+            "key": "read_ItemOptions"
+        },
+        {
+            "label": "Edit Item Options",
+            "key": "edit_ItemOptions"
+        },
+        {
+            "label": "Add Item Options",
+            "key": "add_ItemOptions"
+        },
+        {
+            "label": "Delete Item Options",
+            "key": "delete_ItemOptions"
+        }
+    ],
+    "itemPreference": [
+        {
+            "label": "Browse Item Preference",
+            "key": "browse_ItemPreference"
+        },
+        {
+            "label": "Read Item Preference",
+            "key": "read_ItemPreference"
+        },
+        {
+            "label": "Edit Item Preference",
+            "key": "edit_ItemPreference"
+        },
+        {
+            "label": "Add Item Preference",
+            "key": "add_ItemPreference"
+        },
+        {
+            "label": "Delete Item Preference",
+            "key": "delete_ItemPreference"
+        }
+    ],
+    "itemPreferences": [
+        {
+            "label": "Browse Item Preferences",
+            "key": "browse_ItemPreferences"
+        },
+        {
+            "label": "Read Item Preferences",
+            "key": "read_ItemPreferences"
+        },
+        {
+            "label": "Edit Item Preferences",
+            "key": "edit_ItemPreferences"
+        },
+        {
+            "label": "Add Item Preferences",
+            "key": "add_ItemPreferences"
+        },
+        {
+            "label": "Delete Item Preferences",
+            "key": "delete_ItemPreferences"
+        }
+    ],
+    "formTypes": [
+        {
+            "label": "Browse Form Types",
+            "key": "browse_FormTypes"
+        },
+        {
+            "label": "Read Form Types",
+            "key": "read_FormTypes"
+        },
+        {
+            "label": "Edit Form Types",
+            "key": "edit_FormTypes"
+        },
+        {
+            "label": "Add Form Types",
+            "key": "add_FormTypes"
+        },
+        {
+            "label": "Delete Form Types",
+            "key": "delete_FormTypes"
+        }
+    ],
+    "orderDetails": [
+        {
+            "label": "Browse Order Details",
+            "key": "browse_OrderDetails"
+        },
+        {
+            "label": "Read Order Details",
+            "key": "read_OrderDetails"
+        },
+        {
+            "label": "Edit Order Details",
+            "key": "edit_OrderDetails"
+        },
+        {
+            "label": "Add Order Details",
+            "key": "add_OrderDetails"
+        },
+        {
+            "label": "Delete Order Details",
+            "key": "delete_OrderDetails"
+        }
+    ]
+}
+  
 
 export const mockDataTeam = [
   {
