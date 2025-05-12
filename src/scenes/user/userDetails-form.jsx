@@ -2,33 +2,44 @@ import { Box, Button, TextField, useMediaQuery, MenuItem, Switch, FormGroup, For
 import { Header } from "../../components";
 import { Formik } from "formik";
 import * as yup from "yup";
-import { DvrOutlined, Home } from "@mui/icons-material";
+import { DvrOutlined } from "@mui/icons-material";
 import { useLocation } from "react-router-dom";
-import ItemServices from "../../services/itemServices";
 import { toast } from "react-toastify";
 import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
 import { useEffect, useState } from "react";
+import RoleServices from "../../services/roleServices";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import dayjs from "dayjs";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import UserServices from "../../services/userServices";
 
 
 
 const validationSchema = yup.object().shape({
-    item_name: yup.string().required("Item Name is required"),
-    item_chinese_name: yup.string().required("Item Chinese Name is required"),
-    options: yup
-        .array()
-        .of(yup.string().required("Each option must be a string"))
-        .min(1, "At least one option is required")
-        .required("Options are required"),
-    cat_id: yup
+    name: yup.string().required("Name is required"),
+    user_name: yup.string().required("User Name is required"),
+    email: yup.string().email("Invalid email format").required("Email is required"),
+    password: yup
+        .string()
+        .min(6, "Password must be at least 6 characters")
+        .required("Password is required"),
+    // email_verified_at: yup
+    //     .date()
+    //     .nullable()
+    //     .typeError("Invalid date format"),
+    // avatar: yup
+    //     .mixed()
+    //     .nullable()
+    //     .test("fileSize", "File size is too large", (value) =>
+    //         value ? value.size <= 2 * 1024 * 1024 : true // Max size: 2MB
+    //     )
+    //     .test("fileType", "Unsupported file format", (value) =>
+    //         value ? ["image/jpeg", "image/png"].includes(value.type) : true
+    //     ),
+    role_id: yup
         .number()
-        .typeError("Parent Id must be a number")
-        .required("Parent Id is required"),
-    is_allday: yup.boolean().required("Is All Day is required"),
-    preference: yup
-        .array()
-        .of(yup.string().required("Each preference must be a string"))
-        .min(1, "At least one preference is required")
-        .required("preference are required"),
+        .typeError("Role is required")
+        .required("Role is required"),
 });
 
 
@@ -36,77 +47,64 @@ const UserDetailsForm = () => {
     const location = useLocation();
     const isNonMobile = useMediaQuery("(min-width:600px)");
     const [loading, setLoading] = useState(true);
-    const [userList, setUserList] = useState()
-    const categoryListData = location.state?.categoryListData || [];
-    const optionsListData = location.state?.optionsList || [];
-    const peferencesListData = location.state?.peferencesList || [];
+    const [userList, setUserList] = useState('');
+    const [roleListData, setRoleListData] = useState([]);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            const fetchedItemDetails = location.state?.selectedRow;
+            setUserList(fetchedItemDetails);
+            setLoading(false);
+        }, 1500);
+        return () => clearTimeout(timer);
+    }, [location.state])
+
+
     const initialValues = {
         id: userList?.id || "",
-        item_name: userList?.item_name || "",
-        item_chinese_name: userList?.item_chinese_name || "",
-        cat_id: userList?.cat_id || 0,
-        is_allday: userList?.is_allday || false,
-        options: (() => {
-            try {
-                return userList?.options
-                    ? JSON.parse(userList.options).map(String)
-                    : [];
-            } catch (error) {
-                console.error("Error parsing options:", error);
-                return [];
-            }
-        })(),
-        preference: (() => {
-            try {
-                return userList?.preference
-                    ? JSON.parse(userList.preference).map(String)
-                    : [];
-            } catch (error) {
-                console.error("Error parsing preference:", error);
-                return [];
-            }
-        })(),
-        image: null,
+        name: userList?.name || "",
+        user_name: userList?.user_name || "",
+        email: userList?.email || "",
+        password: userList?.password || "",
+        email_verified_at: userList?.email_verified_at || "",
+        avatar: null,
+        role: userList?.role || "",
+        role_id: userList?.role_id || "",
     };
 
-     useEffect(() => {
-            const timer = setTimeout(() => {
-                const fetchedItemDetails = location.state?.selectedRow;
-                setUserList(fetchedItemDetails);
-                setLoading(false);
-            }, 1500);
-            return () => clearTimeout(timer);
-        }, [location.state])
-
-    const categoryData = categoryListData.map((category) => ({
-        label: category.cat_name,
-        value: category.id,
-    }));
-
-    const optionData = optionsListData.map((opt) => ({
-        label: opt.option_name,
-        value: opt.id,
-    }));
+    useEffect(() => {
+        roleList()
+    }, [])
+    const roleList = async (id) => {
+        try {
+            setLoading(true);
+            const response = await RoleServices.getRoleList();
+            setRoleListData(response?.data);
+        } catch (error) {
+            console.error("Error fetching menu list:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+    // console.log("roleListData", roleListData);
 
     const handleFormSubmit = async (values) => {
 
         const payload = {
             ...values,
-            options: JSON.stringify(values.options),
-            preference: JSON.stringify(values.preference),
         };
-        console.log("Form Submitted:", payload);
+        // console.log("Form Submitted:", payload);
 
         try {
             let response;
             if (payload?.id) {
-                // Update Items if ID is available
-                response = await ItemServices.updatetItems(payload.id, payload);
-                toast.success("Items updated successfully!");
+                // Update User if ID is available
+                response = await UserServices.updatetUser(payload.id, payload);
+                toast.success("User updated successfully!");
             } else {
-                // Create Items if ID is not available
-                response = await ItemServices.createItems(payload);
-                toast.success("Items created successfully!");
+                // Create User if ID is not available
+                response = await UserServices.createUser(payload);
+                toast.success("User created successfully!");
             }
         } catch (error) {
             console.error("Error processing menu:", error);
@@ -118,8 +116,8 @@ const UserDetailsForm = () => {
 
     return (
         <Box m="20px">
-            
-            <Header title={loading ?  "":userList?.id  ? "Update Item Detail":"Add Item Detail"} icon={<DvrOutlined />} Buttons={false} />
+
+            <Header title={loading ? "" : userList?.id ? "Update User Detail" : "Add User Detail"} icon={<DvrOutlined />} Buttons={false} />
             {loading ? (
                 <Box
                     display="flex"
@@ -131,10 +129,12 @@ const UserDetailsForm = () => {
                 </Box>
             ) : (
                 <Formik
+                    enableReinitialize
                     onSubmit={handleFormSubmit}
                     initialValues={initialValues}
-                    validateOnBlur
-                    validateOnChange
+                    validationSchema={validationSchema}
+                    validateOnBlur={true}
+                    validateOnChange={true}
                 >
                     {({
                         values,
@@ -161,13 +161,13 @@ const UserDetailsForm = () => {
                                     fullWidth
                                     variant="filled"
                                     type="text"
-                                    label="Item Name"
+                                    label="Name"
                                     onBlur={handleBlur}
                                     onChange={handleChange}
-                                    value={values.item_name}
-                                    name="item_name"
-                                    error={touched.item_name && Boolean(errors.item_name)}
-                                    helperText={touched.item_name && errors.item_name}
+                                    value={values.name}
+                                    name="name"
+                                    error={touched.name && Boolean(errors.name)}
+                                    helperText={touched.name && errors.name}
                                     sx={{ gridColumn: "span 4" }}
                                 />
 
@@ -176,120 +176,100 @@ const UserDetailsForm = () => {
                                     fullWidth
                                     variant="filled"
                                     type="text"
-                                    label="Item Chinese Name"
+                                    label="User Name"
                                     onBlur={handleBlur}
                                     onChange={handleChange}
-                                    value={values.item_chinese_name}
-                                    name="item_chinese_name"
+                                    value={values.user_name}
+                                    name="user_name"
                                     error={
-                                        touched.item_chinese_name && Boolean(errors.item_chinese_name)
+                                        touched.user_name && Boolean(errors.user_name)
                                     }
-                                    helperText={touched.item_chinese_name && errors.item_chinese_name}
+                                    helperText={touched.user_name && errors.user_name}
                                     sx={{ gridColumn: "span 4" }}
                                 />
-
-                                {/* Category Dropdown */}
-                                <Autocomplete
-                                    options={categoryData}
-                                    getOptionLabel={(option) => option.label}
-                                    value={
-                                        categoryData.find((option) => option.value === values.cat_id) ||
-                                        null
+                                <TextField
+                                    fullWidth
+                                    variant="filled"
+                                    type="email"
+                                    label="Email"
+                                    onBlur={handleBlur}
+                                    onChange={handleChange}
+                                    value={values.email}
+                                    name="email"
+                                    error={
+                                        touched.email && Boolean(errors.email)
                                     }
-                                    onChange={(event, newValue) => {
-                                        setFieldValue("cat_id", newValue ? newValue.value : 0);
-                                    }}
-                                    renderInput={(params) => (
-                                        <TextField
-                                            {...params}
-                                            label="Category"
-                                            variant="filled"
-                                            error={touched.cat_id && Boolean(errors.cat_id)}
-                                            helperText={touched.cat_id && errors.cat_id}
-                                        />
-                                    )}
+                                    helperText={touched.email && errors.email}
                                     sx={{ gridColumn: "span 4" }}
                                 />
-
-                                {/* Is All Day Switch */}
-                                <FormGroup>
-                                    <FormControlLabel
-                                        control={
-                                            <Switch
-                                                color="secondary"
-                                                checked={values.is_allday}
-                                                onChange={(e) =>
-                                                    setFieldValue("is_allday", e.target.checked)
-                                                }
-                                                name="is_allday"
+                                <TextField
+                                    fullWidth
+                                    variant="filled"
+                                    type="password"
+                                    label="password"
+                                    onBlur={handleBlur}
+                                    onChange={handleChange}
+                                    value={values.password}
+                                    name="password"
+                                    error={
+                                        touched.password && Boolean(errors.password)
+                                    }
+                                    helperText={touched.password && errors.password}
+                                    sx={{ gridColumn: "span 4" }}
+                                />
+                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                    <DatePicker
+                                        label="Email Verified At"
+                                        value={values.email_verified_at ? dayjs(values.email_verified_at) : null}
+                                        onChange={(newValue) => setFieldValue("email_verified_at", newValue ? newValue.format("YYYY-MM-DD") : null)} // Use setFieldValue to update the form state
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                fullWidth
+                                                variant="filled"
+                                                error={touched.email_verified_at && Boolean(errors.email_verified_at)}
+                                                helperText={touched.email_verified_at && errors.email_verified_at}
+                                                sx={{ gridColumn: "span 1" }}
                                             />
-                                        }
-                                        label="Is All Day"
+                                        )}
                                     />
-                                </FormGroup>
-
-                                {/* Image Upload */}
+                                </LocalizationProvider>
+                                {/* avatar Upload */}
                                 <TextField
                                     fullWidth
                                     type="file"
                                     variant="filled"
-                                    label="Upload Image"
+                                    label="Upload avatar"
                                     InputLabelProps={{ shrink: true }}
                                     onChange={(event) =>
-                                        setFieldValue("image", event.currentTarget.files[0])
+                                        setFieldValue("avatar", event.currentTarget.files[0])
                                     }
                                     sx={{ gridColumn: "span 4" }}
                                 />
 
-                                {/* Options Multi-Select */}
+                                {/* Role Dropdown */}
                                 <Autocomplete
-                                    multiple
-                                    options={optionData}
-                                    getOptionLabel={(option) => option.label}
-                                    value={optionData.filter((option) =>
-                                        values.options.includes(String(option.value))
-                                    )}
+                                    options={roleListData}
+                                    getOptionLabel={(option) => option.name}
+                                    value={
+                                        roleListData.find((option) => option.id === values.role_id) || null
+                                    }
                                     onChange={(event, newValue) => {
-                                        const selectedValues = newValue.map((item) => String(item.value));
-                                        setFieldValue("options", selectedValues);
+                                        setFieldValue("role_id", newValue ? newValue.id : 0);
+                                        setFieldValue("role", newValue ? newValue.name : "");
                                     }}
                                     renderInput={(params) => (
                                         <TextField
                                             {...params}
-                                            label="Options"
+                                            label="Role"
                                             variant="filled"
-                                            error={touched.options && Boolean(errors.options)}
-                                            helperText={touched.options && errors.options}
-                                        />
-                                    )}
-                                    sx={{ gridColumn: "span 4" }}
-                                />
-
-                                {/* Preference Multi-Select */}
-                                <Autocomplete
-                                    multiple
-                                    options={peferencesListData}
-                                    getOptionLabel={(option) => option.pname}
-                                    value={peferencesListData.filter((option) =>
-                                        values.preference.includes(String(option.id))
-                                    )}
-                                    onChange={(event, newValue) => {
-                                        const selectedIds = newValue.map((item) => String(item.id));
-                                        setFieldValue("preference", selectedIds);
-                                    }}
-                                    renderInput={(params) => (
-                                        <TextField
-                                            {...params}
-                                            label="preference"
-                                            variant="filled"
-                                            error={touched.preference && Boolean(errors.preference)}
-                                            helperText={touched.preference && errors.preference}
+                                            error={touched.role_id && Boolean(errors.role_id)}
+                                            helperText={touched.role_id && errors.role_id}
                                         />
                                     )}
                                     sx={{ gridColumn: "span 4" }}
                                 />
                             </Box>
-
                             <Box
                                 display="flex"
                                 alignItems="center"

@@ -7,11 +7,12 @@ import {
     useTheme,
 } from "@mui/material";
 import { Header } from "../../components";
-import { ListAltOutlined } from "@mui/icons-material";
+import { PersonOutlined } from "@mui/icons-material";
 import { tokens } from "../../theme";
 import { useLocation } from "react-router-dom";
-import ItemServices from "../../services/itemServices";
 import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
+import UserServices from "../../services/userServices";
+import dayjs from "dayjs";
 
 const UserDetailsView = () => {
     const theme = useTheme();
@@ -19,25 +20,19 @@ const UserDetailsView = () => {
     const isXlDevices = useMediaQuery("(min-width: 1260px)");
 
     const location = useLocation();
-    const categoryListData = location.state?.categoryListData || [];
-    const optionsListData = location.state?.optionsList || [];
-    const peferencesListData = location.state?.peferencesList || [];
-
-    const [itemDetails, setItemDetails] = useState('')
+    const [UserDetails, setUserDetails] = useState('')
     const [loading, setLoading] = useState(false);
-    const itemId = location.state.id
+    const UserId = location.state.id
 
     useEffect(() => {
-        getItemsDetails(itemId)
-    }, [itemId])
+        getUsersDetails(UserId)
+    }, [UserId])
 
-    const getItemsDetails = async (id) => {
+    const getUsersDetails = async (id) => {
         try {
             setLoading(true);
-            const response = await ItemServices.getItemsDetails(id);
-            // console.log(response?.data)
-            setItemDetails(response?.data);
-
+            const response = await UserServices.getUserDetails(id);
+            setUserDetails(response?.data);
         } catch (error) {
             console.error("Error fetching menu list:", error);
         } finally {
@@ -48,8 +43,8 @@ const UserDetailsView = () => {
     return (
         <Box m="20px">
             <Header
-                title="Item Details View"
-                icon={<ListAltOutlined />}
+                title="User Details View"
+                icon={<PersonOutlined />}
                 Buttons={false}
                 ActionButton={true}
             />
@@ -58,7 +53,7 @@ const UserDetailsView = () => {
                 <Box
                     display="flex"
                     justifyContent="center"
-                    alignItems="center"
+                    alignUsers="center"
                     height="calc(100vh - 100px)"
                 >
                     <CustomLoadingOverlay />
@@ -72,99 +67,80 @@ const UserDetailsView = () => {
                 >
                     <Box p="10px">
                         <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
-                            Item Name
+                            Name
                         </Typography>
                         <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                            {itemDetails?.item_name}
+                            {UserDetails?.name}
                         </Typography>
                     </Box>
                     <Divider sx={{ bgcolor: colors.gray[300] }} />
                     <Box p="10px">
                         <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
-                            Item Chinese Name
+                            User Name
                         </Typography>
                         <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                            {itemDetails?.item_chinese_name}
+                            {UserDetails?.user_name}
                         </Typography>
                     </Box>
                     <Divider sx={{ bgcolor: colors.gray[300] }} />
                     <Box p="10px">
                         <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
-                            Category
+                            Email
                         </Typography>
                         <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                            {(() => {
-                                const typeId = itemDetails?.cat_id;
-                                const typeObj = categoryListData.find((t) => t.id === typeId);
-                                return typeObj ? typeObj.cat_name : "N/A";
-                            })()}
+                            {UserDetails?.email}
                         </Typography>
                     </Box>
                     <Divider sx={{ bgcolor: colors.gray[300] }} />
                     <Box p="10px">
                         <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
-                            Is Allday
+                            Created At
                         </Typography>
                         <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                            {itemDetails?.is_allday ? itemDetails?.is_allday : 0}
+                            {UserDetails?.created_at ? dayjs(UserDetails.created_at).format("YYYY-MM-DD HH:mm:ss") : "N/A"}
                         </Typography>
                     </Box>
                     <Divider sx={{ bgcolor: colors.gray[300] }} />
                     <Box p="10px">
                         <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
-                            Item Image
+                            Email Verified At
                         </Typography>
                         <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                            {itemDetails?.image}
+                            {UserDetails?.email_varified_at ? dayjs(UserDetails.email_varified_at).format("YYYY-MM-DD HH:mm:ss") : "N/A"}
                         </Typography>
                     </Box>
                     <Divider sx={{ bgcolor: colors.gray[300] }} />
                     <Box p="10px">
                         <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
-                            Options
+                            Avtar
                         </Typography>
-                        {/* <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                        {Options.find((option) => option.value === itemDetails?.options)?.label || "N/A"}
-                    </Typography> */}
-                        <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                            {(() => {
-                                try {
-                                    const optionIds = JSON.parse(itemDetails?.options || "[]");
-                                    const optionNames = optionIds
-                                        .map((id) => {
-                                            const option = optionsListData.find((opt) => opt.id === parseInt(id));
-                                            return option ? option.option_name : null;
-                                        })
-                                        .filter(Boolean);
-                                    return optionNames.length > 0 ? optionNames.join(", ") : "N/A";
-                                } catch (error) {
-                                    console.error("Error parsing options:", error);
-                                    return "N/A";
-                                }
-                            })()}
-                        </Typography>
+                        {UserDetails?.avatar ? (
+                            <Box mt="10px" display="flex" justifyContent="flex-start" textAlign="flex-start">
+                                <img
+                                    src={UserDetails?.avatar}
+                                    alt="User Avatar"
+                                    style={{
+                                        width: "100px",
+                                        height: "100px",
+                                        borderRadius: "50%",
+                                        objectFit: "cover",
+                                        border: `2px solid ${colors.gray[300]}`,
+                                    }}
+                                />
+                            </Box>
+                        ) : (
+                            <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
+                                No Avatar Available
+                            </Typography>
+                        )}
                     </Box>
                     <Divider sx={{ bgcolor: colors.gray[300] }} />
                     <Box p="10px">
                         <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
-                            Preference
+                            Role
                         </Typography>
                         <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                            {(() => {
-                                try {
-                                    const opeferenceIds = JSON.parse(itemDetails?.preference || "[]");
-                                    const opeferenceNames = opeferenceIds
-                                        .map((id) => {
-                                            const opeference = peferencesListData.find((opt) => opt.id === parseInt(id));
-                                            return opeference ? opeference.pname : null;
-                                        })
-                                        .filter(Boolean);
-                                    return opeferenceNames.length > 0 ? opeferenceNames.join(", ") : "N/A";
-                                } catch (error) {
-                                    console.error("Error parsing options:", error);
-                                    return "N/A";
-                                }
-                            })()}
+                            {UserDetails?.role}
                         </Typography>
                     </Box>
 

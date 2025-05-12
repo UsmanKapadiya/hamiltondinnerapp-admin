@@ -3,18 +3,14 @@ import { Header } from "../../components";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import {
-  DvrOutlined,
   PersonOutlined,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
-import { useSelector } from "react-redux";
 import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
-import CategoryServices from "../../services/categoryServices";
 import { toast } from "react-toastify";
 import UserServices from "../../services/userServices";
-import { usersMockData } from "../../data/mockData";
 
 const User = () => {
   const theme = useTheme();
@@ -25,9 +21,6 @@ const User = () => {
   const [selectedId, setSelectedId] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
   const [selectedItemName, setselectedItemName] = useState("");
-  const [itemListData, setItemListData] = useState([])
-  const [categoryListData, setCategoryListData] = useState([])
-  const [optionsListData, setpOptionsListData] = useState([])
   const [userListData, setUserListData] = useState([])
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({
@@ -38,32 +31,29 @@ const User = () => {
 
   useEffect(() => {
     fetchALLUserList()
-
   }, []);
 
   const fetchALLUserList = async () => {
     try {
-      setUserListData(usersMockData)
-      // const response = await UserServices.getPreferencesList();
-      // setUserListData(response.data);
+      const response = await UserServices.getUserList();
+      setUserListData(response.data);
     } catch (error) {
       console.error("Error fetching menu list:", error);
     } finally {
       setLoading(false);
     }
   };
- 
-    
+
   const handleDelete = (data) => {
     setSelectedIds([])
     setSelectedId(data?.id);
-    setselectedItemName(data?.item_name);
+    setselectedItemName(data?.name);
     setDialogOpen(true);
   };
 
   const confirmDelete = () => {
     selectedIds.length > 0 && !selectedItemName
-      ? bulkdeleteItem(selectedIds) : deleteItem(selectedId);
+      ? bulkDeleteUsers(selectedIds) : deleteUser(selectedId);
     setDialogOpen(false);
   };
 
@@ -74,24 +64,16 @@ const User = () => {
   };
 
   const handleView = (id) => {
-    navigate(`/item-details/${id}`, {
-      state: {
-        id,
-        categoryListData: categoryListData,
-        optionsList: optionsListData,
-        peferencesList: userListData
-      }
+    navigate(`/users-details/${id}`, {
+      state: { id, }
     });
   };
 
   const handleEdit = (id) => {
-    const selectedRow = itemListData.find((row) => row.id === id);
-    navigate(`/item-details/${id}/edit`, {
+    const selectedRow = userListData.find((row) => row.id === id);
+    navigate(`/users-details/${id}/edit`, {
       state: {
         selectedRow,
-        categoryListData,
-        optionsList: optionsListData,
-        peferencesList: userListData,
       },
     });
   };
@@ -99,20 +81,12 @@ const User = () => {
     setShowDeleted((prev) => !prev);
   };
   const handleAddNewClick = () => {
-    navigate("/item-details/create", {
-      state:
-      {
-        categoryListData: categoryListData,
-        optionsList: optionsListData,
-        peferencesList: userListData
-      }
-    });
+    navigate("/users-details/create");
   };
   const handleBulkDelete = () => {
     setDialogOpen(true);
   };
   const handleOrderClick = () => {
-    navigate("/item-details/order");
   };
 
   const handleRowSelection = (ids) => {
@@ -129,29 +103,36 @@ const User = () => {
     setCurrentPage(newPaginationModel.page + 1,)
   };
 
-  const bulkdeleteItem = async (ids) => {
+  const bulkDeleteUsers = async (ids) => {
+    console.log("Selected IDs for deletion:", ids); // Debugging
+
+    if (!ids || ids.length === 0) {
+      toast.error("No users selected for deletion.");
+      return;
+    }
+
     try {
-      let data = JSON.stringify({
-        "ids": ids
-      });
-      const response = await UserServices.bulkdeleteItems(data);
-      // console.log(response)
-      setLoading(true)
-      toast.success("Multiple Items Deleted successfully!");
-      fetchALLUserList();
+      const data = { ids };
+      const response = await UserServices.bulkdeleteUser(data);
+      if (response.success) {
+        toast.success("Multiple Users Deleted successfully!");
+        fetchALLUserList();
+      } else {
+        toast.error(response.errors?.ids?.[0] || "Failed to delete users.");
+      }
     } catch (error) {
-      console.error("Error fetching menu list:", error);
-      toast.error("Failed to process menu. Please try again.");
+      console.error("Error deleting users:", error);
+      toast.error("Failed to process the request. Please try again.");
     } finally {
       setLoading(false);
     }
   };
-  const deleteItem = async (id) => {
+  const deleteUser = async (id) => {
     try {
-      const response = await UserServices.deleteItems(id);
+      const response = await UserServices.deleteUser(id);
       // console.log(response)
       setLoading(true)
-      toast.success("Item Deleted successfully!");
+      toast.success("User Deleted successfully!");
       fetchALLUserList();
     } catch (error) {
       console.error("Error fetching menu list:", error);
@@ -161,44 +142,44 @@ const User = () => {
     }
   };
 
-console.log("user",userListData)
+  // console.log("user",userListData)
   const columns = [
     { field: "name", headerName: "Name", flex: 1, },
     {
       field: "user_name",
       headerName: "User Name",
-      flex: 1,
+      // flex: 1,
     },
     {
       field: "email",
       headerName: "Email",
       flex: 1,
     },
-    {
-      field: "created_at",
-      headerName: "Created At",
-      flex: 1,
-    },
-    {
-      field: "email_verified_at",
-      headerName: "Email Verified At",
-      flex: 1,
-    },
+    // {
+    //   field: "created_at",
+    //   headerName: "Created At",
+    //   flex: 1,
+    // },
+    // {
+    //   field: "email_verified_at",
+    //   headerName: "Email Verified At",
+    //   flex: 1,
+    // },
     {
       field: "avatar",
       headerName: "Avtar",
-      // flex: 1,
+      //flex: 1,
     },
     {
       field: "role",
       headerName: "Role",
       // flex: 1,
     },
-    {
-      field: "roles",
-      headerName: "Roles",
-      // flex: 1,
-    },
+    // {
+    //   field: "roles",
+    //   headerName: "Roles",
+    //   // flex: 1,
+    // },
     {
       field: "actions",
       headerName: "Actions",
@@ -302,7 +283,7 @@ console.log("user",userListData)
           title="Confirm Delete"
           message={
             selectedIds.length > 0 && !selectedItemName
-              ? `Are you sure you want to delete ${selectedIds.length} Option items?`
+              ? `Are you sure you want to delete ${selectedIds.length} Users?`
               : `Are you sure you want to delete the Option "${selectedItemName}"?`
           }
           onConfirm={confirmDelete}
