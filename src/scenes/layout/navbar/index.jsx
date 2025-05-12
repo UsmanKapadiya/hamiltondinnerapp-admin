@@ -1,9 +1,12 @@
+import React, { useState } from "react";
 import {
   Box,
   IconButton,
   InputBase,
   useMediaQuery,
   useTheme,
+  Menu,
+  MenuItem,
 } from "@mui/material";
 import { tokens, ColorModeContext } from "../../../theme";
 import { useContext } from "react";
@@ -17,6 +20,9 @@ import {
   SettingsOutlined,
 } from "@mui/icons-material";
 import { ToggledContext } from "../../../App";
+import AuthServices from "../../../services/authServices";
+import { toast } from "react-toastify";
+
 const Navbar = () => {
   const theme = useTheme();
   const colorMode = useContext(ColorModeContext);
@@ -24,13 +30,41 @@ const Navbar = () => {
   const isMdDevices = useMediaQuery("(max-width:768px)");
   const isXsDevices = useMediaQuery("(max-width:466px)");
   const colors = tokens(theme.palette.mode);
+  const [loading, setLoading] = useState(true);
+
+  // State for dropdown menu
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = async () => {
+    try {
+      setLoading(true);
+      let response = await AuthServices.logout();
+      const { message } = response;
+      toast.success(`${message}`);
+      setTimeout(() => {
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("userData");
+        window.location.href = "/login";
+      }, 2000);
+    } catch (error) {
+      console.error("Error processing menu:", error);
+      toast.error("Failed to process menu. Please try again."); // Error toast
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <Box
-      display="flex"
-      alignItems="center"
-      justifyContent="space-between"
-      p={2}
-    >
+    <Box display="flex" alignItems="center" justifyContent="space-between" p={2}>
       <Box display="flex" alignItems="center" gap={2}>
         <IconButton
           sx={{ display: `${isMdDevices ? "flex" : "none"}` }}
@@ -66,9 +100,27 @@ const Navbar = () => {
         <IconButton>
           <SettingsOutlined />
         </IconButton>
-        <IconButton>
+        {/* Dropdown Menu Trigger */}
+        <IconButton onClick={handleMenuOpen}>
           <PersonOutlined />
         </IconButton>
+        {/* Dropdown Menu */}
+        <Menu
+          anchorEl={anchorEl}
+          open={open}
+          onClose={handleMenuClose}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "right",
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "right",
+          }}
+        >
+          <MenuItem onClick={handleMenuClose}>User Settings</MenuItem>
+          <MenuItem onClick={handleLogout}>Logout</MenuItem>
+        </Menu>
       </Box>
     </Box>
   );

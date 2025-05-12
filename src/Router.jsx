@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import App from "./App";
 import {
   Dashboard,
@@ -47,12 +47,24 @@ import User from "./scenes/user";
 import UserDetailsView from "./scenes/user/userDetails-view";
 import UserDetailsForm from "./scenes/user/userDetails-form";
 
+
+const ProtectedRoute = ({ children }) => {
+  const isAuthenticated = !!localStorage.getItem("authToken"); // Check if token exists
+  return isAuthenticated ? children : <Navigate to="/login" />;
+};
 const AppRouter = () => {
   return (
     <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/" element={<App />}>
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <App />
+            </ProtectedRoute>
+          }
+        >        
           <Route path="/" element={<Dashboard />} />
           {/*Room  */}
           <Route path="/room-details" element={<Room />} />
@@ -76,7 +88,7 @@ const AppRouter = () => {
           <Route path="/item-options" element={<ItemOptions />} />
           <Route path="/item-options/create" element={<ItemoptionsForm />} />
           <Route path="/item-options/:id/edit" element={<ItemoptionsForm />} />
-          <Route path="/item-options/:id" element={<ItemOptionsView/>} />
+          <Route path="/item-options/:id" element={<ItemOptionsView />} />
           {/*Item Preferences */}
           <Route path="/item-preferences" element={<ItemPreferences />} />
           <Route path="/item-preferences/create" element={<ItemPreferencesForm />} />
