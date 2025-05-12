@@ -14,9 +14,8 @@ import { PermissionsList } from "../../data/mockData"
 
 
 const validationSchema = yup.object().shape({
-    role_name: yup.string().required("Option  Name is required"),
-    role_display: yup.string().required("Option  Chinese Name is required"),
-    is_paid_item: yup.string().required("Is Paid Item is required"),
+    name: yup.string().required("Option  Name is required"),
+    display_name: yup.string().required("Option  Chinese Name is required"),
 });
 
 
@@ -44,9 +43,8 @@ const RoleDetailsForm = () => {
     }, [location.state])
     const initialValues = {
         id: optionsDetails?.id || "",
-        role_name: optionsDetails?.role_name || "",
-        role_display: optionsDetails?.role_display || "",
-        is_paid_item: optionsDetails?.is_paid_item || false,
+        name: optionsDetails?.name || "",
+        display_name: optionsDetails?.display_name || "",
     };
 
 
@@ -172,10 +170,10 @@ const RoleDetailsForm = () => {
                                     label="Name"
                                     onBlur={handleBlur}
                                     onChange={handleChange}
-                                    value={values.role_name}
-                                    name="role_name"
-                                    error={touched.role_name && Boolean(errors.role_name)}
-                                    helperText={touched.role_name && errors.role_name}
+                                    value={values.name}
+                                    name="name"
+                                    error={touched.name && Boolean(errors.name)}
+                                    helperText={touched.name && errors.name}
                                     sx={{ gridColumn: "span 4" }}
                                 />
                                 <TextField
@@ -185,10 +183,10 @@ const RoleDetailsForm = () => {
                                     label="Display Name"
                                     onBlur={handleBlur}
                                     onChange={handleChange}
-                                    value={values.role_display}
-                                    name="role_display"
-                                    error={touched.role_display && Boolean(errors.role_display)}
-                                    helperText={touched.role_display && errors.role_display}
+                                    value={values.display_name}
+                                    name="display_name"
+                                    error={touched.display_name && Boolean(errors.display_name)}
+                                    helperText={touched.display_name && errors.display_name}
                                     sx={{ gridColumn: "span 4" }}
                                 />
                                 <Typography color={colors.gray[100]} variant="h5" fontWeight="600" sx={{ gridColumn: "span 4" }} >

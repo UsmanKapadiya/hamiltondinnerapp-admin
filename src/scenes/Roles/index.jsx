@@ -45,15 +45,15 @@ const Roles = () => {
 
   const fetchAllRolelist = async () => {
     try {
-      setRoleList(rolesData);
-      // setLoading(true)
-      // const response = await RoleServices.getRoleList({ currentPage, perPageRecords });
-      // console.log(response)
-      // setRoleList(response.data);
-      // setPagination((prev) => ({
-      //   ...prev,
-      //   total: response.pagination.total,
-      // }));
+      // setRoleList(rolesData);
+      setLoading(true)
+      const response = await RoleServices.getRoleList({ currentPage, perPageRecords });
+      console.log(response)
+      setRoleList(response.data);
+      setPagination((prev) => ({
+        ...prev,
+        total: response.count,
+      }));
     } catch (error) {
       console.error("Error fetching menu list:", error);
     } finally {
@@ -65,11 +65,11 @@ const Roles = () => {
       let data = JSON.stringify({
         "ids": ids
       });
-      const response = await MenuServices.bulkdeleteMenus(data);
+      const response = await RoleServices.bulkdeleteRole(data);
       // console.log(response)
       setLoading(true)
-      toast.success("Multiple Menus Deleted successfully!");
-      fetchroleList();
+      toast.success("Multiple Roles Deleted successfully!");
+      fetchAllRolelist();
     } catch (error) {
       console.error("Error fetching menu list:", error);
       toast.error("Failed to process menu. Please try again.");
@@ -77,13 +77,13 @@ const Roles = () => {
       setLoading(false);
     }
   };
-  const deleteMenu = async (id) => {
+  const deleteRole = async (id) => {
     try {
-      const response = await MenuServices.deleteMenus(id);
+      const response = await RoleServices.deleteRole(id);
       console.log(response)
       setLoading(true)
-      toast.success("Menu Deleted successfully!");
-      fetchroleList();
+      toast.success("Role Deleted successfully!");
+      fetchAllRolelist();
     } catch (error) {
       console.error("Error fetching menu list:", error);
       toast.error("Failed to process menu. Please try again.");
@@ -94,13 +94,13 @@ const Roles = () => {
 
   const handleDelete = (data) => {
     setSelectedId(data?.id);
-    setSelectedRoleName(data?.role_name);
+    setSelectedRoleName(data?.name);
     setDialogOpen(true);
   };
 
   const confirmDelete = () => {
     selectedIds.length > 0 && !selectedRoleName
-      ? bulkDeleteMenu(selectedIds) : deleteMenu(selectedId);
+      ? bulkDeleteMenu(selectedIds) : deleteRole(selectedId);
     setDialogOpen(false);
     setLoading(true)
   };
@@ -139,8 +139,8 @@ const Roles = () => {
   };
 console.log("roleList",roleList)
   const columns = [
-    { field: "role_name", headerName: "Name", flex: 1, },
-    { field: "role_display", headerName: "Display", flex: 1, },
+    { field: "name", headerName: "Name", flex: 1, },
+    { field: "display_name ", headerName: "Display", flex: 1, },
     {
       field: "actions",
       headerName: "Actions",
@@ -256,8 +256,8 @@ console.log("roleList",roleList)
           title="Confirm Delete"
           message={
             selectedIds.length > 0 && !selectedRoleName
-              ? `Are you sure you want to delete ${selectedIds.length} items?`
-              : `Are you sure you want to delete the menu "${selectedRoleName}"?`
+              ? `Are you sure you want to delete ${selectedIds.length} Roles?`
+              : `Are you sure you want to delete the Role "${selectedRoleName}"?`
           }
           onConfirm={confirmDelete}
           onCancel={cancelDelete}
