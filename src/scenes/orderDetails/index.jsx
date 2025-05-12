@@ -181,10 +181,11 @@ const OrderDetails = () => {
             </Menu>
           </Box>
         </Box>
-        <TableContainer component={Paper}>
           {loading ? (
             <CustomLoadingOverlay />
           ) : data && data?.result?.rows?.length > 0 ? (
+        <TableContainer component={Paper}>
+        
             <Table sx={{ border: '1px solid rgba(224, 224, 224, 1)', borderCollapse: 'collapse' }}>
               <TableHead>
                 <TableRow sx={{ backgroundColor: colors.blueAccent[700] }}>
@@ -249,12 +250,13 @@ const OrderDetails = () => {
                 ))}
               </TableBody>
             </Table>
-          ) : (
+         
+        </TableContainer>
+         ) : (
             <Typography variant="h6" align="center" sx={{ padding: '20px' }}>
               No Data Available for the selected date.
             </Typography>
           )}
-        </TableContainer>
       </Box>
     </Box>
   );

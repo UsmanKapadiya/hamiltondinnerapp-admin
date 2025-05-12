@@ -38,7 +38,6 @@ import MenuDetails from "./scenes/menuDetails";
 import MenuDetailsForm from "./scenes/menuDetails/menuDetails-form";
 import MenuDetailsView from "./scenes/menuDetails/menuDetails-view";
 import OrderDetails from "./scenes/orderDetails";
-import OrderDetailsForm from "./scenes/orderDetails/orderDetails-form";
 import Setting from "./scenes/settings";
 import Roles from "./scenes/Roles";
 import RolesDetailsView from "./scenes/Roles/rolesDetails-view";
@@ -99,9 +98,8 @@ const AppRouter = () => {
           <Route path="/menu-details/create" element={<MenuDetailsForm />} />
           <Route path="/menu-details/:id/edit" element={<MenuDetailsForm />} />
           <Route path="/menu-details/:id" element={<MenuDetailsView />} />
-          {/*Menu Details */}
+          {/*Order Details */}
           <Route path="/order-details" element={<OrderDetails />} />
-          <Route path="/order-details/create" element={<OrderDetailsForm />} />
 
           {/*Menu Details */}
           <Route path="/settings" element={<Setting />} />
