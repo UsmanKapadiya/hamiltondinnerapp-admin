@@ -8,7 +8,7 @@ import { type } from "../../data/mockData";
 import CategoryServices from "../../services/categoryServices";
 import { toast } from "react-toastify";
 import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 
 
@@ -22,10 +22,19 @@ const validationSchema = yup.object().shape({
 
 const CategoryDetailsForm = () => {
     const location = useLocation();
-    const categoryDetails = location.state?.selectedCategory;
+    const [categoryDetails, setcCategoryDetails] = useState(true);
     const categoryListData = location.state?.categoryListData;
     const isNonMobile = useMediaQuery("(min-width:600px)");
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            const fetchedDetails = location.state?.selectedCategory;
+            setcCategoryDetails(fetchedDetails);
+            setLoading(false);
+        }, 1500);
+        return () => clearTimeout(timer);
+    }, [location.state])
 
     const initialValues = {
         id: categoryDetails?.id || "",
@@ -82,7 +91,7 @@ const CategoryDetailsForm = () => {
 
     return (
         <Box m="20px">
-            {loading && (
+            {/* {loading && (
                 <Box
                     position="fixed"
                     top={0}
@@ -92,118 +101,129 @@ const CategoryDetailsForm = () => {
                     display="flex"
                     justifyContent="center"
                     alignItems="center"
-                    zIndex={9999} 
+                    zIndex={9999}
                 >
                     <CustomLoadingOverlay />
                 </Box>
-            )}
-            <Header title="Add Category Detail" icon={<DvrOutlined />} Buttons={false} />
-            <Formik
-                onSubmit={handleFormSubmit}
-                initialValues={initialValues}
-                validationSchema={validationSchema}
-                validateOnBlur={true} // Enable validation on blur
-                validateOnChange={true} // Enable validation on change
-            >
-                {({
-                    values,
-                    errors,
-                    touched,
-                    handleBlur,
-                    handleChange,
-                    handleSubmit,
-                    setFieldValue,
-                }) => (
+            )} */}
+            <Header title={loading ? "" : categoryDetails?.id ? "Update Category Detail" : "Add Category Detail"} icon={<DvrOutlined />} Buttons={false} />
+            {loading ? (
+                <Box
+                    display="flex"
+                    justifyContent="center"
+                    alignItems="center"
+                    height="calc(100vh - 100px)"
+                >
+                    <CustomLoadingOverlay />
+                </Box>
+            ) : (
+                <Formik
+                    onSubmit={handleFormSubmit}
+                    initialValues={initialValues}
+                    validationSchema={validationSchema}
+                    validateOnBlur={true} // Enable validation on blur
+                    validateOnChange={true} // Enable validation on change
+                >
+                    {({
+                        values,
+                        errors,
+                        touched,
+                        handleBlur,
+                        handleChange,
+                        handleSubmit,
+                        setFieldValue,
+                    }) => (
 
-                    <form onSubmit={handleSubmit}>
-                        <Box
-                            display="grid"
-                            gap="30px"
-                            gridTemplateColumns="repeat(4, minmax(0, 1fr))"
-                            sx={{
-                                "& > div": {
-                                    gridColumn: isNonMobile ? undefined : "span 4",
-                                },
-                            }}
-                        >
-                            <TextField
-                                fullWidth
-                                variant="filled"
-                                type="text"
-                                label="Category Name"
-                                onBlur={handleBlur}
-                                onChange={handleChange}
-                                value={values.cat_name}
-                                name="cat_name"
-                                error={touched.cat_name && Boolean(errors.cat_name)}
-                                helperText={touched.cat_name && errors.cat_name}
-                                sx={{ gridColumn: "span 4" }}
-                            />
-                            <TextField
-                                fullWidth
-                                variant="filled"
-                                type="text"
-                                label="Category Chinese Name"
-                                onBlur={handleBlur}
-                                onChange={handleChange}
-                                value={values.category_chinese_name}
-                                name="category_chinese_name"
-                                error={touched.category_chinese_name && Boolean(errors.category_chinese_name)}
-                                helperText={touched.category_chinese_name && errors.category_chinese_name}
-                                sx={{ gridColumn: "span 4" }}
-                            />
-                            <TextField
-                                fullWidth
-                                select
-                                variant="filled"
-                                label="Select category type"
-                                onBlur={handleBlur}
-                                onChange={handleChange}
-                                value={values.type}
-                                name="type"
-                                error={touched.type && Boolean(errors.type)}
-                                helperText={touched.type && errors.type}
-                                sx={{ gridColumn: "span 4" }}
-                            >
-                                {type.map((option) => (
-                                    <MenuItem key={option.id} value={option.id}>
-                                        {option.type_name}
-                                    </MenuItem>
-                                ))}
-                            </TextField>
-                            <Autocomplete
-                                options={parent_id}
-                                getOptionLabel={(option) => option.label}
-                                value={parent_id?.find((option) => option.value === values.parent_id) || null}
-                                onChange={(event, newValue) => {
-                                    setFieldValue("parent_id", newValue ? newValue.value : ""); // Update parent_id correctly
+                        <form onSubmit={handleSubmit}>
+                            <Box
+                                display="grid"
+                                gap="30px"
+                                gridTemplateColumns="repeat(4, minmax(0, 1fr))"
+                                sx={{
+                                    "& > div": {
+                                        gridColumn: isNonMobile ? undefined : "span 4",
+                                    },
                                 }}
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        label="Parent Id"
-                                        variant="filled"
-                                        error={touched.parent_id && Boolean(errors.parent_id)}
-                                        helperText={touched.parent_id && errors.parent_id}
-                                    />
-                                )}
-                                sx={{ gridColumn: "span 4" }}
-                            />
-                        </Box>
-                        <Box
-                            display="flex"
-                            alignItems="center"
-                            justifyContent="end"
-                            mt="20px"
-                        >
-                            <Button type="submit" color="secondary" variant="contained">
-                                Save Category Details
-                            </Button>
-                        </Box>
-                    </form>
+                            >
+                                <TextField
+                                    fullWidth
+                                    variant="filled"
+                                    type="text"
+                                    label="Category Name"
+                                    onBlur={handleBlur}
+                                    onChange={handleChange}
+                                    value={values.cat_name}
+                                    name="cat_name"
+                                    error={touched.cat_name && Boolean(errors.cat_name)}
+                                    helperText={touched.cat_name && errors.cat_name}
+                                    sx={{ gridColumn: "span 4" }}
+                                />
+                                <TextField
+                                    fullWidth
+                                    variant="filled"
+                                    type="text"
+                                    label="Category Chinese Name"
+                                    onBlur={handleBlur}
+                                    onChange={handleChange}
+                                    value={values.category_chinese_name}
+                                    name="category_chinese_name"
+                                    error={touched.category_chinese_name && Boolean(errors.category_chinese_name)}
+                                    helperText={touched.category_chinese_name && errors.category_chinese_name}
+                                    sx={{ gridColumn: "span 4" }}
+                                />
+                                <TextField
+                                    fullWidth
+                                    select
+                                    variant="filled"
+                                    label="Select category type"
+                                    onBlur={handleBlur}
+                                    onChange={handleChange}
+                                    value={values.type}
+                                    name="type"
+                                    error={touched.type && Boolean(errors.type)}
+                                    helperText={touched.type && errors.type}
+                                    sx={{ gridColumn: "span 4" }}
+                                >
+                                    {type.map((option) => (
+                                        <MenuItem key={option.id} value={option.id}>
+                                            {option.type_name}
+                                        </MenuItem>
+                                    ))}
+                                </TextField>
+                                <Autocomplete
+                                    options={parent_id}
+                                    getOptionLabel={(option) => option.label}
+                                    value={parent_id?.find((option) => option.value === values.parent_id) || null}
+                                    onChange={(event, newValue) => {
+                                        setFieldValue("parent_id", newValue ? newValue.value : ""); // Update parent_id correctly
+                                    }}
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            label="Parent Id"
+                                            variant="filled"
+                                            error={touched.parent_id && Boolean(errors.parent_id)}
+                                            helperText={touched.parent_id && errors.parent_id}
+                                        />
+                                    )}
+                                    sx={{ gridColumn: "span 4" }}
+                                />
+                            </Box>
+                            <Box
+                                display="flex"
+                                alignItems="center"
+                                justifyContent="end"
+                                mt="20px"
+                            >
+                                <Button type="submit" color="secondary" variant="contained">
+                                    Save Category Details
+                                </Button>
+                            </Box>
+                        </form>
 
-                )}
-            </Formik>
+                    )}
+                </Formik>
+            )}
         </Box>
     );
 };

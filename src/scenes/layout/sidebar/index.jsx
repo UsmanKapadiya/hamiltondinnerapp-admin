@@ -10,6 +10,7 @@ import {
   CreateOutlined,
   DashboardOutlined,
   DonutLargeOutlined,
+  DvrOutlined,
   ExpandLessOutlined,
   ExpandMoreOutlined,
   HelpOutlineOutlined,
@@ -184,7 +185,7 @@ const SideBar = () => {
             title="Category Details"
             path="/category-details"
             colors={colors}
-            icon={<Home />}
+            icon={<DvrOutlined />}
           />
           <List>
             <ListItemButton onClick={handleDropdownToggle}>
