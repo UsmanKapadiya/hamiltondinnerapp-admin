@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { Avatar, Box, IconButton, Typography, useTheme, Collapse, List, ListItemButton, ListItemText } from "@mui/material";
+import { Avatar, Box, IconButton, Typography, useTheme, Collapse, List, ListItemButton, ListItemText, ListItemIcon } from "@mui/material";
 import { useContext, useState } from "react";
 import { tokens } from "../../../theme";
 import { Menu, MenuItem, Sidebar } from "react-pro-sidebar";
@@ -26,6 +26,7 @@ import {
   ReceiptOutlined,
   SettingsOutlined,
   TimelineOutlined,
+  TonalityOutlined,
   WavesOutlined,
 
 } from "@mui/icons-material";
@@ -189,6 +190,9 @@ const SideBar = () => {
           />
           <List>
             <ListItemButton onClick={handleDropdownToggle}>
+              <ListItemIcon style={{paddingLeft:10}}>
+                <TonalityOutlined style={{ color: colors.gray[100], }} />
+              </ListItemIcon>
               <ListItemText
                 primary="Manage Items"
                 primaryTypographyProps={{
