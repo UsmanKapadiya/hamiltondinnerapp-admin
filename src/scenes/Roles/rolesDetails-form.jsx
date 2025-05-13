@@ -10,6 +10,7 @@ import ItemServices from "../../services/itemServices";
 import { toast } from "react-toastify";
 import { tokens } from "../../theme";
 import { PermissionsList } from "../../data/mockData"
+import RoleServices from "../../services/roleServices";
 
 
 
@@ -24,104 +25,179 @@ const RoleDetailsForm = () => {
     const colors = tokens(theme.palette.mode);
     const location = useLocation();
     const isNonMobile = useMediaQuery("(min-width:600px)");
-    const [optionsDetails, setOptionsDetails] = useState('')
-    const [loading, setLoading] = useState(true);
-    const [permissions, setPermissions] = useState(
-        Object.keys(PermissionsList).reduce((acc, key) => {
-            acc[key] = PermissionsList[key].map((item) => ({ ...item, checked: false }));
-            acc[`${key}Checked`] = false;
-            return acc;
-        }, {})
-    );
+    const [roleDetails, setRoleDetails] = useState({
+        id: "",
+        name: "",
+        display_name: "",
+        permissions: [], 
+    }); const [loading, setLoading] = useState(true);
+    const [permissionsList, setPermissionsList] = useState([]);
+
     useEffect(() => {
-        const timer = setTimeout(() => {
-            const fetchedOptionsDetails = location.state;
-            setOptionsDetails(fetchedOptionsDetails);
-            setLoading(false);
-        }, 1500);
-        return () => clearTimeout(timer);
-    }, [location.state])
-    const initialValues = {
-        id: optionsDetails?.id || "",
-        name: optionsDetails?.name || "",
-        display_name: optionsDetails?.display_name || "",
-    };
+        getAllPermission();
+    }, [])
 
+   useEffect(() => {
+    const timer = setTimeout(() => {
+        console.log(location.state);
+        const fetchedOptionsDetails = location.state || {};
 
-    const handleParentCheckboxChange = (key) => {
-        setPermissions((prev) => {
-            const updated = { ...prev };
-            updated[key] = updated[key].map((item) => ({
+        // Set role details
+        setRoleDetails({
+            id: fetchedOptionsDetails.id || "",
+            name: fetchedOptionsDetails.name || "",
+            display_name: fetchedOptionsDetails.display_name || "",
+            permissions: fetchedOptionsDetails.permission_list?.map((perm) => perm.id) || [], // Extract permission IDs
+        });
+
+        // Update permissionsList to mark assigned permissions as checked
+        setPermissionsList((prev) =>
+            prev.map((item) => ({
                 ...item,
-                checked: !prev[`${key}Checked`],
-            }));
-            updated[`${key}Checked`] = !prev[`${key}Checked`];
-            return updated;
+                checked: fetchedOptionsDetails.permission_list?.some(
+                    (perm) => perm.id === item.id
+                ) || false, // Mark as checked if permission is assigned
+            }))
+        );
+
+        setLoading(false);
+    }, 1500);
+    return () => clearTimeout(timer);
+}, [location.state]);
+  useEffect(() => {
+    if (roleDetails && permissionsList.length > 0) {
+        const updatedPermissionsList = permissionsList.map((item) => ({
+            ...item,
+            checked: roleDetails.permissions?.includes(item.id) || false, // Mark as checked if the permission is assigned
+        }));
+        setPermissionsList(updatedPermissionsList);
+    }
+}, [roleDetails]);
+
+    const getAllPermission = async () => {
+    try {
+        setLoading(true);
+        const response = await RoleServices.getPermissionsList();
+        console.log("Permissions List Response:", response);
+
+        // Add `checked` property to each permission
+        const permissionsWithChecked = response?.data.map((item) => ({
+            ...item,
+            checked: false, // Default to unchecked
+        }));
+
+        setPermissionsList(permissionsWithChecked);
+    } catch (error) {
+        console.error("Error fetching permissions list:", error);
+    } finally {
+        setLoading(false);
+    }
+};
+    const handleSelectPermissions = (data) => {
+        // Update the `checked` state in `permissionsList`
+        setPermissionsList((prev) =>
+            prev.map((item) =>
+                item.id === data.id ? { ...item, checked: !item.checked } : item
+            )
+        );
+
+        // Update `roleDetails.permissions` dynamically
+        setRoleDetails((prev) => {
+            const updatedPermissions = prev?.permissions?.includes(data.id)
+                ? prev.permissions.filter((id) => id !== data.id) // Remove if exists
+                : [...(prev.permissions || []), data.id]; // Add if not exists
+
+            return {
+                ...prev,
+                permissions: updatedPermissions,
+            };
         });
     };
 
-    const handleChildCheckboxChange = (key, index) => {
-        setPermissions((prev) => {
-            const updated = { ...prev };
-            updated[key][index].checked = !updated[key][index].checked;
-            updated[`${key}Checked`] = updated[key].every((item) => item.checked);
-            return updated;
-        });
+    const handleSelectAllPermissions = () => {
+        setPermissionsList((prev) =>
+            prev.map((item) => ({
+                ...item,
+                checked: true,
+            }))
+        );
     };
+
+
+
+    const handleDeselectAllPermissions = () => {
+        setPermissionsList((prev) =>
+            prev.map((item) => ({
+                ...item,
+                checked: false, // Set all items to unchecked
+            }))
+        );
+    };
+
 
     const handleFormSubmit = async (values, actions) => {
-        // setLoading(true)
-        const formData = { ...values };
-       console.log(formData)
-       console.log(permissions)
+        const selectedPermissions = permissionsList
+            .filter((item) => item.checked) // Get only checked permissions
+            .map((item) => item.id); // Extract their IDs
 
-        // try {
-        //     let response;
-        //     if (formData?.id) {
-        //         // Update Options if ID is available
-        //         response = await ItemServices.updatetOptionsDetails(formData.id, formData);
-        //         setOptionsDetails(response?.data)
-        //         toast.success("Item Options updated successfully!");
-        //     } else {
-        //         // Create Options if ID is not available
-        //         response = await ItemServices.createOptionsDetails(formData);
-        //         toast.success("Item Options created successfully!");
-        //         actions.resetForm({
-        //             values: initialValues,
-        //         });
-        //     }
-        // } catch (error) {
-        //     toast.error("Failed to process menu. Please try again.");
-        // } finally {
-        //     setLoading(false);
-        // }
-    };
+        const formData = {
+            ...values,
+            permissions: selectedPermissions, // Include selected permissions
+        };
 
-    const handleSelectAll = () => {
-        setPermissions((prev) => {
-            const updated = { ...prev };
-            Object.keys(updated).forEach((key) => {
-                if (Array.isArray(updated[key])) {
-                    updated[key] = updated[key].map((item) => ({ ...item, checked: true }));
-                }
-                updated[`${key}Checked`] = true;
-            });
-            return updated;
-        });
+        console.log("Form Data:", formData);
+
+        try {
+            let response;
+            if (formData.id) {
+                // Update Role if ID is available
+                response = await RoleServices.updateRole(formData.id, formData);
+                toast.success("Role updated successfully!");
+            } else {
+                // Create Role if ID is not available
+                response = await RoleServices.createRole(formData);
+                toast.success("Role created successfully!");
+                actions.resetForm({
+                    values: roleDetails,
+                });
+            }
+        } catch (error) {
+            console.error("Error submitting form:", error);
+            toast.error("Failed to process the request. Please try again.");
+        } finally {
+            setLoading(false);
+        }
     };
-    
-    const handleDeselectAll = () => {
-        setPermissions((prev) => {
-            const updated = { ...prev };
-            Object.keys(updated).forEach((key) => {
-                if (Array.isArray(updated[key])) {
-                    updated[key] = updated[key].map((item) => ({ ...item, checked: false }));
-                }
-                updated[`${key}Checked`] = false;
-            });
-            return updated;
-        });
-    };
+    console.log("Role Details:", roleDetails);
+console.log("Permissions List:", permissionsList);
+    // const handleFormSubmit = async (values, actions) => {
+    //     // setLoading(true)
+    //     const formData = { ...values };
+    //     console.log(formData)
+    //     console.log(permissions)
+
+    //     // try {
+    //     //     let response;
+    //     //     if (formData?.id) {
+    //     //         // Update Options if ID is available
+    //     //         response = await ItemServices.updatetOptionsDetails(formData.id, formData);
+    //     //         setOptionsDetails(response?.data)
+    //     //         toast.success("Item Options updated successfully!");
+    //     //     } else {
+    //     //         // Create Options if ID is not available
+    //     //         response = await ItemServices.createOptionsDetails(formData);
+    //     //         toast.success("Item Options created successfully!");
+    //     //         actions.resetForm({
+    //     //             values: initialValues,
+    //     //         });
+    //     //     }
+    //     // } catch (error) {
+    //     //     toast.error("Failed to process menu. Please try again.");
+    //     // } finally {
+    //     //     setLoading(false);
+    //     // }
+    // };
+
 
     return (
         <Box m="20px">
@@ -138,10 +214,11 @@ const RoleDetailsForm = () => {
             ) : (
                 <Formik
                     onSubmit={handleFormSubmit}
-                    initialValues={initialValues}
+                    initialValues={roleDetails}
                     validationSchema={validationSchema}
                     validateOnBlur={true}
                     validateOnChange={true}
+                    enableReinitialize // Ensures the form reinitializes when `roleDetails` changes
                 >
                     {({
                         values,
@@ -192,58 +269,48 @@ const RoleDetailsForm = () => {
                                 <Typography color={colors.gray[100]} variant="h5" fontWeight="600" sx={{ gridColumn: "span 4" }} >
                                     Permission
                                 </Typography>
-                                <Box display="flex" justifyContent="flex-start" alignItems="center" sx={{ gridColumn: "span 4" }}>
-                                    <Typography
-                                        color={colors.blueAccent[100]}
-                                        variant="h5"
-                                        fontWeight="600"
-                                        sx={{ cursor: "pointer" }}
-                                        onClick={() => handleSelectAll()}
-                                    >
-                                        Select All /
-                                    </Typography>
-                                    <Typography
-                                        color={colors.blueAccent[100]}
-                                        variant="h5"
-                                        fontWeight="600"
-                                        sx={{ cursor: "pointer" }}
-                                        onClick={() => handleDeselectAll()}
-                                    >
-                                        &nbsp;Deselect All
-                                    </Typography>
-                                </Box>
+
+                            </Box>
+                            <Box display="flex" justifyContent="flex-start" alignItems="center" sx={{ gridColumn: "span 4" }}>
+                                <Typography
+                                    color={colors.blueAccent[100]}
+                                    variant="h5"
+                                    fontWeight="600"
+                                    sx={{ cursor: "pointer" }}
+                                    onClick={handleSelectAllPermissions}
+                                >
+                                    Select All /
+                                </Typography>
+                                <Typography
+                                    color={colors.blueAccent[100]}
+                                    variant="h5"
+                                    fontWeight="600"
+                                    sx={{ cursor: "pointer" }}
+                                    onClick={handleDeselectAllPermissions}
+                                >
+                                    &nbsp;Deselect All
+                                </Typography>
                             </Box>
                             <Box display="flex" flexDirection="column" sx={{ gridColumn: "span 4" }}>
-                                {Object.keys(PermissionsList).map((key) => (
-                                    <FormGroup key={key} sx={{ mb: 2 }}> {/* Add margin between groups */}
-                                        <FormControlLabel
-                                            control={
-                                                <Checkbox
-                                                    checked={permissions[`${key}Checked`]}
-                                                    onChange={() => handleParentCheckboxChange(key)}
-                                                    color="secondary"
-                                                />
-                                            }
-                                            label={key.charAt(0).toUpperCase() + key.slice(1)} 
-                                        />
-                                        <Box ml={4} display="flex" flexDirection="column">
-                                            {permissions[key].map((item, index) => (
-                                                <FormControlLabel
-                                                    key={item.key}
-                                                    control={
-                                                        <Checkbox
-                                                            checked={item.checked}
-                                                            onChange={() => handleChildCheckboxChange(key, index)}
-                                                            color="secondary"
-                                                        />
-                                                    }
-                                                    label={item.label}
-                                                />
-                                            ))}
-                                        </Box>
-                                    </FormGroup>
-                                ))}
+                                <FormGroup sx={{ mb: 2 }}>
+                                    <Box ml={4} display="flex" flexDirection="column">
+                                        {permissionsList.map((item, index) => (
+                                            <FormControlLabel
+                                                key={item.id}
+                                                control={
+                                                    <Checkbox
+                                                        checked={item.checked}
+                                                        onChange={() => handleSelectPermissions(item)}
+                                                        color="secondary"
+                                                    />
+                                                }
+                                                label={item.display_name}
+                                            />
+                                        ))}
+                                    </Box>
+                                </FormGroup>
                             </Box>
+
                             <Box
                                 display="flex"
                                 alignItems="center"
