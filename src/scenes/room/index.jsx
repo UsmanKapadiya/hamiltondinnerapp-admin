@@ -69,7 +69,7 @@ const Room = () => {
     setSelectedRoomName()
   };
   const handleView = (id) => {
-    navigate(`/room-details/${id}`,  { state: { id }});
+    navigate(`/room-details/${id}`, { state: { id } });
   };
   const handleEdit = (id) => {
     const selectedRow = roomListData.find((row) => row.id === id);
@@ -110,14 +110,15 @@ const Room = () => {
       headerAlign: "left",
       align: "left",
     },
-    { field: "language", headerName: "Language Preference", 
+    {
+      field: "language", headerName: "Language Preference",
       renderCell: ({ value }) => {
         return (
-            <Typography>
-                {value === "0" || value === 0 ? "Chinese" : "English"}
-            </Typography>
+          <Typography>
+            {value === "0" || value === 0 ? "Chinese" : "English"}
+          </Typography>
         );
-    },
+      },
     },
     {
       field: "is_active",
@@ -282,8 +283,8 @@ const Room = () => {
           title="Confirm Delete"
           message={
             selectedIds.length > 0 && !selectedRoomName
-              ? `Are you sure you want to delete ${selectedIds.length} Rooms items? `
-              : `Are you sure you want to delete the Rooms "${selectedRoomName}"?`
+              ? `Are you sure you want to delete ${selectedIds.length} Room${selectedIds.length > 1 ? 's' : ''}?` // Handles singular/plural for multiple room delete
+              : `Are you sure you want to delete the Room "${selectedRoomName}"?` // Single room delete message
           }
           onConfirm={confirmDelete}
           onCancel={cancelDelete}

@@ -82,7 +82,7 @@ const RoomDetailsForm = () => {
 
     return (
         <Box m="20px">
-            <Header title="Add Room Detail" icon={<Home />} Buttons={false} />
+            <Header title={loading ? "" : roomDetails?.id ? "Update Room Detail" : "Add Room Detail"} icon={<Home />} Buttons={false} />            
             {loading ? (
                 <Box
                     display="flex"
