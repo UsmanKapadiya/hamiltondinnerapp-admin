@@ -41,7 +41,7 @@ const SideBar = () => {
   const colors = tokens(theme.palette.mode);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [reportsDropdownOpen, setReportsDropdownOpen] = useState(false);
-
+  const userData = JSON.parse(localStorage.getItem('userData')); // Use the correct key for the token
 
   const handleDropdownToggle = () => {
     setDropdownOpen(!dropdownOpen);
@@ -124,15 +124,15 @@ const SideBar = () => {
           />
           <Box sx={{ textAlign: "center" }}>
             <Typography variant="h3" fontWeight="bold" color={colors.gray[100]}>
-              Tony Stark
+              {userData?.name}
             </Typography>
-            <Typography
+            {/* <Typography
               variant="h6"
               fontWeight="500"
               color={colors.greenAccent[500]}
             >
               VP Fancy Admin
-            </Typography>
+            </Typography> */}
           </Box>
         </Box>
       )}
