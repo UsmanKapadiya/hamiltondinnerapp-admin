@@ -52,16 +52,16 @@ const Item = () => {
     }
   };
 
-   const fetchALLOptionsList = async () => {
-      try {
-        const response = await ItemServices.getOptionList();
-        setpOptionsListData(response.data);
-      } catch (error) {
-        console.error("Error fetching menu list:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchALLOptionsList = async () => {
+    try {
+      const response = await ItemServices.getOptionList();
+      setpOptionsListData(response.data);
+    } catch (error) {
+      console.error("Error fetching menu list:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
   const getCategoryListData = async () => {
@@ -110,35 +110,46 @@ const Item = () => {
   };
 
   const handleView = (id) => {
-    navigate(`/item-details/${id}`,  { state: { 
-      id,
-      categoryListData: categoryListData,
-      optionsList: optionsListData,
-      peferencesList:peferencesListData 
-    }});
+    navigate(`/item-details/${id}`, {
+      state: {
+        id,
+        categoryListData: categoryListData,
+        optionsList: optionsListData,
+        peferencesList: peferencesListData
+      }
+    });
   };
 
   const handleEdit = (id) => {
     const selectedRow = itemListData.find((row) => row.id === id);
-    navigate(`/item-details/${id}/edit`, {  state: {
-      selectedRow,
-      categoryListData,
-      optionsList: optionsListData,
-      peferencesList: peferencesListData,
-  },
+    navigate(`/item-details/${id}/edit`, {
+      state: {
+        selectedRow,
+        categoryListData,
+        optionsList: optionsListData,
+        peferencesList: peferencesListData,
+      },
     });
   };
   const handleToggle = () => {
     setShowDeleted((prev) => !prev);
   };
   const handleAddNewClick = () => {
-    navigate("/item-details/create", { state: 
-      { categoryListData: categoryListData, 
+    navigate("/item-details/create", {
+      state:
+      {
+        categoryListData: categoryListData,
         optionsList: optionsListData,
-        peferencesList:peferencesListData } });
+        peferencesList: peferencesListData
+      }
+    });
   };
   const handleBulkDelete = () => {
-    setDialogOpen(true);
+    if (selectedIds.length > 0) {
+      setDialogOpen(true);
+    } else {
+      toast.warning("Please select at least one Item to delete.");
+    }
   };
   const handleOrderClick = () => {
     navigate("/item-details/order");
@@ -182,6 +193,7 @@ const Item = () => {
       setLoading(true)
       toast.success("Item Deleted successfully!");
       fetchALLItemsList();
+      setselectedItemName("");
     } catch (error) {
       console.error("Error fetching menu list:", error);
       toast.error("Failed to process menu. Please try again.");
@@ -192,7 +204,7 @@ const Item = () => {
 
 
   const columns = [
-    { field: "item_name", headerName: "item Name",flex: 1, },
+    { field: "item_name", headerName: "item Name", flex: 1, },
     {
       field: "item_chinese_name",
       headerName: "item Chinese Name",
@@ -210,7 +222,7 @@ const Item = () => {
 
     },
     // Temperory Comments
-    { field: "is_allday", headerName: "Is Allday"},
+    { field: "is_allday", headerName: "Is Allday" },
     {
       field: "actions",
       headerName: "Actions",

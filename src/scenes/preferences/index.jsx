@@ -76,7 +76,7 @@ const ItemPreferences = () => {
   const cancelDelete = () => {
     setDialogOpen(false);
     setSelectedId(null);
-    setSelectedPreferenceName()
+    setSelectedPreferenceName("")
   };
 
   const handleView = (id) => {
@@ -94,7 +94,11 @@ const ItemPreferences = () => {
     navigate("/item-preferences/create");
   };
   const handleBulkDelete = () => {
-    setDialogOpen(true);
+    if (selectedIds.length > 0) {
+      setDialogOpen(true);
+    } else {
+      toast.warning("Please select at least one Option to delete.");
+    }
   };
   const handleOrderClick = () => {
     // navigate("/item-details/order");
@@ -127,14 +131,15 @@ const ItemPreferences = () => {
   };
   const deletePreference = async (id) => {
     try {
+      setLoading(true);
       const response = await ItemServices.deletePreferences(id);
       console.log(response)
-      setLoading(true)
       toast.success("Preference Deleted successfully!");
       fetchALLPreferenceList();
+      setSelectedPreferenceName("");
     } catch (error) {
-      console.error("Error fetching menu list:", error);
-      toast.error("Failed to process menu. Please try again.");
+      console.error("Error fetching Preference list:", error);
+      toast.error("Failed to process Preference. Please try again.");
     } finally {
       setLoading(false);
     }

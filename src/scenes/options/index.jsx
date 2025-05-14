@@ -80,7 +80,7 @@ const ItemOptions = () => {
   };
 
   const handleView = (id) => {
-    navigate(`/item-options/${id}`,  { state: { id }});
+    navigate(`/item-options/${id}`, { state: { id } });
   };
 
   const handleEdit = (id) => {
@@ -94,7 +94,11 @@ const ItemOptions = () => {
     navigate("/item-options/create");
   };
   const handleBulkDelete = () => {
-    setDialogOpen(true);
+    if (selectedIds.length > 0) {
+      setDialogOpen(true);
+    } else {
+      toast.warning("Please select at least one Option to delete.");
+    }
   };
   const handleOrderClick = () => {
     // navigate("/item-details/order");
@@ -109,36 +113,37 @@ const ItemOptions = () => {
     setCurrentPage(newPaginationModel.page + 1,)
   };
 
-    const bulkDeleteOptions = async (ids) => {
-      try {
-        let data = JSON.stringify({
-          "ids": ids
-        });
-        const response = await ItemServices.bulkdeleteOptions(data);
-        setLoading(true)
-        toast.success("Multiple Options Deleted successfully!");
-        fetchALLOptionsList();
-      } catch (error) {
-        console.error("Error fetching menu list:", error);
-        toast.error("Failed to process menu. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    const deleteOptions = async (id) => {
-      try {
-        const response = await ItemServices.deleteOptions(id);
-        console.log(response)
-        setLoading(true)
-        toast.success("Options Deleted successfully!");
-        fetchALLOptionsList();
-      } catch (error) {
-        console.error("Error fetching menu list:", error);
-        toast.error("Failed to process menu. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
+  const bulkDeleteOptions = async (ids) => {
+    try {
+      let data = JSON.stringify({
+        "ids": ids
+      });
+      const response = await ItemServices.bulkdeleteOptions(data);
+      setLoading(true)
+      toast.success("Multiple Options Deleted successfully!");
+      fetchALLOptionsList();
+    } catch (error) {
+      console.error("Error fetching menu list:", error);
+      toast.error("Failed to process menu. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  const deleteOptions = async (id) => {
+    try {
+      setLoading(true);
+      const response = await ItemServices.deleteOptions(id);
+      console.log(response);
+      toast.success("Options Deleted successfully!");
+      fetchALLOptionsList();
+      setSelectedOptionName("");
+    } catch (error) {
+      console.error("Error fetching Options list:", error);
+      toast.error("Failed to process Option. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const columns = [
     { field: "option_name", headerName: "Option Name", flex: 1, },
@@ -148,7 +153,11 @@ const ItemOptions = () => {
       flex: 1,
       // cellClassName: "name-column--cell",
     },
-    { field: "is_paid_item", headerName: "Is Paid Item", },
+    {
+      field: "is_paid_item",
+      headerName: "Is Paid Item",
+      renderCell: (params) => (params.value ? "Yes" : "No"),
+    },
     {
       field: "actions",
       headerName: "Actions",
