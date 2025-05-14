@@ -84,8 +84,12 @@ const User = () => {
     navigate("/users-details/create");
   };
   const handleBulkDelete = () => {
-    setDialogOpen(true);
-  };
+    if (selectedIds.length > 0) {
+        setDialogOpen(true);
+    } else {
+        toast.warning("Please select at least one User to delete.");
+    }
+};
   const handleOrderClick = () => {
   };
 
@@ -134,9 +138,10 @@ const User = () => {
       setLoading(true)
       toast.success("User Deleted successfully!");
       fetchALLUserList();
+      setselectedItemName();
     } catch (error) {
-      console.error("Error fetching menu list:", error);
-      toast.error("Failed to process menu. Please try again.");
+      console.error("Error fetching User list:", error);
+      toast.error("Failed to process User. Please try again.");
     } finally {
       setLoading(false);
     }
