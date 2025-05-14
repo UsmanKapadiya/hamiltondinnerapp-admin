@@ -1,15 +1,13 @@
-import { Box, Button, TextField, useMediaQuery, MenuItem, Switch, FormGroup, FormControlLabel, Autocomplete, useTheme, Typography, Checkbox } from "@mui/material";
+import { Box, Button, TextField, useMediaQuery, FormGroup, FormControlLabel, useTheme, Typography, Checkbox } from "@mui/material";
 import { Header } from "../../components";
 import { Formik } from "formik";
 import * as yup from "yup";
-import { DvrOutlined, Home, LockOutlined } from "@mui/icons-material";
+import { LockOutlined } from "@mui/icons-material";
 import { useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
-import ItemServices from "../../services/itemServices";
 import { toast } from "react-toastify";
 import { tokens } from "../../theme";
-import { PermissionsList } from "../../data/mockData"
 import RoleServices from "../../services/roleServices";
 
 
@@ -29,7 +27,7 @@ const RoleDetailsForm = () => {
         id: "",
         name: "",
         display_name: "",
-        permissions: [], 
+        permissions: [],
     }); const [loading, setLoading] = useState(true);
     const [permissionsList, setPermissionsList] = useState([]);
 
@@ -37,75 +35,67 @@ const RoleDetailsForm = () => {
         getAllPermission();
     }, [])
 
-   useEffect(() => {
-    const timer = setTimeout(() => {
-        console.log(location.state);
-        const fetchedOptionsDetails = location.state || {};
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            const fetchedOptionsDetails = location.state || {};
+            setRoleDetails({
+                id: fetchedOptionsDetails.id || "",
+                name: fetchedOptionsDetails.name || "",
+                display_name: fetchedOptionsDetails.display_name || "",
+                permissions: fetchedOptionsDetails.permission_list?.map((perm) => perm.id) || [],
+            });
 
-        // Set role details
-        setRoleDetails({
-            id: fetchedOptionsDetails.id || "",
-            name: fetchedOptionsDetails.name || "",
-            display_name: fetchedOptionsDetails.display_name || "",
-            permissions: fetchedOptionsDetails.permission_list?.map((perm) => perm.id) || [], // Extract permission IDs
-        });
+            setPermissionsList((prev) =>
+                prev.map((item) => ({
+                    ...item,
+                    checked: fetchedOptionsDetails.permission_list?.some(
+                        (perm) => perm.id === item.id
+                    ) || false,
+                }))
+            );
 
-        // Update permissionsList to mark assigned permissions as checked
-        setPermissionsList((prev) =>
-            prev.map((item) => ({
+            setLoading(false);
+        }, 1500);
+        return () => clearTimeout(timer);
+    }, [location.state]);
+    useEffect(() => {
+        if (roleDetails && permissionsList.length > 0) {
+            const updatedPermissionsList = permissionsList.map((item) => ({
                 ...item,
-                checked: fetchedOptionsDetails.permission_list?.some(
-                    (perm) => perm.id === item.id
-                ) || false, // Mark as checked if permission is assigned
-            }))
-        );
-
-        setLoading(false);
-    }, 1500);
-    return () => clearTimeout(timer);
-}, [location.state]);
-  useEffect(() => {
-    if (roleDetails && permissionsList.length > 0) {
-        const updatedPermissionsList = permissionsList.map((item) => ({
-            ...item,
-            checked: roleDetails.permissions?.includes(item.id) || false, // Mark as checked if the permission is assigned
-        }));
-        setPermissionsList(updatedPermissionsList);
-    }
-}, [roleDetails]);
+                checked: roleDetails.permissions.includes(item.id),
+            }));
+            setPermissionsList(updatedPermissionsList);
+        }
+    }, [roleDetails.permissions, permissionsList]);
 
     const getAllPermission = async () => {
-    try {
-        setLoading(true);
-        const response = await RoleServices.getPermissionsList();
-        console.log("Permissions List Response:", response);
+        try {
+            setLoading(true);
+            const response = await RoleServices.getPermissionsList();
 
-        // Add `checked` property to each permission
-        const permissionsWithChecked = response?.data.map((item) => ({
-            ...item,
-            checked: false, // Default to unchecked
-        }));
+            const permissionsWithChecked = response?.data.map((item) => ({
+                ...item,
+                checked: false,
+            }));
 
-        setPermissionsList(permissionsWithChecked);
-    } catch (error) {
-        console.error("Error fetching permissions list:", error);
-    } finally {
-        setLoading(false);
-    }
-};
+            setPermissionsList(permissionsWithChecked);
+        } catch (error) {
+            console.error("Error fetching permissions list:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
     const handleSelectPermissions = (data) => {
-        // Update the `checked` state in `permissionsList`
         setPermissionsList((prev) =>
             prev.map((item) =>
                 item.id === data.id ? { ...item, checked: !item.checked } : item
             )
         );
 
-        // Update `roleDetails.permissions` dynamically
         setRoleDetails((prev) => {
             const updatedPermissions = prev?.permissions?.includes(data.id)
-                ? prev.permissions.filter((id) => id !== data.id) // Remove if exists
-                : [...(prev.permissions || []), data.id]; // Add if not exists
+                ? prev.permissions.filter((id) => id !== data.id)
+                : [...(prev.permissions || []), data.id];
 
             return {
                 ...prev,
@@ -129,7 +119,7 @@ const RoleDetailsForm = () => {
         setPermissionsList((prev) =>
             prev.map((item) => ({
                 ...item,
-                checked: false, // Set all items to unchecked
+                checked: false,
             }))
         );
     };
@@ -137,12 +127,12 @@ const RoleDetailsForm = () => {
 
     const handleFormSubmit = async (values, actions) => {
         const selectedPermissions = permissionsList
-            .filter((item) => item.checked) // Get only checked permissions
-            .map((item) => item.id); // Extract their IDs
+            .filter((item) => item.checked)
+            .map((item) => item.id);
 
         const formData = {
             ...values,
-            permissions: selectedPermissions, // Include selected permissions
+            permissions: selectedPermissions,
         };
 
         console.log("Form Data:", formData);
@@ -150,11 +140,9 @@ const RoleDetailsForm = () => {
         try {
             let response;
             if (formData.id) {
-                // Update Role if ID is available
                 response = await RoleServices.updateRole(formData.id, formData);
                 toast.success("Role updated successfully!");
             } else {
-                // Create Role if ID is not available
                 response = await RoleServices.createRole(formData);
                 toast.success("Role created successfully!");
                 actions.resetForm({
@@ -168,36 +156,6 @@ const RoleDetailsForm = () => {
             setLoading(false);
         }
     };
-    console.log("Role Details:", roleDetails);
-console.log("Permissions List:", permissionsList);
-    // const handleFormSubmit = async (values, actions) => {
-    //     // setLoading(true)
-    //     const formData = { ...values };
-    //     console.log(formData)
-    //     console.log(permissions)
-
-    //     // try {
-    //     //     let response;
-    //     //     if (formData?.id) {
-    //     //         // Update Options if ID is available
-    //     //         response = await ItemServices.updatetOptionsDetails(formData.id, formData);
-    //     //         setOptionsDetails(response?.data)
-    //     //         toast.success("Item Options updated successfully!");
-    //     //     } else {
-    //     //         // Create Options if ID is not available
-    //     //         response = await ItemServices.createOptionsDetails(formData);
-    //     //         toast.success("Item Options created successfully!");
-    //     //         actions.resetForm({
-    //     //             values: initialValues,
-    //     //         });
-    //     //     }
-    //     // } catch (error) {
-    //     //     toast.error("Failed to process menu. Please try again.");
-    //     // } finally {
-    //     //     setLoading(false);
-    //     // }
-    // };
-
 
     return (
         <Box m="20px">
@@ -218,7 +176,7 @@ console.log("Permissions List:", permissionsList);
                     validationSchema={validationSchema}
                     validateOnBlur={true}
                     validateOnChange={true}
-                    enableReinitialize // Ensures the form reinitializes when `roleDetails` changes
+                    enableReinitialize={!!roleDetails.id}
                 >
                     {({
                         values,
