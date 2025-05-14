@@ -64,7 +64,7 @@ const Category = () => {
   const cancelDelete = () => {
     setDialogOpen(false);
     setSelectedId(null);
-    setSelectedCategoryName()
+    setSelectedCategoryName("")
   };
 
   const handleView = (id) => {
@@ -83,9 +83,12 @@ const Category = () => {
     navigate("/category-details/create", { state: { categoryListData: categoryListData } });
   };
   const handleBulkDelete = () => {
-    setDialogOpen(true);
-    // console.log("BulkDelete call",selectedIds)
-  };
+    if (selectedIds.length > 0) {
+        setDialogOpen(true);
+    } else {
+        toast.warning("Please select at least one category to delete.");
+    }
+};
   const handleOrderClick = () => {
     navigate("/category-details/order");
   };
@@ -118,6 +121,7 @@ const Category = () => {
       setLoading(true)
       toast.success("Category Deleted successfully!");
       getCategoryListData();
+      setSelectedCategoryName("")
     } catch (error) {
       console.error("Error fetching menu list:", error);
       toast.error("Failed to process menu. Please try again.");
