@@ -55,7 +55,7 @@ const Login = () => {
     console.error("Error processing login:", error);
 
     const errorMessage =
-      error.response?.error || "An unexpected error occurred. Please try again.";
+      error.response?.data?.error || "An unexpected error occurred. Please try again.";
     toast.error(errorMessage);
 
     setTimeout(() => {
