@@ -15,33 +15,38 @@ import UserServices from "../../services/userServices";
 
 
 
-const validationSchema = yup.object().shape({
-    name: yup.string().required("Name is required"),
-    user_name: yup.string().required("User Name is required"),
-    email: yup.string().email("Invalid email format").required("Email is required"),
-    password: yup
-        .string()
-        .min(6, "Password must be at least 6 characters")
-        .required("Password is required"),
-    // email_verified_at: yup
-    //     .date()
-    //     .nullable()
-    //     .typeError("Invalid date format"),
-    // avatar: yup
-    //     .mixed()
-    //     .nullable()
-    //     .test("fileSize", "File size is too large", (value) =>
-    //         value ? value.size <= 2 * 1024 * 1024 : true // Max size: 2MB
-    //     )
-    //     .test("fileType", "Unsupported file format", (value) =>
-    //         value ? ["image/jpeg", "image/png"].includes(value.type) : true
-    //     ),
-    role_id: yup
-        .number()
-        .typeError("Role is required")
-        .required("Role is required"),
-});
-
+const validationSchema = (isUpdate = false) => {
+    return yup.object().shape({
+        name: yup.string().required("Name is required"),
+        user_name: yup.string().required("User Name is required"),
+        email: yup.string().email("Invalid email format").required("Email is required"),
+        password: yup
+            .string()
+            .min(6, "Password must be at least 6 characters")
+            .when([], {
+                is: () => !isUpdate,
+                then: schema => schema.required("Password is required"),
+                otherwise: schema => schema.notRequired(),
+            }),
+        // email_verified_at: yup
+        //     .date()
+        //     .nullable()
+        //     .typeError("Invalid date format"),
+        // avatar: yup
+        //     .mixed()
+        //     .nullable()
+        //     .test("fileSize", "File size is too large", (value) =>
+        //         value ? value.size <= 2 * 1024 * 1024 : true // Max size: 2MB
+        //     )
+        //     .test("fileType", "Unsupported file format", (value) =>
+        //         value ? ["image/jpeg", "image/png"].includes(value.type) : true
+        //     ),
+        role_id: yup
+            .number()
+            .typeError("Role is required")
+            .required("Role is required"),
+    });
+}
 
 const UserDetailsForm = () => {
     const location = useLocation();
@@ -61,17 +66,16 @@ const UserDetailsForm = () => {
 
 
     const initialValues = {
-        id: userList?.id || "",
+        id: userList?.id || "", // Ensure `id` is included
         name: userList?.name || "",
         user_name: userList?.user_name || "",
         email: userList?.email || "",
-        password: userList?.password || "",
-        // email_verified_at: userList?.email_verified_at || "",
+        password: "", // Password should be empty by default
         avatar: null,
         role: userList?.role || "",
         role_id: userList?.role_id || "",
+        is_admin: userList?.is_admin || false,
     };
-
     useEffect(() => {
         roleList()
     }, [])
@@ -94,6 +98,9 @@ const UserDetailsForm = () => {
             ...values,
         };
         // console.log("Form Submitted:", payload);
+        if (payload.id && !payload.password) {
+            delete payload.password;
+        }
 
         try {
             let response;
@@ -139,9 +146,9 @@ const UserDetailsForm = () => {
             ) : (
                 <Formik
                     enableReinitialize
+                    initialValues={initialValues} // Pass the corrected `initialValues`
+                    validationSchema={validationSchema(userList?.id ? true : false)} // Pass the correct
                     onSubmit={handleFormSubmit}
-                    initialValues={initialValues}
-                    validationSchema={validationSchema}
                     validateOnBlur={true}
                     validateOnChange={true}
                 >
@@ -279,6 +286,22 @@ const UserDetailsForm = () => {
                                     )}
                                     sx={{ gridColumn: "span 4" }}
                                 />
+                                <FormGroup>
+                                    <FormControlLabel
+                                        control={
+                                            <Switch
+                                                color="secondary"
+                                                checked={values.is_admin}
+                                                onChange={(e) =>
+                                                    setFieldValue("is_admin", e.target.checked)
+                                                }
+                                                name="is_admin"
+                                            />
+                                        }
+                                        label="Is Admin"
+                                        sx={{ gridColumn: "span 4" }}
+                                    />
+                                </FormGroup>
                             </Box>
                             <Box
                                 display="flex"
