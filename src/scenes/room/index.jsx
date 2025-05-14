@@ -66,7 +66,7 @@ const Room = () => {
   const cancelDelete = () => {
     setDialogOpen(false);
     setSelectedId(null);
-    setSelectedRoomName()
+    setSelectedRoomName("");
   };
   const handleView = (id) => {
     navigate(`/room-details/${id}`, { state: { id } });
@@ -82,8 +82,12 @@ const Room = () => {
     navigate("/room-details/create");
   };
   const handleBulkDelete = () => {
-    setDialogOpen(true);
-  };
+    if (selectedIds.length > 0) {
+        setDialogOpen(true);
+    } else {
+        toast.warning("Please select at least one Room to delete.");
+    }
+};
   const handleOrderClick = () => {
     navigate("/room-details/order");
   };
@@ -210,6 +214,7 @@ const Room = () => {
       setLoading(true)
       toast.success("Rooms Deleted successfully!");
       fetchALLRoomList();
+      setSelectedRoomName("");
     } catch (error) {
       console.error("Error fetching menu list:", error);
       toast.error("Failed to process menu. Please try again.");
