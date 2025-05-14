@@ -18,7 +18,7 @@ const ItemServices = {
     return requests.delete(`/item-details/${id}`);
   },
   bulkdeleteItems: async (data) => {
-    return requests.delete(`/item-details/bulk-delete`, { data });
+    return requests.delete(`/item-details/bulk-delete`, data);
   },
 
 
@@ -39,7 +39,7 @@ const ItemServices = {
     return requests.delete(`/item-options/${id}`);
   },
   bulkdeleteOptions: async (data) => {
-    return requests.delete(`/item-options/bulk-delete`, { data });
+    return requests.delete(`/item-options/bulk-delete`, data );
   },
 
 
@@ -60,7 +60,7 @@ const ItemServices = {
     return requests.delete(`/item-preferences/${id}`);
   },
   bulkdeletePreferences: async (data) => {
-    return requests.delete(`/item-preferences/bulk-delete`, { data });
+    return requests.delete(`/item-preferences/bulk-delete`,  data );
   },
 
 

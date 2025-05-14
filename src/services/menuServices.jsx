@@ -5,7 +5,7 @@ const MenuServices = {
     return requests.get(`/menus?pagesize=${perPageRecords}&pagenumber=${currentPage}`);
   },
   createMenu: async (formData) => {
-    return requests.customPost(`/menus`, formData);
+    return requests.post(`/menus`, formData);
   },
   updateMenus: async (id, formData) => {
     console.log(id)
@@ -16,7 +16,7 @@ const MenuServices = {
   },
   bulkdeleteMenus: async (data) => {
     // console.log("body", data);
-    return requests.delete(`/menus/bulk-delete`, { data });
+    return requests.delete(`/menus/bulk-delete`,  data );
   }
   // getMediaList: async(body) =>{
   //   return requests.post("/media/list", body);

@@ -266,7 +266,7 @@ const Setting = () => {
                     gridTemplateColumns="repeat(8, 1fr)"
                   >
                     {/* Site Title Input */}
-                    <Box
+                    {/* <Box
                       display="flex"
                       sx={{ gridColumn: "span 6" }}
                       flexDirection="column"
@@ -300,10 +300,10 @@ const Setting = () => {
                         helperText={touched.siteTitle && errors.siteTitle}
                         sx={{ gridColumn: "span 2" }}
                       />
-                    </Box>
+                    </Box> */}
 
                     {/* Dropdown and Icons */}
-                    <Box
+                    {/* <Box
                       display="flex"
                       flexDirection="column"
                       alignItems="flex-end" // Align content to the left
@@ -311,7 +311,6 @@ const Setting = () => {
                       sx={{ gridColumn: "span 2" }}
                       flex={1}
                     >
-                      {/* Icons Right-Aligned */}
                       <Box
                         display="flex"
                         justifyContent="flex-end" // Align buttons to the right
@@ -324,7 +323,7 @@ const Setting = () => {
                         <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
                       </Box>
 
-                      {/* Dropdown */}
+                      /* Dropdown *
                       <Autocomplete
                         fullWidth // Makes the dropdown full width
                         options={mockDataSiteRole}
@@ -343,16 +342,15 @@ const Setting = () => {
                         )}
                         sx={{ gridColumn: "span 4" }}
                       />
-                    </Box>
+                    </Box> */}
                   </Box>
                   {/* Site Description */}
-                  <Box
+                  {/* <Box
                     display="grid"
                     gap="20px"
                     mt="20px"
                     gridTemplateColumns="repeat(8, 1fr)"
                   >
-                    {/* Site Title Input */}
                     <Box
                       display="flex"
                       sx={{ gridColumn: "span 6" }}
@@ -389,7 +387,6 @@ const Setting = () => {
                       />
                     </Box>
 
-                    {/* Dropdown and Icons */}
                     <Box
                       display="flex"
                       flexDirection="column"
@@ -398,7 +395,6 @@ const Setting = () => {
                       sx={{ gridColumn: "span 2" }}
                       flex={1}
                     >
-                      {/* Icons Right-Aligned */}
                       <Box
                         display="flex"
                         justifyContent="flex-end" // Align buttons to the right
@@ -411,7 +407,6 @@ const Setting = () => {
                         <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
                       </Box>
 
-                      {/* Dropdown */}
                       <Autocomplete
                         fullWidth // Makes the dropdown full width
                         options={mockDataSiteRole}
@@ -431,15 +426,14 @@ const Setting = () => {
                         sx={{ gridColumn: "span 4" }}
                       />
                     </Box>
-                  </Box>
+                  </Box> */}
                   {/* Site Logo */}
-                  <Box
+                  {/* <Box
                     display="grid"
                     gap="20px"
                     mt="20px"
                     gridTemplateColumns="repeat(8, 1fr)"
                   >
-                    {/* Site Title Input */}
                     <Box
                       display="flex"
                       sx={{ gridColumn: "span 6" }}
@@ -463,7 +457,6 @@ const Setting = () => {
                         </Box>
                       </Typography>
 
-                      {/* Uploaded Image Preview */}
                       {values.siteLogo && (
                         <Box
                           component="img"
@@ -479,7 +472,6 @@ const Setting = () => {
                         />
                       )}
 
-                      {/* Image Uploader */}
                       <Button
                         variant="contained"
                         component="label"
@@ -510,7 +502,7 @@ const Setting = () => {
                       </Button>
                     </Box>
 
-                    {/* Dropdown and Icons */}
+                    {/* Dropdown and Icons *
                     <Box
                       display="flex"
                       flexDirection="column"
@@ -519,7 +511,7 @@ const Setting = () => {
                       sx={{ gridColumn: "span 2" }}
                       flex={1}
                     >
-                      {/* Icons Right-Aligned */}
+                      {/* Icons Right-Aligned *
                       <Box
                         display="flex"
                         justifyContent="flex-end" // Align buttons to the right
@@ -532,7 +524,7 @@ const Setting = () => {
                         <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
                       </Box>
 
-                      {/* Dropdown */}
+                      {/* Dropdown *
                       <Autocomplete
                         fullWidth // Makes the dropdown full width
                         options={mockDataSiteRole}
@@ -552,15 +544,14 @@ const Setting = () => {
                         sx={{ gridColumn: "span 4" }}
                       />
                     </Box>
-                  </Box>
+                  </Box> */}
                   {/* Site google Analytic  */}
-                  <Box
+                  {/* <Box
                     display="grid"
                     gap="20px"
                     mt="20px"
                     gridTemplateColumns="repeat(8, 1fr)"
                   >
-                    {/* Site Title Input */}
                     <Box
                       display="flex"
                       sx={{ gridColumn: "span 6" }}
@@ -597,7 +588,6 @@ const Setting = () => {
                       />
                     </Box>
 
-                    {/* Dropdown and Icons */}
                     <Box
                       display="flex"
                       flexDirection="column"
@@ -606,7 +596,6 @@ const Setting = () => {
                       sx={{ gridColumn: "span 2" }}
                       flex={1}
                     >
-                      {/* Icons Right-Aligned */}
                       <Box
                         display="flex"
                         justifyContent="flex-end" // Align buttons to the right
@@ -619,7 +608,6 @@ const Setting = () => {
                         <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
                       </Box>
 
-                      {/* Dropdown */}
                       <Autocomplete
                         fullWidth // Makes the dropdown full width
                         options={mockDataSiteRole}
@@ -639,7 +627,7 @@ const Setting = () => {
                         sx={{ gridColumn: "span 4" }}
                       />
                     </Box>
-                  </Box>
+                  </Box> */}
                   {/* Site Guidelines   */}
                   <Box
                     display="grid"
@@ -647,7 +635,6 @@ const Setting = () => {
                     mt="20px"
                     gridTemplateColumns="repeat(8, 1fr)"
                   >
-                    {/* Site Title Input */}
                     <Box
                       display="flex"
                       sx={{ gridColumn: "span 6" }}
@@ -686,7 +673,6 @@ const Setting = () => {
                       />
                     </Box>
 
-                    {/* Dropdown and Icons */}
                     <Box
                       display="flex"
                       flexDirection="column"
@@ -695,7 +681,6 @@ const Setting = () => {
                       sx={{ gridColumn: "span 2" }}
                       flex={1}
                     >
-                      {/* Icons Right-Aligned */}
                       <Box
                         display="flex"
                         justifyContent="flex-end" // Align buttons to the right
@@ -709,7 +694,6 @@ const Setting = () => {
                         <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
                       </Box>
 
-                      {/* Dropdown */}
                       <Autocomplete
                         fullWidth // Makes the dropdown full width
                         options={mockDataSiteRole}
@@ -737,7 +721,6 @@ const Setting = () => {
                     mt="20px"
                     gridTemplateColumns="repeat(8, 1fr)"
                   >
-                    {/* Site Title Input */}
                     <Box
                       display="flex"
                       sx={{ gridColumn: "span 6" }}
@@ -776,7 +759,6 @@ const Setting = () => {
                       />
                     </Box>
 
-                    {/* Dropdown and Icons */}
                     <Box
                       display="flex"
                       flexDirection="column"
@@ -785,7 +767,6 @@ const Setting = () => {
                       sx={{ gridColumn: "span 2" }}
                       flex={1}
                     >
-                      {/* Icons Right-Aligned */}
                       <Box
                         display="flex"
                         justifyContent="flex-end" // Align buttons to the right
@@ -799,7 +780,6 @@ const Setting = () => {
                         <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
                       </Box>
 
-                      {/* Dropdown */}
                       <Autocomplete
                         fullWidth // Makes the dropdown full width
                         options={mockDataSiteRole}

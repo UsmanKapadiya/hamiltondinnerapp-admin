@@ -18,7 +18,7 @@ const RoomServices = {
     return requests.delete(`/rooms/${id}`);
   },
   bulkdeleteRooms: async (data) => {
-    return requests.delete(`/rooms/bulk-delete`, { data });
+    return requests.delete(`/rooms/bulk-delete`,  data );
   }
 }
 export default RoomServices;

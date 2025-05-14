@@ -19,7 +19,7 @@ const CategoryServices = {
   },
   bulkdeleteCategorys: async (data) => {
     // console.log("body", data);
-    return requests.delete(`/categories/bulk-delete`, { data });
+    return requests.delete(`/categories/bulk-delete`, data);
   }
   // getCategoryDetails: async (id) => {
   //   return requests.get(`/categories/${id}`);

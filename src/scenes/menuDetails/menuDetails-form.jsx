@@ -175,7 +175,7 @@ const MenuDetailsForm = () => {
             is_allday: false,
         };
 
-
+        console.log(formData);
         try {
             let response;
             if (formData?.id) {
@@ -184,6 +184,7 @@ const MenuDetailsForm = () => {
                 toast.success("Menu updated successfully!");
             } else {
                 // Create menu if ID is not available
+                console.log("formData",formData)
                 response = await MenuServices.createMenu(formData);
                 toast.success("Menu created successfully!");
             }
