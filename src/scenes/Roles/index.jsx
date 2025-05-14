@@ -69,14 +69,15 @@ const Roles = () => {
   };
   const deleteRole = async (id) => {
     try {
+      setLoading(true)
       const response = await RoleServices.deleteRole(id);
       console.log(response)
-      setLoading(true)
       toast.success("Role Deleted successfully!");
       fetchAllRolelist();
+      setSelectedRoleName("");
     } catch (error) {
-      console.error("Error fetching menu list:", error);
-      toast.error("Failed to process menu. Please try again.");
+      console.error("Error fetching Role list:", error);
+      toast.error("Failed to process Role. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -118,8 +119,12 @@ const Roles = () => {
     navigate("/roles-details/create");
   };
   const handleBulkDelete = () => {
-    setDialogOpen(true);
-  };
+    if (selectedIds.length > 0) {
+        setDialogOpen(true);
+    } else {
+        toast.warning("Please select at least one Role to delete.");
+    }
+};
   const handleRowSelection = (ids) => {
     setSelectedIds(ids);
   };
