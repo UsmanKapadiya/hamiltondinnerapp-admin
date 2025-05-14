@@ -26,6 +26,7 @@ const CategoryDetailsForm = () => {
     const categoryListData = location.state?.categoryListData;
     const isNonMobile = useMediaQuery("(min-width:600px)");
     const [loading, setLoading] = useState(true);
+    const [filteredParentOptions, setFilteredParentOptions] = useState([]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -34,7 +35,20 @@ const CategoryDetailsForm = () => {
             setLoading(false);
         }, 1500);
         return () => clearTimeout(timer);
-    }, [location.state])
+    }, [location.state]);
+
+    useEffect(() => {
+        if (categoryDetails?.type) {
+            const filteredOptions = categoryListData
+                ?.filter((category) => category.type === categoryDetails.type && category.id !== categoryDetails.id)
+                .map((category) => ({
+                    label: category.cat_name,
+                    value: category.id,
+                    type: category?.type,
+                })) || [];
+            setFilteredParentOptions(filteredOptions);
+        }
+    }, [categoryDetails?.type, categoryListData]);
 
     const initialValues = {
         id: categoryDetails?.id || "",
@@ -53,37 +67,34 @@ const CategoryDetailsForm = () => {
             return parentObj ? parentObj.id : 0;
         })(),
     };
-    const parent_id = categoryListData
-        ?.filter((category) => category.id !== categoryDetails?.id)
-        .map((category) => ({
-            label: category.cat_name,
-            value: category.id,
-        })) || [];
+
     const handleFormSubmit = async (values, actions) => {
-        setLoading(true)
-        const { ...restValues } = values;
-        const formData = {
-            ...restValues,
-        }
+        setLoading(true);
+
+        const payload = {
+            ...values,
+        };
 
         try {
             let response;
-            if (formData?.id) {
-                // Update menu if ID is available
-                response = await CategoryServices.updateCategoryDetails(formData.id, formData);
-                console.log(response)
+            if (payload?.id) {
+                // Update category if ID is available
+                response = await CategoryServices.updateCategoryDetails(payload.id, payload);
                 toast.success("Category updated successfully!");
+                setcCategoryDetails(response?.data); // Update categoryDetails with the new data
             } else {
-                // Create menu if ID is not available
-                response = await CategoryServices.createCategoryDetails(formData);
+                // Create category if ID is not available
+                response = await CategoryServices.createCategoryDetails(payload);
                 toast.success("Category created successfully!");
-                actions.resetForm({
-                    values: initialValues,
-                });
+                setcCategoryDetails(response?.data); // Set categoryDetails with the created data
             }
+            actions.resetForm({
+                values: {
+                    ...response?.data, // Reset form with updated values
+                },
+            });
         } catch (error) {
-            console.error("Error processing menu:", error);
-            toast.error("Failed to process menu. Please try again.");
+            toast.error("Failed to process category. Please try again.");
         } finally {
             setLoading(false);
         }
@@ -91,21 +102,6 @@ const CategoryDetailsForm = () => {
 
     return (
         <Box m="20px">
-            {/* {loading && (
-                <Box
-                    position="fixed"
-                    top={0}
-                    left={0}
-                    width="100%"
-                    height="100%"
-                    display="flex"
-                    justifyContent="center"
-                    alignItems="center"
-                    zIndex={9999}
-                >
-                    <CustomLoadingOverlay />
-                </Box>
-            )} */}
             <Header title={loading ? "" : categoryDetails?.id ? "Update Category Detail" : "Add Category Detail"} icon={<DvrOutlined />} Buttons={false} />
             {loading ? (
                 <Box
@@ -121,8 +117,6 @@ const CategoryDetailsForm = () => {
                     onSubmit={handleFormSubmit}
                     initialValues={initialValues}
                     validationSchema={validationSchema}
-                    validateOnBlur={true} // Enable validation on blur
-                    validateOnChange={true} // Enable validation on change
                 >
                     {({
                         values,
@@ -133,7 +127,6 @@ const CategoryDetailsForm = () => {
                         handleSubmit,
                         setFieldValue,
                     }) => (
-
                         <form onSubmit={handleSubmit}>
                             <Box
                                 display="grid"
@@ -177,7 +170,20 @@ const CategoryDetailsForm = () => {
                                     variant="filled"
                                     label="Select category type"
                                     onBlur={handleBlur}
-                                    onChange={handleChange}
+                                    onChange={(e) => {
+                                        handleChange(e);
+                                        const selectedType = e.target.value;
+                                        setFieldValue("type", selectedType);
+                                        // Filter parent options based on the selected type
+                                        const filteredOptions = categoryListData
+                                            ?.filter((category) => category.type === selectedType && category.id !== values.id)
+                                            .map((category) => ({
+                                                label: category.cat_name,
+                                                value: category.id,
+                                                type: category?.type,
+                                            })) || [];
+                                        setFilteredParentOptions(filteredOptions);
+                                    }}
                                     value={values.type}
                                     name="type"
                                     error={touched.type && Boolean(errors.type)}
@@ -191,9 +197,9 @@ const CategoryDetailsForm = () => {
                                     ))}
                                 </TextField>
                                 <Autocomplete
-                                    options={parent_id}
+                                    options={filteredParentOptions}
                                     getOptionLabel={(option) => option.label}
-                                    value={parent_id?.find((option) => option.value === values.parent_id) || null}
+                                    value={filteredParentOptions?.find((option) => option.value === values.parent_id) || null}
                                     onChange={(event, newValue) => {
                                         setFieldValue("parent_id", newValue ? newValue.value : ""); // Update parent_id correctly
                                     }}
@@ -220,7 +226,6 @@ const CategoryDetailsForm = () => {
                                 </Button>
                             </Box>
                         </form>
-
                     )}
                 </Formik>
             )}
