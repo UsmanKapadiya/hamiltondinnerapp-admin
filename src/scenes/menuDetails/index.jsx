@@ -73,12 +73,13 @@ const MenuDetails = () => {
     }
   };
   const deleteMenu = async (id) => {
-    try {
+    try {      
+      setLoading(true);
       const response = await MenuServices.deleteMenus(id);
       console.log(response)
-      setLoading(true)
       toast.success("Menu Deleted successfully!");
       fetchMenuList();
+      setSelectedMenuName("");
     } catch (error) {
       console.error("Error fetching menu list:", error);
       toast.error("Failed to process menu. Please try again.");
@@ -121,9 +122,12 @@ const MenuDetails = () => {
     navigate("/menu-details/create");
   };
   const handleBulkDelete = () => {
-    setDialogOpen(true);
-    // console.log("BulkDelete call",selectedIds)
-  };
+    if (selectedIds.length > 0) {
+        setDialogOpen(true);
+    } else {
+        toast.warning("Please select at least one Menu to delete.");
+    }
+};
   const handleRowSelection = (ids) => {
     setSelectedIds(ids);
   };

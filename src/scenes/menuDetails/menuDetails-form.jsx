@@ -184,7 +184,7 @@ const MenuDetailsForm = () => {
                 toast.success("Menu updated successfully!");
             } else {
                 // Create menu if ID is not available
-                console.log("formData",formData)
+                console.log("formData", formData)
                 response = await MenuServices.createMenu(formData);
                 toast.success("Menu created successfully!");
             }
@@ -261,6 +261,7 @@ const MenuDetailsForm = () => {
                                     label="Date"
                                     value={values.date ? dayjs(values.date) : null} // Convert to dayjs if needed
                                     onChange={(newValue) => setFieldValue("date", newValue ? newValue.format("YYYY-MM-DD") : "")}
+                                    minDate={dayjs()}
                                     renderInput={(params) => (
                                         <TextField
                                             {...params}
