@@ -88,7 +88,7 @@ const ItemOptionsView = () => {
                             Is Paid Item
                         </Typography>
                         <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                            {optionsDetails?.is_paid_item}
+                            {optionsDetails?.is_paid_item ? "Yes" : "No"}
                         </Typography>
                     </Box>
                 </Box>
