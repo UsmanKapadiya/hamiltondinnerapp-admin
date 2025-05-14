@@ -101,14 +101,15 @@ const UserDetailsView = () => {
                         </Typography>
                     </Box>
                     <Divider sx={{ bgcolor: colors.gray[300] }} />
-                    <Box p="10px">
+                    {/* Remove  Email Verified At*/}
+                    {/* <Box p="10px">
                         <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
                             Email Verified At
                         </Typography>
                         <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
                             {UserDetails?.email_varified_at ? dayjs(UserDetails.email_varified_at).format("YYYY-MM-DD HH:mm:ss") : "N/A"}
                         </Typography>
-                    </Box>
+                    </Box> */}
                     <Divider sx={{ bgcolor: colors.gray[300] }} />
                     <Box p="10px">
                         <Typography color={colors.gray[100]} variant="h3" fontWeight="600">

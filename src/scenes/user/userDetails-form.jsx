@@ -66,7 +66,7 @@ const UserDetailsForm = () => {
         user_name: userList?.user_name || "",
         email: userList?.email || "",
         password: userList?.password || "",
-        email_verified_at: userList?.email_verified_at || "",
+        // email_verified_at: userList?.email_verified_at || "",
         avatar: null,
         role: userList?.role || "",
         role_id: userList?.role_id || "",
@@ -226,7 +226,8 @@ const UserDetailsForm = () => {
                                     helperText={touched.password && errors.password}
                                     sx={{ gridColumn: "span 4" }}
                                 />
-                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                {/* Remove  Email Verified At*/}
+                                {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
                                     <DatePicker
                                         label="Email Verified At"
                                         value={values.email_verified_at ? dayjs(values.email_verified_at) : null}
@@ -242,7 +243,7 @@ const UserDetailsForm = () => {
                                             />
                                         )}
                                     />
-                                </LocalizationProvider>
+                                </LocalizationProvider> */}
                                 {/* avatar Upload */}
                                 <TextField
                                     fullWidth
@@ -286,7 +287,7 @@ const UserDetailsForm = () => {
                                 mt="20px"
                             >
                                 <Button type="submit" color="secondary" variant="contained">
-                                    Save Item Details
+                                    Save User Details
                                 </Button>
                             </Box>
                         </form>
