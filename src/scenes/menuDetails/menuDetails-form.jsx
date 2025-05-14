@@ -191,8 +191,16 @@ const MenuDetailsForm = () => {
 
             console.log("response", response);
         } catch (error) {
-            console.error("Error processing menu:", error);
-            toast.error("Failed to process menu. Please try again.");
+            if (error.response && error.response.data && error.response.data.errors) {
+                const errors = error.response.data.errors;
+                Object.keys(errors).forEach((key) => {
+                    errors[key].forEach((message) => {
+                        toast.error(message);
+                    });
+                });
+            } else {
+                toast.error("Failed to process menu. Please try again.");
+            }
         } finally {
             setLoading(false);
         }
