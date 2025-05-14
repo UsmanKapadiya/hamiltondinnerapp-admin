@@ -1,22 +1,13 @@
 import { Box, Typography, useTheme, Button } from "@mui/material";
 import { Header } from "../../components";
 import { DataGrid } from "@mui/x-data-grid";
-import {  rolesData } from "../../data/mockData";
 import { tokens } from "../../theme";
 import {
-  AdminPanelSettingsOutlined,
-  ClearAllOutlined,
-  CreateOutlined,
-  DvrOutlined,
-  FormatListBulletedOutlined,
-  Home,
   LockOutlined,
-  SecurityOutlined,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
-import MenuServices from "../../services/menuServices";
 import { toast } from "react-toastify";
 import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
 import RoleServices from "../../services/roleServices";
@@ -45,10 +36,9 @@ const Roles = () => {
 
   const fetchAllRolelist = async () => {
     try {
-      // setRoleList(rolesData);
       setLoading(true)
-      const response = await RoleServices.getRoleList({ currentPage, perPageRecords });
-      console.log(response)
+      const response = await RoleServices.getRoleList();
+      // console.log(response)
       setRoleList(response.data);
       setPagination((prev) => ({
         ...prev,
@@ -137,10 +127,9 @@ const Roles = () => {
   const handleOrderClick = () => {
     // navigate("/item-details/order");
   };
-console.log("roleList",roleList)
   const columns = [
     { field: "name", headerName: "Name", flex: 1, },
-    { field: "display_name ", headerName: "Display", flex: 1, },
+    { field: "display_name", headerName: "Display", flex: 1, }, // Fixed the typo
     {
       field: "actions",
       headerName: "Actions",
@@ -172,7 +161,6 @@ console.log("roleList",roleList)
             >
               Delete
             </Button>
-
           </Box>
         );
       },
