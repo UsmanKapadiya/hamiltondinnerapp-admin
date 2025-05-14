@@ -105,24 +105,33 @@ const RoleDetailsForm = () => {
     };
 
     const handleSelectAllPermissions = () => {
-        setPermissionsList((prev) =>
-            prev.map((item) => ({
-                ...item,
-                checked: true,
-            }))
-        );
-    };
+    setPermissionsList((prev) =>
+        prev.map((item) => ({
+            ...item,
+            checked: true,
+        }))
+    );
 
+    setRoleDetails((prev) => ({
+        ...prev,
+        permissions: permissionsList.map((item) => item.id),
+    }));
+};
 
 
     const handleDeselectAllPermissions = () => {
-        setPermissionsList((prev) =>
-            prev.map((item) => ({
-                ...item,
-                checked: false,
-            }))
-        );
-    };
+    setPermissionsList((prev) =>
+        prev.map((item) => ({
+            ...item,
+            checked: false,
+        }))
+    );
+
+    setRoleDetails((prev) => ({
+        ...prev,
+        permissions: [],
+    }));
+};
 
 
     const handleFormSubmit = async (values, actions) => {
