@@ -27,6 +27,8 @@ import { useEffect, useState } from "react";
 import ItemServices from "../../services/itemServices";
 import { useDispatch } from "react-redux";
 import { setItemList } from "../../redux/action/itemAction";
+import RoleServices from "../../services/roleServices";
+import { setPermissionList } from "../../redux/action/permissionAction";
 
 function Dashboard() {
   const dispatch = useDispatch();
@@ -37,11 +39,18 @@ function Dashboard() {
   const isXsDevices = useMediaQuery("(max-width: 436px)");
   const [itemListData, setItemListData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const userData = JSON.parse(localStorage.getItem('userData')); 
 
   useEffect(() => {
     fetchItemsList();
     setLoading(true)
   }, []);
+  useEffect(()=>{
+    console.log(userData?.role_id)
+    if(userData?.role_id){
+      fetchGetRoleById(userData?.role_id);
+    }
+  },[userData])
 
   const fetchItemsList = async () => {
     try {
@@ -49,6 +58,19 @@ function Dashboard() {
       console.log("response", response)
       dispatch(setItemList(response.data)); // Store in Redux
       setItemListData(response.data);
+    } catch (error) {
+      console.error("Error fetching menu list:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+    const fetchGetRoleById = async (id) => {
+    try {
+      const response = await RoleServices.getRoleById(id);
+      // console.log("response", response)
+      dispatch(setPermissionList(response?.data?.permission_list)); // Store in Redux
+      // setItemListData(response.data);
     } catch (error) {
       console.error("Error fetching menu list:", error);
     } finally {

@@ -15,12 +15,14 @@ import ConfirmationDialog from "../../components/ConfirmationDialog";
 import CategoryServices from "../../services/categoryServices";
 import { toast } from "react-toastify";
 import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
+import { hasPermission } from "../../components/permissions";
+import { useSelector } from "react-redux";
 
 const Category = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
-
+  const permissionList = useSelector((state) => state?.permissionState?.permissionsList);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
@@ -84,11 +86,11 @@ const Category = () => {
   };
   const handleBulkDelete = () => {
     if (selectedIds.length > 0) {
-        setDialogOpen(true);
+      setDialogOpen(true);
     } else {
-        toast.warning("Please select at least one category to delete.");
+      toast.warning("Please select at least one category to delete.");
     }
-};
+  };
   const handleOrderClick = () => {
     navigate("/category-details/order");
   };
@@ -129,6 +131,11 @@ const Category = () => {
       setLoading(false);
     }
   };
+
+  const canAdd = hasPermission(permissionList, "add_CategoryDetails");
+  const canView = hasPermission(permissionList, "read_CategoryDetails");
+  const canEdit = hasPermission(permissionList, "edit_CategoryDetails");
+  const canDelete = hasPermission(permissionList, "delete_CategoryDetails");
 
   const columns = [
     { field: "cat_name", headerName: "Category Name", flex: 1 },
@@ -197,6 +204,7 @@ const Category = () => {
               color="info"
               size="small"
               onClick={() => handleView(row.id)}
+              disabled={!canView}
             >
               View
             </Button>
@@ -205,6 +213,7 @@ const Category = () => {
               color="primary"
               size="small"
               onClick={() => handleEdit(row.id)}
+              disabled={!canEdit}
             >
               Edit
             </Button>
@@ -213,6 +222,8 @@ const Category = () => {
               color="secondary"
               size="small"
               onClick={() => handleDelete(row)}
+              disabled={!canDelete}
+
             >
               Delete
             </Button>
@@ -281,7 +292,7 @@ const Category = () => {
           checkboxSelection
           onRowSelectionModelChange={(ids) => handleRowSelection(ids)}
           components={{
-            LoadingOverlay: CustomLoadingOverlay, 
+            LoadingOverlay: CustomLoadingOverlay,
           }}
         />
         <ConfirmationDialog

@@ -11,7 +11,12 @@ import ConfirmationDialog from "../../components/ConfirmationDialog";
 import RoomServices from "../../services/roomServices";
 import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
 import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
+import { hasPermission } from "../../components/permissions";
 
+// export function hasPermission(permissionList, permissionName) {
+//   return permissionList.some(p => p.name === permissionName);
+// }
 const Room = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -24,6 +29,8 @@ const Room = () => {
   const [roomListData, setroomListData] = useState([])
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const permissionList = useSelector((state) => state?.permissionState?.permissionsList);
+  console.log(permissionList)
   const [pagination, setPagination] = useState({
     page: 1,
     pageSize: 10,
@@ -83,11 +90,11 @@ const Room = () => {
   };
   const handleBulkDelete = () => {
     if (selectedIds.length > 0) {
-        setDialogOpen(true);
+      setDialogOpen(true);
     } else {
-        toast.warning("Please select at least one Room to delete.");
+      toast.warning("Please select at least one Room to delete.");
     }
-};
+  };
   const handleOrderClick = () => {
     navigate("/room-details/order");
   };
@@ -99,6 +106,16 @@ const Room = () => {
     }));
     setCurrentPage(newPaginationModel.page + 1,)
   };
+
+
+
+  // Usage example in your component:
+  const canAdd = hasPermission(permissionList, "add_RoomDetails");
+  const canView = hasPermission(permissionList, "read_RoomDetails");
+  const canEdit = hasPermission(permissionList, "edit_RoomDetails");
+  const canDelete = hasPermission(permissionList, "delete_RoomDetails");
+
+
   const columns = [
     { field: "room_name", headerName: "Unit Number" },
     {
@@ -165,6 +182,7 @@ const Room = () => {
               color="info"
               size="small"
               onClick={() => handleView(row.id)}
+              disabled={!canView}
             >
               View
             </Button>
@@ -173,6 +191,7 @@ const Room = () => {
               color="primary"
               size="small"
               onClick={() => handleEdit(row.id)}
+              disabled={!canEdit}
             >
               Edit
             </Button>
@@ -181,6 +200,8 @@ const Room = () => {
               color="secondary"
               size="small"
               onClick={() => handleDelete(row)}
+              disabled={!canDelete}
+
             >
               Delete
             </Button>

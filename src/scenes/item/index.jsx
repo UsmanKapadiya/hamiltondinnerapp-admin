@@ -13,6 +13,7 @@ import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
 import ItemServices from "../../services/itemServices";
 import CategoryServices from "../../services/categoryServices";
 import { toast } from "react-toastify";
+import { hasPermission } from "../../components/permissions";
 
 const Item = () => {
   const theme = useTheme();
@@ -28,6 +29,7 @@ const Item = () => {
   const [optionsListData, setpOptionsListData] = useState([])
   const [peferencesListData, setpPeferencesListData] = useState([])
   const [loading, setLoading] = useState(true);
+  const permissionList = useSelector((state) => state?.permissionState?.permissionsList);
   const [pagination, setPagination] = useState({
     page: 1,
     pageSize: 10,
@@ -90,6 +92,8 @@ const Item = () => {
       setLoading(false);
     }
   };
+
+
   const handleDelete = (data) => {
     setSelectedIds([])
     setSelectedId(data?.id);
@@ -202,6 +206,10 @@ const Item = () => {
     }
   };
 
+  const canAdd = hasPermission(permissionList, "add_ItemDetails");
+  const canView = hasPermission(permissionList, "read_ItemDetails");
+  const canEdit = hasPermission(permissionList, "edit_ItemDetails");
+  const canDelete = hasPermission(permissionList, "delete_ItemDetails");
 
   const columns = [
     { field: "item_name", headerName: "item Name", flex: 1, },
@@ -235,6 +243,7 @@ const Item = () => {
               color="info"
               size="small"
               onClick={() => handleView(row.id)}
+              disabled={!canView}
             >
               View
             </Button>
@@ -243,6 +252,7 @@ const Item = () => {
               color="primary"
               size="small"
               onClick={() => handleEdit(row.id)}
+              disabled={!canEdit}
             >
               Edit
             </Button>
@@ -251,6 +261,8 @@ const Item = () => {
               color="secondary"
               size="small"
               onClick={() => handleDelete(row)}
+              disabled={!canDelete}
+
             >
               Delete
             </Button>

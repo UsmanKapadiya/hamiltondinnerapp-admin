@@ -11,6 +11,8 @@ import ConfirmationDialog from "../../components/ConfirmationDialog";
 import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
 import { toast } from "react-toastify";
 import UserServices from "../../services/userServices";
+import { useSelector } from "react-redux";
+import { hasPermission } from "../../components/permissions";
 
 const User = () => {
   const theme = useTheme();
@@ -22,6 +24,7 @@ const User = () => {
   const [selectedIds, setSelectedIds] = useState([]);
   const [selectedItemName, setselectedItemName] = useState("");
   const [userListData, setUserListData] = useState([])
+  const permissionList = useSelector((state) => state?.permissionState?.permissionsList);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({
     page: 1,
@@ -85,11 +88,11 @@ const User = () => {
   };
   const handleBulkDelete = () => {
     if (selectedIds.length > 0) {
-        setDialogOpen(true);
+      setDialogOpen(true);
     } else {
-        toast.warning("Please select at least one User to delete.");
+      toast.warning("Please select at least one User to delete.");
     }
-};
+  };
   const handleOrderClick = () => {
   };
 
@@ -147,6 +150,11 @@ const User = () => {
     }
   };
 
+  const canAdd = hasPermission(permissionList, "add_Users");
+  const canView = hasPermission(permissionList, "read_Users");
+  const canEdit = hasPermission(permissionList, "edit_Users");
+  const canDelete = hasPermission(permissionList, "delete_Users");
+
   // console.log("user",userListData)
   const columns = [
     { field: "name", headerName: "Name", flex: 1, },
@@ -190,13 +198,14 @@ const User = () => {
       headerName: "Actions",
       flex: 1,
       renderCell: ({ row }) => {
-        return (
+         return (
           <Box display="flex" gap={1}>
             <Button
               variant="contained"
               color="info"
               size="small"
               onClick={() => handleView(row.id)}
+              disabled={!canView}
             >
               View
             </Button>
@@ -205,6 +214,7 @@ const User = () => {
               color="primary"
               size="small"
               onClick={() => handleEdit(row.id)}
+              disabled={!canEdit}
             >
               Edit
             </Button>
@@ -213,6 +223,8 @@ const User = () => {
               color="secondary"
               size="small"
               onClick={() => handleDelete(row)}
+              disabled={!canDelete}
+
             >
               Delete
             </Button>

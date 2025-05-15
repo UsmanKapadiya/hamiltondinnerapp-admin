@@ -18,6 +18,8 @@ import ConfirmationDialog from "../../components/ConfirmationDialog";
 import MenuServices from "../../services/menuServices";
 import { toast } from "react-toastify";
 import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
+import { hasPermission } from "../../components/permissions";
+import { useSelector } from "react-redux";
 
 const MenuDetails = () => {
   const theme = useTheme();
@@ -30,6 +32,7 @@ const MenuDetails = () => {
   const [selectedIds, setSelectedIds] = useState([]);
   const [selectedMenuName, setSelectedMenuName] = useState("");
   const [menuList, setMenuList] = useState([]);
+  const permissionList = useSelector((state) => state?.permissionState?.permissionsList);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({
     page: 1,
@@ -73,7 +76,7 @@ const MenuDetails = () => {
     }
   };
   const deleteMenu = async (id) => {
-    try {      
+    try {
       setLoading(true);
       const response = await MenuServices.deleteMenus(id);
       console.log(response)
@@ -123,11 +126,11 @@ const MenuDetails = () => {
   };
   const handleBulkDelete = () => {
     if (selectedIds.length > 0) {
-        setDialogOpen(true);
+      setDialogOpen(true);
     } else {
-        toast.warning("Please select at least one Menu to delete.");
+      toast.warning("Please select at least one Menu to delete.");
     }
-};
+  };
   const handleRowSelection = (ids) => {
     setSelectedIds(ids);
   };
@@ -135,6 +138,11 @@ const MenuDetails = () => {
   const handleOrderClick = () => {
     // navigate("/item-details/order");
   };
+
+  const canAdd = hasPermission(permissionList, "add_Menus");
+  const canView = hasPermission(permissionList, "read_Menus");
+  const canEdit = hasPermission(permissionList, "edit_Menus");
+  const canDelete = hasPermission(permissionList, "delete_Menus");
 
   const columns = [
     { field: "menu_name", headerName: "Menu Name", flex: 1, },
@@ -162,6 +170,7 @@ const MenuDetails = () => {
               color="info"
               size="small"
               onClick={() => handleView(row.id)}
+              disabled={!canView}
             >
               View
             </Button>
@@ -170,6 +179,7 @@ const MenuDetails = () => {
               color="primary"
               size="small"
               onClick={() => handleEdit(row.id)}
+              disabled={!canEdit}
             >
               Edit
             </Button>
@@ -178,6 +188,8 @@ const MenuDetails = () => {
               color="secondary"
               size="small"
               onClick={() => handleDelete(row)}
+              disabled={!canDelete}
+
             >
               Delete
             </Button>

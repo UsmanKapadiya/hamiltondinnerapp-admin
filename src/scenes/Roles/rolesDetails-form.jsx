@@ -9,6 +9,8 @@ import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
 import { toast } from "react-toastify";
 import { tokens } from "../../theme";
 import RoleServices from "../../services/roleServices";
+import { setPermissionList } from "../../redux/action/permissionAction";
+import { useDispatch } from "react-redux";
 
 
 
@@ -19,6 +21,7 @@ const validationSchema = yup.object().shape({
 
 
 const RoleDetailsForm = () => {
+    const dispatch = useDispatch();
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
     const location = useLocation();
@@ -30,6 +33,8 @@ const RoleDetailsForm = () => {
         permissions: [],
     }); const [loading, setLoading] = useState(true);
     const [permissionsList, setPermissionsList] = useState([]);
+    const userData = JSON.parse(localStorage.getItem('userData'));
+
 
     useEffect(() => {
         getAllPermission();
@@ -105,33 +110,33 @@ const RoleDetailsForm = () => {
     };
 
     const handleSelectAllPermissions = () => {
-    setPermissionsList((prev) =>
-        prev.map((item) => ({
-            ...item,
-            checked: true,
-        }))
-    );
+        setPermissionsList((prev) =>
+            prev.map((item) => ({
+                ...item,
+                checked: true,
+            }))
+        );
 
-    setRoleDetails((prev) => ({
-        ...prev,
-        permissions: permissionsList.map((item) => item.id),
-    }));
-};
+        setRoleDetails((prev) => ({
+            ...prev,
+            permissions: permissionsList.map((item) => item.id),
+        }));
+    };
 
 
     const handleDeselectAllPermissions = () => {
-    setPermissionsList((prev) =>
-        prev.map((item) => ({
-            ...item,
-            checked: false,
-        }))
-    );
+        setPermissionsList((prev) =>
+            prev.map((item) => ({
+                ...item,
+                checked: false,
+            }))
+        );
 
-    setRoleDetails((prev) => ({
-        ...prev,
-        permissions: [],
-    }));
-};
+        setRoleDetails((prev) => ({
+            ...prev,
+            permissions: [],
+        }));
+    };
 
 
     const handleFormSubmit = async (values, actions) => {
@@ -150,10 +155,12 @@ const RoleDetailsForm = () => {
             let response;
             if (formData.id) {
                 response = await RoleServices.updateRole(formData.id, formData);
+                fetchGetRoleById()
                 toast.success("Role updated successfully!");
             } else {
                 response = await RoleServices.createRole(formData);
                 toast.success("Role created successfully!");
+                fetchGetRoleById()
                 actions.resetForm({
                     values: roleDetails,
                 });
@@ -161,6 +168,18 @@ const RoleDetailsForm = () => {
         } catch (error) {
             console.error("Error submitting form:", error);
             toast.error("Failed to process the request. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    };
+    const fetchGetRoleById = async () => {
+        try {
+            const response = await RoleServices.getRoleById(userData?.role_id);
+            // console.log("response", response)
+            dispatch(setPermissionList(response?.data?.permission_list)); // Store in Redux
+            // setItemListData(response.data);
+        } catch (error) {
+            console.error("Error fetching menu list:", error);
         } finally {
             setLoading(false);
         }

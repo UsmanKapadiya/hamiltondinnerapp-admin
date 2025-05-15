@@ -17,6 +17,8 @@ import ConfirmationDialog from "../../components/ConfirmationDialog";
 import ItemServices from "../../services/itemServices";
 import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
 import { toast } from "react-toastify";
+import { hasPermission } from "../../components/permissions";
+import { useSelector } from "react-redux";
 
 const ItemPreferences = () => {
   const theme = useTheme();
@@ -28,6 +30,7 @@ const ItemPreferences = () => {
   const [selectedIds, setSelectedIds] = useState([]);
   const [selectedPreferenceName, setSelectedPreferenceName] = useState("");
   const [preferencesListData, setpPeferencesListData] = useState([])
+  const permissionList = useSelector((state) => state?.permissionState?.permissionsList);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({
     page: 1,
@@ -145,6 +148,11 @@ const ItemPreferences = () => {
     }
   };
 
+  const canAdd = hasPermission(permissionList, "add_ItemPreference");
+  const canView = hasPermission(permissionList, "read_ItemPreference");
+  const canEdit = hasPermission(permissionList, "edit_ItemPreference");
+  const canDelete = hasPermission(permissionList, "delete_ItemPreference");
+
 
   const columns = [
     { field: "pname", headerName: "Preferences Name", flex: 1, },
@@ -166,6 +174,7 @@ const ItemPreferences = () => {
               color="info"
               size="small"
               onClick={() => handleView(row.id)}
+              disabled={!canView}
             >
               View
             </Button>
@@ -174,6 +183,7 @@ const ItemPreferences = () => {
               color="primary"
               size="small"
               onClick={() => handleEdit(row.id)}
+              disabled={!canEdit}
             >
               Edit
             </Button>
@@ -182,6 +192,8 @@ const ItemPreferences = () => {
               color="secondary"
               size="small"
               onClick={() => handleDelete(row)}
+              disabled={!canDelete}
+
             >
               Delete
             </Button>
@@ -259,7 +271,7 @@ const ItemPreferences = () => {
             selectedIds.length > 0 && !selectedPreferenceName
               ? `Are you sure you want to Preference ${selectedIds.length}  items?`
               : `Are you sure you want to delete the Preference "${selectedPreferenceName}"?`
-          } 
+          }
           onConfirm={confirmDelete}
           onCancel={cancelDelete}
         />

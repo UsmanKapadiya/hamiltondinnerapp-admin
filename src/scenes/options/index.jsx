@@ -16,6 +16,8 @@ import ConfirmationDialog from "../../components/ConfirmationDialog";
 import ItemServices from "../../services/itemServices";
 import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
 import { toast } from "react-toastify";
+import { hasPermission } from "../../components/permissions";
+import { useSelector } from "react-redux";
 
 const ItemOptions = () => {
   const theme = useTheme();
@@ -26,8 +28,8 @@ const ItemOptions = () => {
   const [selectedId, setSelectedId] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
   const [selectedOptionName, setSelectedOptionName] = useState("");
-
   const [optionsListData, setpOptionsListData] = useState([])
+  const permissionList = useSelector((state) => state?.permissionState?.permissionsList);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({
     page: 1,
@@ -39,6 +41,8 @@ const ItemOptions = () => {
   useEffect(() => {
     fetchALLOptionsList()
   }, []);
+
+
 
   const fetchALLOptionsList = async () => {
     try {
@@ -145,6 +149,11 @@ const ItemOptions = () => {
     }
   };
 
+  const canAdd = hasPermission(permissionList, "add_ItemOptions");
+  const canView = hasPermission(permissionList, "read_ItemOptions");
+  const canEdit = hasPermission(permissionList, "edit_ItemOptions");
+  const canDelete = hasPermission(permissionList, "delete_ItemOptions");
+  
   const columns = [
     { field: "option_name", headerName: "Option Name", flex: 1, },
     {
@@ -170,6 +179,7 @@ const ItemOptions = () => {
               color="info"
               size="small"
               onClick={() => handleView(row.id)}
+              disabled={!canView}
             >
               View
             </Button>
@@ -178,6 +188,7 @@ const ItemOptions = () => {
               color="primary"
               size="small"
               onClick={() => handleEdit(row.id)}
+              disabled={!canEdit}
             >
               Edit
             </Button>
@@ -186,6 +197,8 @@ const ItemOptions = () => {
               color="secondary"
               size="small"
               onClick={() => handleDelete(row)}
+              disabled={!canDelete}
+
             >
               Delete
             </Button>
