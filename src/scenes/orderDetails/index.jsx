@@ -26,6 +26,7 @@ import ReportServices from "../../services/reportServices";
 import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
 import { hasPermission } from "../../components/permissions";
 import { useSelector } from "react-redux";
+import NoPermissionMessage from "../../components/NoPermissionMessage";
 
 const OrderDetails = () => {
   const theme = useTheme();
@@ -85,7 +86,6 @@ const OrderDetails = () => {
       <Header
         title="Order Details"
         icon={<LocalPizzaOutlined />}
-        Buttons={false}
       />
       {canView ? (
         <Box
@@ -266,25 +266,10 @@ const OrderDetails = () => {
           )}
         </Box>
       ) : (
-        <Box
-          sx={{
-            backgroundColor: "#fff3cd",
-            border: "1px solid #ffeeba",
-            borderRadius: 2,
-            padding: "32px",
-            margin: "40px auto",
-            maxWidth: 500,
-            textAlign: "center",
-            boxShadow: 2,
-          }}
-        >
-          <Typography variant="h6" color="warning.main" fontWeight="bold">
-            You do not have permission to view Order Details.
-          </Typography>
-          <Typography variant="body2" color={colors.primary[400]} mt={1}>
-            Please contact your administrator if you believe this is a mistake.
-          </Typography>
-        </Box>
+        <NoPermissionMessage
+          title="You do not have permission to view Order Details."
+          message="Please contact your administrator if you believe this is a mistake."
+        />
       )}
     </Box>
   );

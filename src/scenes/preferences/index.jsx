@@ -19,6 +19,7 @@ import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
 import { toast } from "react-toastify";
 import { hasPermission } from "../../components/permissions";
 import { useSelector } from "react-redux";
+import NoPermissionMessage from "../../components/NoPermissionMessage";
 
 const ItemPreferences = () => {
   const theme = useTheme();
@@ -152,6 +153,7 @@ const ItemPreferences = () => {
   const canView = hasPermission(permissionList, "read_ItemPreference");
   const canEdit = hasPermission(permissionList, "edit_ItemPreference");
   const canDelete = hasPermission(permissionList, "delete_ItemPreference");
+  const canBrowse = hasPermission(permissionList, "browse_Preference");
 
 
   const columns = [
@@ -209,73 +211,81 @@ const ItemPreferences = () => {
       <Header
         title="Item Preferences"
         icon={<ClearAllOutlined />}
-        Buttons={true}
         addNewClick={handleAddNewClick}
         addBulkDelete={handleBulkDelete}
         orderClick={handleOrderClick}
         showToggleClick={handleToggle}
+        addButton={canAdd && canBrowse}
+        deleteButton={canDelete && canBrowse}
       />
-      <Box
-        mt="40px"
-        height="75vh"
-        flex={1}
-        sx={{
-          "& .MuiDataGrid-root": {
-            border: "none",
-          },
-          "& .MuiDataGrid-cell": {
-            border: "none",
-          },
-          "& .name-column--cell": {
-            color: colors.greenAccent[300],
-          },
-          "& .MuiDataGrid-columnHeaders": {
-            backgroundColor: colors.blueAccent[700],
-            borderBottom: "none",
-          },
-          "& .MuiDataGrid-virtualScroller": {
-            backgroundColor: colors.primary[400],
-          },
-          "& .MuiDataGrid-footerContainer": {
-            borderTop: "none",
-            backgroundColor: colors.blueAccent[700],
-          },
-          "& .MuiCheckbox-root": {
-            color: `${colors.greenAccent[200]} !important`,
-          },
-          "& .MuiDataGrid-iconSeparator": {
-            color: colors.primary[100],
-          },
-        }}
-      >
-        <DataGrid
-          rows={preferencesListData}
-          columns={columns}
-          loading={loading}
-          rowCount={pagination.total}
-          paginationModel={{
-            page: pagination.page - 1,
-            pageSize: pagination.pageSize,
+      {canBrowse ? (
+        <Box
+          mt="40px"
+          height="75vh"
+          flex={1}
+          sx={{
+            "& .MuiDataGrid-root": {
+              border: "none",
+            },
+            "& .MuiDataGrid-cell": {
+              border: "none",
+            },
+            "& .name-column--cell": {
+              color: colors.greenAccent[300],
+            },
+            "& .MuiDataGrid-columnHeaders": {
+              backgroundColor: colors.blueAccent[700],
+              borderBottom: "none",
+            },
+            "& .MuiDataGrid-virtualScroller": {
+              backgroundColor: colors.primary[400],
+            },
+            "& .MuiDataGrid-footerContainer": {
+              borderTop: "none",
+              backgroundColor: colors.blueAccent[700],
+            },
+            "& .MuiCheckbox-root": {
+              color: `${colors.greenAccent[200]} !important`,
+            },
+            "& .MuiDataGrid-iconSeparator": {
+              color: colors.primary[100],
+            },
           }}
-          onPaginationModelChange={handlePaginationChange}
-          onRowSelectionModelChange={(ids) => handleRowSelection(ids)}
-          checkboxSelection
-          components={{
-            LoadingOverlay: CustomLoadingOverlay,
-          }}
+        >
+          <DataGrid
+            rows={preferencesListData}
+            columns={columns}
+            loading={loading}
+            rowCount={pagination.total}
+            paginationModel={{
+              page: pagination.page - 1,
+              pageSize: pagination.pageSize,
+            }}
+            onPaginationModelChange={handlePaginationChange}
+            onRowSelectionModelChange={(ids) => handleRowSelection(ids)}
+            checkboxSelection
+            components={{
+              LoadingOverlay: CustomLoadingOverlay,
+            }}
+          />
+          <ConfirmationDialog
+            open={dialogOpen}
+            title="Confirm Delete"
+            message={
+              selectedIds.length > 0 && !selectedPreferenceName
+                ? `Are you sure you want to Preference ${selectedIds.length}  items?`
+                : `Are you sure you want to delete the Preference "${selectedPreferenceName}"?`
+            }
+            onConfirm={confirmDelete}
+            onCancel={cancelDelete}
+          />
+        </Box>
+      ) : (
+        <NoPermissionMessage
+          title="You do not have permission to view Preferences Details."
+          message="Please contact your administrator if you believe this is a mistake."
         />
-        <ConfirmationDialog
-          open={dialogOpen}
-          title="Confirm Delete"
-          message={
-            selectedIds.length > 0 && !selectedPreferenceName
-              ? `Are you sure you want to Preference ${selectedIds.length}  items?`
-              : `Are you sure you want to delete the Preference "${selectedPreferenceName}"?`
-          }
-          onConfirm={confirmDelete}
-          onCancel={cancelDelete}
-        />
-      </Box>
+      )}
     </Box>
   );
 };

@@ -13,6 +13,7 @@ import { toast } from "react-toastify";
 import UserServices from "../../services/userServices";
 import { useSelector } from "react-redux";
 import { hasPermission } from "../../components/permissions";
+import NoPermissionMessage from "../../components/NoPermissionMessage";
 
 const User = () => {
   const theme = useTheme();
@@ -154,6 +155,7 @@ const User = () => {
   const canView = hasPermission(permissionList, "read_Users");
   const canEdit = hasPermission(permissionList, "edit_Users");
   const canDelete = hasPermission(permissionList, "delete_Users");
+  const canBrowse = hasPermission(permissionList, "browse_Users");
 
   // console.log("user",userListData)
   const columns = [
@@ -198,7 +200,7 @@ const User = () => {
       headerName: "Actions",
       flex: 1,
       renderCell: ({ row }) => {
-         return (
+        return (
           <Box display="flex" gap={1}>
             <Button
               variant="contained"
@@ -240,73 +242,81 @@ const User = () => {
       <Header
         title="Users"
         icon={<PersonOutlined />}
-        Buttons={true}
         addNewClick={handleAddNewClick}
         addBulkDelete={handleBulkDelete}
         orderClick={handleOrderClick}
         showToggleClick={handleToggle}
+        addButton={canAdd && canBrowse}
+        deleteButton={canDelete && canBrowse}
       />
-      <Box
-        mt="40px"
-        height="75vh"
-        flex={1}
-        sx={{
-          "& .MuiDataGrid-root": {
-            border: "none",
-          },
-          "& .MuiDataGrid-cell": {
-            border: "none",
-          },
-          "& .name-column--cell": {
-            color: colors.greenAccent[300],
-          },
-          "& .MuiDataGrid-columnHeaders": {
-            backgroundColor: colors.blueAccent[700],
-            borderBottom: "none",
-          },
-          "& .MuiDataGrid-virtualScroller": {
-            backgroundColor: colors.primary[400],
-          },
-          "& .MuiDataGrid-footerContainer": {
-            borderTop: "none",
-            backgroundColor: colors.blueAccent[700],
-          },
-          "& .MuiCheckbox-root": {
-            color: `${colors.greenAccent[200]} !important`,
-          },
-          "& .MuiDataGrid-iconSeparator": {
-            color: colors.primary[100],
-          },
-        }}
-      >
-        <DataGrid
-          rows={userListData}
-          columns={columns}
-          loading={loading}
-          rowCount={pagination.total}
-          paginationModel={{
-            page: pagination.page - 1,
-            pageSize: pagination.pageSize,
+      {canBrowse ? (
+        <Box
+          mt="40px"
+          height="75vh"
+          flex={1}
+          sx={{
+            "& .MuiDataGrid-root": {
+              border: "none",
+            },
+            "& .MuiDataGrid-cell": {
+              border: "none",
+            },
+            "& .name-column--cell": {
+              color: colors.greenAccent[300],
+            },
+            "& .MuiDataGrid-columnHeaders": {
+              backgroundColor: colors.blueAccent[700],
+              borderBottom: "none",
+            },
+            "& .MuiDataGrid-virtualScroller": {
+              backgroundColor: colors.primary[400],
+            },
+            "& .MuiDataGrid-footerContainer": {
+              borderTop: "none",
+              backgroundColor: colors.blueAccent[700],
+            },
+            "& .MuiCheckbox-root": {
+              color: `${colors.greenAccent[200]} !important`,
+            },
+            "& .MuiDataGrid-iconSeparator": {
+              color: colors.primary[100],
+            },
           }}
-          onPaginationModelChange={handlePaginationChange}
-          onRowSelectionModelChange={(ids) => handleRowSelection(ids)}
-          checkboxSelection
-          components={{
-            LoadingOverlay: CustomLoadingOverlay,
-          }}
+        >
+          <DataGrid
+            rows={userListData}
+            columns={columns}
+            loading={loading}
+            rowCount={pagination.total}
+            paginationModel={{
+              page: pagination.page - 1,
+              pageSize: pagination.pageSize,
+            }}
+            onPaginationModelChange={handlePaginationChange}
+            onRowSelectionModelChange={(ids) => handleRowSelection(ids)}
+            checkboxSelection
+            components={{
+              LoadingOverlay: CustomLoadingOverlay,
+            }}
+          />
+          <ConfirmationDialog
+            open={dialogOpen}
+            title="Confirm Delete"
+            message={
+              selectedIds.length > 0 && !selectedItemName
+                ? `Are you sure you want to delete ${selectedIds.length} Users?`
+                : `Are you sure you want to delete the Option "${selectedItemName}"?`
+            }
+            onConfirm={confirmDelete}
+            onCancel={cancelDelete}
+          />
+        </Box>
+      ) : (
+        <NoPermissionMessage
+          title="You do not have permission to view User Details."
+          message="Please contact your administrator if you believe this is a mistake."
         />
-        <ConfirmationDialog
-          open={dialogOpen}
-          title="Confirm Delete"
-          message={
-            selectedIds.length > 0 && !selectedItemName
-              ? `Are you sure you want to delete ${selectedIds.length} Users?`
-              : `Are you sure you want to delete the Option "${selectedItemName}"?`
-          }
-          onConfirm={confirmDelete}
-          onCancel={cancelDelete}
-        />
-      </Box>
+      )}
     </Box>
   );
 };

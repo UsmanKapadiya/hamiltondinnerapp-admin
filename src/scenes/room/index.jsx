@@ -13,10 +13,8 @@ import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { hasPermission } from "../../components/permissions";
+import NoPermissionMessage from "../../components/NoPermissionMessage";
 
-// export function hasPermission(permissionList, permissionName) {
-//   return permissionList.some(p => p.name === permissionName);
-// }
 const Room = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -114,6 +112,7 @@ const Room = () => {
   const canView = hasPermission(permissionList, "read_RoomDetails");
   const canEdit = hasPermission(permissionList, "edit_RoomDetails");
   const canDelete = hasPermission(permissionList, "delete_RoomDetails");
+  const canBrowseRoom = hasPermission(permissionList, "browse_Room");
 
 
   const columns = [
@@ -248,12 +247,14 @@ const Room = () => {
       <Header
         title="Room Details"
         icon={<Home />}
-        Buttons={true}
         addNewClick={handleAddNewClick}
         addBulkDelete={handleBulkDelete}
         orderClick={handleOrderClick}
         showToggleClick={handleToggle}
+        addButton={canAdd && canBrowseRoom}
+        deleteButton={canDelete && canBrowseRoom}
       />
+      {canBrowseRoom ?(
       <Box
         mt="40px"
         height="75vh"
@@ -317,6 +318,12 @@ const Room = () => {
         />
 
       </Box>
+      ) : (
+        <NoPermissionMessage
+          title="You do not have permission to view Room Details."
+          message="Please contact your administrator if you believe this is a mistake."
+        />
+      )}
     </Box>
   );
 };

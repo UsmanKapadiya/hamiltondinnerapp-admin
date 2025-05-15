@@ -14,13 +14,12 @@ import { useNavigate } from "react-router-dom";
 
 
 
-const Header = ({ title, icon, Buttons, addNewClick, addBulkDelete, orderClick, showToggleClick }) => {
+const Header = ({ title, icon, addNewClick, addBulkDelete, orderClick, showToggleClick, addButton, deleteButton }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const isMdDevices = useMediaQuery("(min-width: 724px)");
   const [showDeleted, setShowDeleted] = useState(false);
   const navigate = useNavigate(); // Initialize useNavigate
-
 
   
   return (
@@ -52,7 +51,6 @@ const Header = ({ title, icon, Buttons, addNewClick, addBulkDelete, orderClick, 
             {title}
           </Typography>
         </Box>
-        {Buttons && (
         <Box display="flex" gap="8px" ml="30px">
           {[
             {
@@ -61,6 +59,7 @@ const Header = ({ title, icon, Buttons, addNewClick, addBulkDelete, orderClick, 
               hoverColor: colors.greenAccent[800],
               icon: <AddOutlined />,
               onClick: addNewClick,
+              disabled:!addButton
             },
             {
               label: "Bulk Delete",
@@ -68,6 +67,7 @@ const Header = ({ title, icon, Buttons, addNewClick, addBulkDelete, orderClick, 
               hoverColor: colors.redAccent[800],
               icon: <DeleteOutline />,
               onClick: addBulkDelete,
+              disabled:!deleteButton
             },
             {
               label: "Order",
@@ -100,12 +100,12 @@ const Header = ({ title, icon, Buttons, addNewClick, addBulkDelete, orderClick, 
                 },
               }}
               startIcon={button.icon}
+              disabled={button?.disabled}
             >
               {button.label}
             </Button>
           ))}
         </Box>
-        )}
       </Box>
     </Box>
   );
