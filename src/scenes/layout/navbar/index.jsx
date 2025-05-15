@@ -72,7 +72,7 @@ const Navbar = () => {
         >
           <MenuOutlined />
         </IconButton>
-        <Box
+        {/* <Box
           display="flex"
           alignItems="center"
           bgcolor={colors.primary[400]}
@@ -83,7 +83,7 @@ const Navbar = () => {
           <IconButton type="button" sx={{ p: 1 }}>
             <SearchOutlined />
           </IconButton>
-        </Box>
+        </Box> */}
       </Box>
 
       <Box>
