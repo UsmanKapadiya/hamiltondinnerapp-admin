@@ -1,9 +1,11 @@
-import { Box, Typography, useTheme, Button } from "@mui/material";
+import { Box, Typography, useTheme, Button, InputBase, IconButton } from "@mui/material";
 import { Header } from "../../components";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import {
+  Close,
   Home,
+  SearchOutlined,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -19,7 +21,7 @@ const Room = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
-
+  const [searchText, setSearchText] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
@@ -254,70 +256,99 @@ const Room = () => {
         addButton={canAdd && canBrowseRoom}
         deleteButton={canDelete && canBrowseRoom}
       />
-      {canBrowseRoom ?(
-      <Box
-        mt="40px"
-        height="75vh"
-        flex={1}
-        sx={{
-          "& .MuiDataGrid-root": {
-            border: "none",
-          },
-          "& .MuiDataGrid-cell": {
-            border: "none",
-          },
-          "& .name-column--cell": {
-            color: colors.greenAccent[300],
-          },
-          "& .MuiDataGrid-columnHeaders": {
-            backgroundColor: colors.blueAccent[700],
-            borderBottom: "none",
-          },
-          "& .MuiDataGrid-virtualScroller": {
-            backgroundColor: colors.primary[400],
-          },
-          "& .MuiDataGrid-footerContainer": {
-            borderTop: "none",
-            backgroundColor: colors.blueAccent[700],
-          },
-          "& .MuiCheckbox-root": {
-            color: `${colors.greenAccent[200]} !important`,
-          },
-          "& .MuiDataGrid-iconSeparator": {
-            color: colors.primary[100],
-          },
-        }}
-      >
-        <DataGrid
-          rows={roomListData}
-          columns={columns}
-          loading={loading}
-          rowCount={pagination.total}
-          paginationModel={{
-            page: pagination.page - 1,
-            pageSize: pagination.pageSize,
+      {canBrowseRoom ? (
+        <Box
+          mt="40px"
+          height="75vh"
+          flex={1}
+          sx={{
+            "& .MuiDataGrid-root": {
+              border: "none",
+            },
+            "& .MuiDataGrid-cell": {
+              border: "none",
+            },
+            "& .name-column--cell": {
+              color: colors.greenAccent[300],
+            },
+            "& .MuiDataGrid-columnHeaders": {
+              backgroundColor: colors.blueAccent[700],
+              borderBottom: "none",
+            },
+            "& .MuiDataGrid-virtualScroller": {
+              backgroundColor: colors.primary[400],
+            },
+            "& .MuiDataGrid-footerContainer": {
+              borderTop: "none",
+              backgroundColor: colors.blueAccent[700],
+            },
+            "& .MuiCheckbox-root": {
+              color: `${colors.greenAccent[200]} !important`,
+            },
+            "& .MuiDataGrid-iconSeparator": {
+              color: colors.primary[100],
+            },
           }}
-          onPaginationModelChange={handlePaginationChange}
-          checkboxSelection
-          onRowSelectionModelChange={(ids) => handleRowSelection(ids)}
-          components={{
-            LoadingOverlay: CustomLoadingOverlay,
-          }}
-        />
+        >
+          <Box
+            display="flex"
+            alignItems="center"
+            bgcolor={colors.primary[400]}
+            borderRadius="3px"
+            mb="10px"
+          // sx={{ display: `${isXsDevices ? "none" : "flex"}` }}
+          >
+            <InputBase
+              placeholder="Search by Unit Number, or Resident Name..."
+              sx={{ ml: 2, flex: 1 }}
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+            />
+            <IconButton
+              type="button"
+              sx={{ p: 1 }}
+              onClick={() => setSearchText("")}
+            >
+              {searchText
+                ? <Close />
+                : <SearchOutlined />
+              }
+            </IconButton>
+          </Box>
+          <DataGrid
+            rows={roomListData.filter(
+              (row) =>
+                row.room_name?.toLowerCase().includes(searchText.toLowerCase()) ||
+                row.resident_name?.toLowerCase().includes(searchText.toLowerCase())
+            )}
+            columns={columns}
+            loading={loading}
+            rowCount={pagination.total}
+            paginationModel={{
+              page: pagination.page - 1,
+              pageSize: pagination.pageSize,
+            }}
+            onPaginationModelChange={handlePaginationChange}
+            checkboxSelection
+            onRowSelectionModelChange={(ids) => handleRowSelection(ids)}
+            components={{
+              LoadingOverlay: CustomLoadingOverlay,
+            }}
+          />
 
-        <ConfirmationDialog
-          open={dialogOpen}
-          title="Confirm Delete"
-          message={
-            selectedIds.length > 0 && !selectedRoomName
-              ? `Are you sure you want to delete ${selectedIds.length} Room${selectedIds.length > 1 ? 's' : ''}?` // Handles singular/plural for multiple room delete
-              : `Are you sure you want to delete the Room "${selectedRoomName}"?` // Single room delete message
-          }
-          onConfirm={confirmDelete}
-          onCancel={cancelDelete}
-        />
+          <ConfirmationDialog
+            open={dialogOpen}
+            title="Confirm Delete"
+            message={
+              selectedIds.length > 0 && !selectedRoomName
+                ? `Are you sure you want to delete ${selectedIds.length} Room${selectedIds.length > 1 ? 's' : ''}?` // Handles singular/plural for multiple room delete
+                : `Are you sure you want to delete the Room "${selectedRoomName}"?` // Single room delete message
+            }
+            onConfirm={confirmDelete}
+            onCancel={cancelDelete}
+          />
 
-      </Box>
+        </Box>
       ) : (
         <NoPermissionMessage
           title="You do not have permission to view Room Details."

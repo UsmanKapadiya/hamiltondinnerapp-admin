@@ -1,12 +1,14 @@
-import { Box, Typography, useTheme, Button } from "@mui/material";
+import { Box, Typography, useTheme, Button, InputBase, IconButton } from "@mui/material";
 import { Header } from "../../components";
 import { DataGrid } from "@mui/x-data-grid";
 import { mockDataCategories, type } from "../../data/mockData";
 import { tokens } from "../../theme";
 import {
   AdminPanelSettingsOutlined,
+  Close,
   DvrOutlined,
   Home,
+  SearchOutlined,
   SecurityOutlined,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
@@ -20,15 +22,15 @@ import { useSelector } from "react-redux";
 import NoPermissionMessage from "../../components/NoPermissionMessage";
 
 const Category = () => {
+  const navigate = useNavigate();
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const navigate = useNavigate();
   const permissionList = useSelector((state) => state?.permissionState?.permissionsList);
+  const [searchText, setSearchText] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
   const [selectedCategoryName, setSelectedCategoryName] = useState("");
-
   const [categoryListData, setCategoryListData] = useState([])
   const [loading, setLoading] = useState(true);
 
@@ -165,35 +167,6 @@ const Category = () => {
       },
       flex: 1,
     },
-    // {
-    //   field: "active",
-    //   headerName: "Active",
-    //   flex: 1,
-    //   renderCell: ({ row: { active } }) => {
-    //     return (
-    //       <Box
-    //         width="120px"
-    //         p={1}
-    //         display="flex"
-    //         alignItems="center"
-    //         justifyContent="center"
-    //         gap={1}
-    //         bgcolor={
-    //           active === true
-    //             ? colors.greenAccent[600]
-    //             : colors.greenAccent[700]
-    //         }
-    //         borderRadius={1}
-    //       >
-    //         {active === true && <AdminPanelSettingsOutlined />}
-    //         {active === false && <SecurityOutlined />}
-    //         <Typography textTransform="capitalize">
-    //           {active === true ? "active" : "Inactive"}
-    //         </Typography>
-    //       </Box>
-    //     );
-    //   },
-    // },
     {
       field: "actions",
       headerName: "Actions",
@@ -282,8 +255,36 @@ const Category = () => {
             },
           }}
         >
+          <Box
+            display="flex"
+            alignItems="center"
+            bgcolor={colors.primary[400]}
+            borderRadius="3px"
+            mb="10px"
+          >
+            <InputBase
+              placeholder="Search by Categopry Name, or Category Chinese Name..."
+              sx={{ ml: 2, flex: 1 }}
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+            />
+            <IconButton
+              type="button"
+              sx={{ p: 1 }}
+              onClick={() => setSearchText("")}
+            >
+              {searchText
+                ? <Close />
+                : <SearchOutlined />
+              }
+            </IconButton>
+          </Box>
           <DataGrid
-            rows={categoryListData}
+            rows={categoryListData.filter(
+              (row) =>
+                row.cat_name?.toLowerCase().includes(searchText.toLowerCase()) ||
+                row.category_chinese_name?.toLowerCase().includes(searchText.toLowerCase())
+            )}
             columns={columns}
             loading={loading}
             initialState={{

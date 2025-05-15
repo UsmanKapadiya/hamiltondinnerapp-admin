@@ -1,9 +1,11 @@
-import { Box, useTheme, Button } from "@mui/material";
+import { Box, useTheme, Button, InputBase, IconButton } from "@mui/material";
 import { Header } from "../../components";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import {
+  Close,
   DvrOutlined,
+  SearchOutlined,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -17,9 +19,10 @@ import { hasPermission } from "../../components/permissions";
 import NoPermissionMessage from "../../components/NoPermissionMessage";
 
 const Item = () => {
+  const navigate = useNavigate();
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const navigate = useNavigate();
+  const [searchText, setSearchText] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
@@ -321,8 +324,36 @@ const Item = () => {
             },
           }}
         >
+          <Box
+            display="flex"
+            alignItems="center"
+            bgcolor={colors.primary[400]}
+            borderRadius="3px"
+            mb="10px"
+          >
+            <InputBase
+              placeholder="Search by Item Name, or Item Chinese Name..."
+              sx={{ ml: 2, flex: 1 }}
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+            />
+            <IconButton
+              type="button"
+              sx={{ p: 1 }}
+              onClick={() => setSearchText("")}
+            >
+              {searchText
+                ? <Close />
+                : <SearchOutlined />
+              }
+            </IconButton>
+          </Box>
           <DataGrid
-            rows={itemListData}
+            rows={itemListData.filter(
+              (row) =>
+                row.item_name?.toLowerCase().includes(searchText.toLowerCase()) ||
+                row.item_chinese_name?.toLowerCase().includes(searchText.toLowerCase())
+            )}
             columns={columns}
             loading={loading}
             rowCount={pagination.total}

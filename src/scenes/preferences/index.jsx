@@ -1,4 +1,4 @@
-import { Box, Typography, useTheme, Button } from "@mui/material";
+import { Box, Typography, useTheme, Button, InputBase, IconButton } from "@mui/material";
 import { Header } from "../../components";
 import { DataGrid } from "@mui/x-data-grid";
 import { mockPreferences } from "../../data/mockData";
@@ -6,9 +6,11 @@ import { tokens } from "../../theme";
 import {
   AdminPanelSettingsOutlined,
   ClearAllOutlined,
+  Close,
   DvrOutlined,
   FormatListBulletedOutlined,
   Home,
+  SearchOutlined,
   SecurityOutlined,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
@@ -22,9 +24,10 @@ import { useSelector } from "react-redux";
 import NoPermissionMessage from "../../components/NoPermissionMessage";
 
 const ItemPreferences = () => {
+  const navigate = useNavigate();
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const navigate = useNavigate();
+  const [searchText, setSearchText] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
@@ -252,8 +255,36 @@ const ItemPreferences = () => {
             },
           }}
         >
+          <Box
+            display="flex"
+            alignItems="center"
+            bgcolor={colors.primary[400]}
+            borderRadius="3px"
+            mb="10px"
+          >
+            <InputBase
+              placeholder="Search by Preferences Name, or Preferences Chinese Name..."
+              sx={{ ml: 2, flex: 1 }}
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+            />
+            <IconButton
+              type="button"
+              sx={{ p: 1 }}
+              onClick={() => setSearchText("")}
+            >
+              {searchText
+                ? <Close />
+                : <SearchOutlined />
+              }
+            </IconButton>
+          </Box>
           <DataGrid
-            rows={preferencesListData}
+          rows={preferencesListData.filter(
+              (row) =>
+                row.pname?.toLowerCase().includes(searchText.toLowerCase()) ||
+                row.pname_cn?.toLowerCase().includes(searchText.toLowerCase())
+            )}
             columns={columns}
             loading={loading}
             rowCount={pagination.total}

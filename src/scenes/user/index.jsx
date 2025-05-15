@@ -1,9 +1,11 @@
-import { Box, useTheme, Button } from "@mui/material";
+import { Box, useTheme, Button, InputBase, IconButton } from "@mui/material";
 import { Header } from "../../components";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import {
+  Close,
   PersonOutlined,
+  SearchOutlined,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -16,16 +18,17 @@ import { hasPermission } from "../../components/permissions";
 import NoPermissionMessage from "../../components/NoPermissionMessage";
 
 const User = () => {
+  const navigate = useNavigate();
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const navigate = useNavigate();
+  const permissionList = useSelector((state) => state?.permissionState?.permissionsList);
+  const [searchText, setSearchText] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
   const [selectedItemName, setselectedItemName] = useState("");
   const [userListData, setUserListData] = useState([])
-  const permissionList = useSelector((state) => state?.permissionState?.permissionsList);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({
     page: 1,
@@ -283,8 +286,36 @@ const User = () => {
             },
           }}
         >
+          <Box
+            display="flex"
+            alignItems="center"
+            bgcolor={colors.primary[400]}
+            borderRadius="3px"
+            mb="10px"
+          >
+            <InputBase
+              placeholder="Search by Name, Username, or Email..." sx={{ ml: 2, flex: 1 }}
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+            />
+            <IconButton
+              type="button"
+              sx={{ p: 1 }}
+              onClick={() => setSearchText("")}
+            >
+              {searchText
+                ? <Close />
+                : <SearchOutlined />
+              }
+            </IconButton>
+          </Box>
           <DataGrid
-            rows={userListData}
+            rows={userListData.filter(
+              (row) =>
+                row.name?.toLowerCase().includes(searchText.toLowerCase()) ||
+                row.user_name?.toLowerCase().includes(searchText.toLowerCase()) ||
+                row.email?.toLowerCase().includes(searchText.toLowerCase())
+            )}
             columns={columns}
             loading={loading}
             rowCount={pagination.total}
