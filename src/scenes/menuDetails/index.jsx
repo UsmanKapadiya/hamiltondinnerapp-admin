@@ -1,4 +1,4 @@
-import { Box, useTheme, Button, InputBase,IconButton } from "@mui/material";
+import { Box, useTheme, Button, InputBase, IconButton } from "@mui/material";
 import { Header } from "../../components";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
@@ -217,6 +217,7 @@ const MenuDetails = () => {
         addBulkDelete={handleBulkDelete}
         orderClick={handleOrderClick}
         showToggleClick={handleToggle}
+        buttons={true}
         addButton={canAdd && canBrowse}
         deleteButton={canDelete && canBrowse}
       />
@@ -279,9 +280,9 @@ const MenuDetails = () => {
             </IconButton>
           </Box>
           <DataGrid
-          rows={menuList.filter(
+            rows={menuList.filter(
               (row) =>
-                row.menu_name?.toLowerCase().includes(searchText.toLowerCase()) 
+                row.menu_name?.toLowerCase().includes(searchText.toLowerCase())
             )}
             columns={columns}
             loading={loading}

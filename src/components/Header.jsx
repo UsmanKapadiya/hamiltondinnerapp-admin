@@ -14,7 +14,7 @@ import { useNavigate } from "react-router-dom";
 
 
 
-const Header = ({ title, icon, addNewClick, addBulkDelete, orderClick, showToggleClick, addButton, deleteButton }) => {
+const Header = ({ title, icon, addNewClick, addBulkDelete, buttons, addButton, deleteButton }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const isMdDevices = useMediaQuery("(min-width: 724px)");
@@ -51,6 +51,7 @@ const Header = ({ title, icon, addNewClick, addBulkDelete, orderClick, showToggl
             {title}
           </Typography>
         </Box>
+        {buttons && (
         <Box display="flex" gap="8px" ml="30px">
           {[
             {
@@ -68,21 +69,7 @@ const Header = ({ title, icon, addNewClick, addBulkDelete, orderClick, showToggl
               icon: <DeleteOutline />,
               onClick: addBulkDelete,
               disabled:!deleteButton
-            },
-            {
-              label: "Order",
-              color: colors.blueAccent[700],
-              hoverColor: colors.blueAccent[800],
-              icon: <MenuOutlined />,
-              onClick: orderClick,
-            },
-            {
-              label: showDeleted ? "Hide Deleted" : "Show Deleted",
-              color: showDeleted ? colors.skyBlueAccent[700] : colors.gray[700],
-              hoverColor: showDeleted ? colors.skyBlueAccent[800] : colors.gray[800],
-              icon: showDeleted ? <VisibilityOffOutlined /> : <VisibilityOutlined />,
-              onClick: showToggleClick,
-            },
+            }
           ].map((button, index) => (
             <Button
               key={index}
@@ -106,6 +93,7 @@ const Header = ({ title, icon, addNewClick, addBulkDelete, orderClick, showToggl
             </Button>
           ))}
         </Box>
+        )}
       </Box>
     </Box>
   );

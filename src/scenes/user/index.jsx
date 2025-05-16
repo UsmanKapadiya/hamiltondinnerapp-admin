@@ -249,6 +249,7 @@ const User = () => {
         addBulkDelete={handleBulkDelete}
         orderClick={handleOrderClick}
         showToggleClick={handleToggle}
+        buttons={true}
         addButton={canAdd && canBrowse}
         deleteButton={canDelete && canBrowse}
       />

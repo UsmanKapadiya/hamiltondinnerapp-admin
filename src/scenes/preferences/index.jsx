@@ -218,6 +218,7 @@ const ItemPreferences = () => {
         addBulkDelete={handleBulkDelete}
         orderClick={handleOrderClick}
         showToggleClick={handleToggle}
+        buttons={true}
         addButton={canAdd && canBrowse}
         deleteButton={canDelete && canBrowse}
       />
@@ -280,7 +281,7 @@ const ItemPreferences = () => {
             </IconButton>
           </Box>
           <DataGrid
-          rows={preferencesListData.filter(
+            rows={preferencesListData.filter(
               (row) =>
                 row.pname?.toLowerCase().includes(searchText.toLowerCase()) ||
                 row.pname_cn?.toLowerCase().includes(searchText.toLowerCase())

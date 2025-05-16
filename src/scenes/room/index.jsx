@@ -253,6 +253,7 @@ const Room = () => {
         addBulkDelete={handleBulkDelete}
         orderClick={handleOrderClick}
         showToggleClick={handleToggle}
+        buttons={true}
         addButton={canAdd && canBrowseRoom}
         deleteButton={canDelete && canBrowseRoom}
       />

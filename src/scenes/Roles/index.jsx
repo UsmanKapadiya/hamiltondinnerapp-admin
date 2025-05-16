@@ -13,11 +13,14 @@ import ConfirmationDialog from "../../components/ConfirmationDialog";
 import { toast } from "react-toastify";
 import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
 import RoleServices from "../../services/roleServices";
+import { hasPermission } from "../../components/permissions";
+import { useSelector } from "react-redux";
 
 const Roles = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
+  const permissionList = useSelector((state) => state?.permissionState?.permissionsList);
   const perPageRecords = (10)
   const [searchText, setSearchText] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -135,6 +138,13 @@ const Roles = () => {
   const handleOrderClick = () => {
     // navigate("/item-details/order");
   };
+
+  const canAdd = hasPermission(permissionList, "add_Roles");
+  const canView = hasPermission(permissionList, "read_Roles");
+  const canEdit = hasPermission(permissionList, "edit_Roles");
+  const canDelete = hasPermission(permissionList, "delete_Roles");
+  const canBrowse = hasPermission(permissionList, "browse_Roles");
+
   const columns = [
     { field: "name", headerName: "Name", flex: 1, },
     { field: "display_name", headerName: "Display", flex: 1, }, // Fixed the typo
@@ -150,6 +160,7 @@ const Roles = () => {
               color="info"
               size="small"
               onClick={() => handleView(row.id)}
+              disabled={!canView}
             >
               View
             </Button>
@@ -158,6 +169,7 @@ const Roles = () => {
               color="primary"
               size="small"
               onClick={() => handleEdit(row.id)}
+              disabled={!canEdit}
             >
               Edit
             </Button>
@@ -166,9 +178,12 @@ const Roles = () => {
               color="secondary"
               size="small"
               onClick={() => handleDelete(row)}
+              disabled={!canDelete}
+
             >
               Delete
             </Button>
+
           </Box>
         );
       },
@@ -195,6 +210,9 @@ const Roles = () => {
         addBulkDelete={handleBulkDelete}
         orderClick={handleOrderClick}
         showToggleClick={handleToggle}
+        buttons={true}
+        addButton={canAdd && canBrowse}
+        deleteButton={canDelete && canBrowse}
       />
       <Box
         mt="40px"
@@ -255,10 +273,10 @@ const Roles = () => {
         </Box>
         <DataGrid
           rows={roleList.filter(
-              (row) =>
-                row.name?.toLowerCase().includes(searchText.toLowerCase()) ||
-                row.display_name?.toLowerCase().includes(searchText.toLowerCase())
-            )}
+            (row) =>
+              row.name?.toLowerCase().includes(searchText.toLowerCase()) ||
+              row.display_name?.toLowerCase().includes(searchText.toLowerCase())
+          )}
           columns={columns}
           loading={loading}
           pagination
