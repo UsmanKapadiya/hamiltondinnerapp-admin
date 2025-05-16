@@ -35,6 +35,7 @@ import RoleDetailsForm from "./scenes/Roles/rolesDetails-form";
 import User from "./scenes/user";
 import UserDetailsView from "./scenes/user/userDetails-view";
 import UserDetailsForm from "./scenes/user/userDetails-form";
+import NotFound from "./scenes/pageNotFounf/NotFound";
 
 
 const ProtectedRoute = ({ children }) => {
@@ -105,6 +106,7 @@ const AppRouter = () => {
           <Route path="/users-details/:id/edit" element={<UserDetailsForm />} />
 
           <Route path="/faq" element={<FAQ />} />
+          <Route path="*" element={<NotFound />} />
 
         </Route>
       </Routes>
