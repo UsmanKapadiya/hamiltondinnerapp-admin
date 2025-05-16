@@ -3,17 +3,7 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-d
 import App from "./App";
 import {
   Dashboard,
-  Team,
-  Invoices,
-  Contacts,
-  Form,
-  Bar,
-  Line,
-  Pie,
-  FAQ,
-  Geography,
-  Calendar,
-  Stream,
+  FAQ
 } from "./scenes";
 import Room from "./scenes/room";
 import RoomDetailsForm from "./scenes/room/roomDetails-form";
@@ -48,7 +38,7 @@ import UserDetailsForm from "./scenes/user/userDetails-form";
 
 
 const ProtectedRoute = ({ children }) => {
-  const isAuthenticated = !!localStorage.getItem("authToken"); // Check if token exists
+  const isAuthenticated = !!localStorage.getItem("authToken");
   return isAuthenticated ? children : <Navigate to="/login" />;
 };
 const AppRouter = () => {
@@ -63,7 +53,7 @@ const AppRouter = () => {
               <App />
             </ProtectedRoute>
           }
-        >        
+        >
           <Route path="/" element={<Dashboard />} />
           {/*Room  */}
           <Route path="/room-details" element={<Room />} />
@@ -114,21 +104,8 @@ const AppRouter = () => {
           <Route path="/users-details/create" element={<UserDetailsForm />} />
           <Route path="/users-details/:id/edit" element={<UserDetailsForm />} />
 
-
-
-
-
-          <Route path="/team" element={<Team />} />
-          <Route path="/contacts" element={<Contacts />} />
-          <Route path="/invoices" element={<Invoices />} />
-          <Route path="/form" element={<Form />} />
-          <Route path="/calendar" element={<Calendar />} />
-          <Route path="/bar" element={<Bar />} />
-          <Route path="/pie" element={<Pie />} />
-          <Route path="/stream" element={<Stream />} />
-          <Route path="/line" element={<Line />} />
           <Route path="/faq" element={<FAQ />} />
-          <Route path="/geography" element={<Geography />} />
+
         </Route>
       </Routes>
     </Router>
