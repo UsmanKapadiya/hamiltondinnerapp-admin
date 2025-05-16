@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from "react";
 import {
     Box,
-    Button,
     Divider,
     Typography,
     useMediaQuery,
     useTheme,
-    CircularProgress
 } from "@mui/material";
 import { Header } from "../../components";
 import { ListAltOutlined } from "@mui/icons-material";
@@ -21,40 +19,50 @@ const CategoryDetailsView = () => {
     const colors = tokens(theme.palette.mode);
     const isXlDevices = useMediaQuery("(min-width: 1260px)");
     const location = useLocation();
-    const [categoryDetails, setCategoryDetails] = useState('')
+    const [categoryDetails, setCategoryDetails] = useState(null);
     const [loading, setLoading] = useState(false);
-    // console.log(location)
-    let categoryId = location.state.id
-    let categoryListData = location.state.categoryListData
 
-    // const categoryDetails = location.state;
+    const categoryId = location.state?.id;
+    const categoryListData = location.state?.categoryListData || [];
+
     useEffect(() => {
-        getCategoryDetails(categoryId)
-    }, [categoryId])
+        if (categoryId) {
+            getCategoryDetails(categoryId);
+        }
+    }, [categoryId]);
 
     const getCategoryDetails = async (id) => {
+        setLoading(true);
         try {
-            setLoading(true);
             const response = await CategoryServices.getCategoryDetails(id);
-            setCategoryDetails(response?.data);
-
+            setCategoryDetails(response?.data || null);
         } catch (error) {
-            console.error("Error fetching menu list:", error);
+            setCategoryDetails(null);
+            console.error("Error fetching category details:", error);
         } finally {
             setLoading(false);
         }
     };
 
+    const getTypeName = (typeId) => {
+        const typeObj = type.find((t) => t.id === typeId);
+        return typeObj ? typeObj.type_name : "N/A";
+    };
+
+    const getParentName = (parentId) => {
+        const parentObj = categoryListData.find((t) => t.id === parentId);
+        return parentObj ? parentObj.cat_name : "No results";
+    };
+
     return (
         <Box m="20px">
             <Header
-                title="Room Details View"
+                title="Category Details View"
                 icon={<ListAltOutlined />}
                 Buttons={false}
                 ActionButton={true}
             />
             {loading ? (
-
                 <Box
                     display="flex"
                     justifyContent="center"
@@ -75,7 +83,7 @@ const CategoryDetailsView = () => {
                             Category Name
                         </Typography>
                         <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                            {categoryDetails?.cat_name}
+                            {categoryDetails?.cat_name || "N/A"}
                         </Typography>
                     </Box>
                     <Divider sx={{ bgcolor: colors.gray[300] }} />
@@ -84,7 +92,7 @@ const CategoryDetailsView = () => {
                             Category Chinese Name
                         </Typography>
                         <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                            {categoryDetails?.category_chinese_name}
+                            {categoryDetails?.category_chinese_name || "N/A"}
                         </Typography>
                     </Box>
                     <Divider sx={{ bgcolor: colors.gray[300] }} />
@@ -93,28 +101,19 @@ const CategoryDetailsView = () => {
                             Type
                         </Typography>
                         <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                            {(() => {
-                                const typeId = categoryDetails?.type;
-                                const typeObj = type.find((t) => t.id === typeId);
-                                return typeObj ? typeObj.type_name : "N/A";
-                            })()}
+                            {getTypeName(categoryDetails?.type)}
                         </Typography>
                     </Box>
                     <Divider sx={{ bgcolor: colors.gray[300] }} />
                     <Box p="10px">
                         <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
-                            Parent Id
+                            Parent Category
                         </Typography>
                         <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                            {(() => {
-                                const parentId = categoryDetails?.parent_id;
-                                const parentObj = categoryListData.find((t) => t.id === parentId);
-                                return parentObj ? parentObj.cat_name : "No results"; { categoryDetails?.parent_id }
-                            })()}
+                            {getParentName(categoryDetails?.parent_id)}
                         </Typography>
                     </Box>
                     <Divider sx={{ bgcolor: colors.gray[300] }} />
-
                 </Box>
             )}
         </Box>
