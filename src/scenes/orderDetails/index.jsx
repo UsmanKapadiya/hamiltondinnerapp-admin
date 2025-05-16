@@ -27,6 +27,7 @@ import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
 import { hasPermission } from "../../components/permissions";
 import { useSelector } from "react-redux";
 import NoPermissionMessage from "../../components/NoPermissionMessage";
+import * as XLSX from "xlsx";
 
 const OrderDetails = () => {
   const theme = useTheme();
@@ -59,8 +60,53 @@ const OrderDetails = () => {
     setExportAnchor(null);
   };
 
-  const handleExportOption = (option) => {
+  const handleExportOption = async (option) => {
     handleExportClose();
+    try {
+      setLoading(true);
+
+      // Prepare data for export
+      const rows = data?.result?.rows || [];
+      const columns = data?.columns?.[data.columns.length - 1] || [];
+
+      // Create an array of objects for export
+      const exportData = rows.map(row =>
+        columns.reduce((acc, col) => {
+          acc[col.field] = row[col.field];
+          return acc;
+        }, {})
+      );
+
+      // Create worksheet and workbook
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "OrderReport");
+
+      // Choose file extension
+      const fileExt = option === "Excel" ? "xlsx" : "xls";
+      const fileType = option === "Excel"
+        ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        : "application/vnd.ms-excel";
+
+      // Write and trigger download
+      const wbout = XLSX.write(workbook, { bookType: fileExt, type: "array" });
+      const blob = new Blob([wbout], { type: fileType });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute(
+        "download",
+        `OrderReport_${dayjs(date).format("YYYY-MM-DD")}.${fileExt}`
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Export failed:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -181,8 +227,16 @@ const OrderDetails = () => {
                 open={Boolean(exportAnchor)}
                 onClose={handleExportClose}
               >
-                <MenuItem onClick={() => handleExportOption("Excel")}>Excel</MenuItem>
-                <MenuItem onClick={() => handleExportOption("MS-Excel")}>
+                <MenuItem
+                  onClick={() => handleExportOption("Excel")}
+                  disabled={!data?.result?.rows?.length}
+                >
+                  Excel
+                </MenuItem>
+                <MenuItem
+                  onClick={() => handleExportOption("MS-Excel")}
+                  disabled={!data?.result?.rows?.length}
+                >
                   MS-Excel
                 </MenuItem>
               </Menu>
