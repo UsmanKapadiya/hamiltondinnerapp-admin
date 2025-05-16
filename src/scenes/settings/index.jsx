@@ -229,7 +229,8 @@ const Setting = () => {
                 transition: "0.3s",
               }}
             />
-            <Tab
+            {/* Admin Tabs Commented */}
+            {/* <Tab
               label="Admin"
               sx={{
                 backgroundColor: value === 1 ? colors.primary[400] : "transparent", // Active tab background
@@ -237,7 +238,7 @@ const Setting = () => {
                 borderRadius: "8px",
                 transition: "0.3s",
               }}
-            />
+            /> */}
 
           </Tabs>
         </Box>
@@ -816,7 +817,7 @@ const Setting = () => {
             </Formik>
           </Box>
         </CustomTabPanel>
-        <CustomTabPanel value={value} index={1}>
+        {/* <CustomTabPanel value={value} index={1}>
           <Box>
             <Formik
               onSubmit={handleAdminFormSubmit}
@@ -840,7 +841,7 @@ const Setting = () => {
                     mt="15px"
                     gridTemplateColumns="repeat(8, 1fr)"
                   >
-                    {/* Admin Title Input */}
+                    /* Admin Title Input *
                     <Box
                       display="flex"
                       sx={{ gridColumn: "span 6" }}
@@ -877,7 +878,7 @@ const Setting = () => {
                       />
                     </Box>
 
-                    {/* Dropdown and Icons */}
+                    {/* Dropdown and Icons
                     <Box
                       display="flex"
                       flexDirection="column"
@@ -886,7 +887,7 @@ const Setting = () => {
                       sx={{ gridColumn: "span 2" }}
                       flex={1}
                     >
-                      {/* Icons Right-Aligned */}
+                      {/* Icons Right-Aligned *
                       <Box
                         display="flex"
                         justifyContent="flex-end" // Align buttons to the right
@@ -899,7 +900,7 @@ const Setting = () => {
                         <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
                       </Box>
 
-                      {/* Dropdown */}
+                      {/* Dropdown *
                       <Autocomplete
                         fullWidth // Makes the dropdown full width
                         options={mockDataAdminRole}
@@ -920,14 +921,14 @@ const Setting = () => {
                       />
                     </Box>
                   </Box>
-                  {/* Admin google Analytic  */}
+                  {/* Admin google Analytic  *
                   <Box
                     display="grid"
                     gap="20px"
                     mt="20px"
                     gridTemplateColumns="repeat(8, 1fr)"
                   >
-                    {/* Admin Title Input */}
+                    {/* Admin Title Input *
                     <Box
                       display="flex"
                       sx={{ gridColumn: "span 6" }}
@@ -964,7 +965,7 @@ const Setting = () => {
                       />
                     </Box>
 
-                    {/* Dropdown and Icons */}
+                    {/* Dropdown and Icons *
                     <Box
                       display="flex"
                       flexDirection="column"
@@ -973,7 +974,7 @@ const Setting = () => {
                       sx={{ gridColumn: "span 2" }}
                       flex={1}
                     >
-                      {/* Icons Right-Aligned */}
+                      {/* Icons Right-Aligned *
                       <Box
                         display="flex"
                         justifyContent="flex-end" // Align buttons to the right
@@ -986,7 +987,7 @@ const Setting = () => {
                         <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
                       </Box>
 
-                      {/* Dropdown */}
+                      {/* Dropdown *
                       <Autocomplete
                         fullWidth // Makes the dropdown full width
                         options={mockDataAdminRole}
@@ -1007,14 +1008,14 @@ const Setting = () => {
                       />
                     </Box>
                   </Box>
-                  {/* Admin Description */}
+                  {/* Admin Description *
                   <Box
                     display="grid"
                     gap="20px"
                     mt="20px"
                     gridTemplateColumns="repeat(8, 1fr)"
                   >
-                    {/* Admin Title Input */}
+                    {/* Admin Title Input *
                     <Box
                       display="flex"
                       sx={{ gridColumn: "span 6" }}
@@ -1051,7 +1052,7 @@ const Setting = () => {
                       />
                     </Box>
 
-                    {/* Dropdown and Icons */}
+                    {/* Dropdown and Icons *
                     <Box
                       display="flex"
                       flexDirection="column"
@@ -1060,7 +1061,7 @@ const Setting = () => {
                       sx={{ gridColumn: "span 2" }}
                       flex={1}
                     >
-                      {/* Icons Right-Aligned */}
+                      {/* Icons Right-Aligned *
                       <Box
                         display="flex"
                         justifyContent="flex-end" // Align buttons to the right
@@ -1079,7 +1080,7 @@ const Setting = () => {
 
                       </Box>
 
-                      {/* Dropdown */}
+                      {/* Dropdown *
                       <Autocomplete
                         fullWidth // Makes the dropdown full width
                         options={mockDataAdminRole}
@@ -1100,14 +1101,14 @@ const Setting = () => {
                       />
                     </Box>
                   </Box>
-                  {/* Admin Loader Logo */}
+                  {/* Admin Loader Logo *
                   <Box
                     display="grid"
                     gap="20px"
                     mt="20px"
                     gridTemplateColumns="repeat(8, 1fr)"
                   >
-                    {/* Admin Title Input */}
+                    {/* Admin Title Input *
                     <Box
                       display="flex"
                       sx={{ gridColumn: "span 6" }}
@@ -1131,7 +1132,7 @@ const Setting = () => {
                         </Box>
                       </Typography>
 
-                      {/* Uploaded Image Preview */}
+                      {/* Uploaded Image Preview *
                       {values.adminLoader && (
                         <Box
                           component="img"
@@ -1147,7 +1148,7 @@ const Setting = () => {
                         />
                       )}
 
-                      {/* Image Uploader */}
+                      {/* Image Uploader *
                       <Button
                         variant="contained"
                         component="label"
@@ -1178,7 +1179,7 @@ const Setting = () => {
                       </Button>
                     </Box>
 
-                    {/* Dropdown and Icons */}
+                    {/* Dropdown and Icons *
                     <Box
                       display="flex"
                       flexDirection="column"
@@ -1187,7 +1188,7 @@ const Setting = () => {
                       sx={{ gridColumn: "span 2" }}
                       flex={1}
                     >
-                      {/* Icons Right-Aligned */}
+                      {/* Icons Right-Aligned *
                       <Box
                         display="flex"
                         justifyContent="flex-end" // Align buttons to the right
@@ -1206,7 +1207,7 @@ const Setting = () => {
 
                       </Box>
 
-                      {/* Dropdown */}
+                      {/* Dropdown *
                       <Autocomplete
                         fullWidth // Makes the dropdown full width
                         options={mockDataAdminRole}
@@ -1227,14 +1228,14 @@ const Setting = () => {
                       />
                     </Box>
                   </Box>
-                  {/* Admin Logo */}
+                  {/* Admin Logo *
                   <Box
                     display="grid"
                     gap="20px"
                     mt="20px"
                     gridTemplateColumns="repeat(8, 1fr)"
                   >
-                    {/* Admin Title Input */}
+                    {/* Admin Title Input *
                     <Box
                       display="flex"
                       sx={{ gridColumn: "span 6" }}
@@ -1258,7 +1259,7 @@ const Setting = () => {
                         </Box>
                       </Typography>
 
-                      {/* Uploaded Image Preview */}
+                      {/* Uploaded Image Preview *
                       {values.adminLogo && (
                         <Box
                           component="img"
@@ -1274,7 +1275,7 @@ const Setting = () => {
                         />
                       )}
 
-                      {/* Image Uploader */}
+                      {/* Image Uploader *
                       <Button
                         variant="contained"
                         component="label"
@@ -1305,7 +1306,7 @@ const Setting = () => {
                       </Button>
                     </Box>
 
-                    {/* Dropdown and Icons */}
+                    {/* Dropdown and Icons *
                     <Box
                       display="flex"
                       flexDirection="column"
@@ -1314,7 +1315,7 @@ const Setting = () => {
                       sx={{ gridColumn: "span 2" }}
                       flex={1}
                     >
-                      {/* Icons Right-Aligned */}
+                      {/* Icons Right-Aligned *
                       <Box
                         display="flex"
                         justifyContent="flex-end" // Align buttons to the right
@@ -1327,7 +1328,7 @@ const Setting = () => {
                         <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
                       </Box>
 
-                      {/* Dropdown */}
+                      {/* Dropdown *
                       <Autocomplete
                         fullWidth // Makes the dropdown full width
                         options={mockDataAdminRole}
@@ -1348,14 +1349,14 @@ const Setting = () => {
                       />
                     </Box>
                   </Box>
-                  {/* Admin Background Image */}
+                  {/* Admin Background Image *
                   <Box
                     display="grid"
                     gap="20px"
                     mt="20px"
                     gridTemplateColumns="repeat(8, 1fr)"
                   >
-                    {/* Admin Title Input */}
+                    {/* Admin Title Input *
                     <Box
                       display="flex"
                       sx={{ gridColumn: "span 6" }}
@@ -1379,7 +1380,7 @@ const Setting = () => {
                         </Box>
                       </Typography>
 
-                      {/* Uploaded Image Preview */}
+                      {/* Uploaded Image Preview *
                       {values.adminBgImage && (
                         <Box
                           component="img"
@@ -1395,7 +1396,7 @@ const Setting = () => {
                         />
                       )}
 
-                      {/* Image Uploader */}
+                      {/* Image Uploader *
                       <Button
                         variant="contained"
                         component="label"
@@ -1426,7 +1427,7 @@ const Setting = () => {
                       </Button>
                     </Box>
 
-                    {/* Dropdown and Icons */}
+                    {/* Dropdown and Icons *
                     <Box
                       display="flex"
                       flexDirection="column"
@@ -1435,7 +1436,7 @@ const Setting = () => {
                       sx={{ gridColumn: "span 2" }}
                       flex={1}
                     >
-                      {/* Icons Right-Aligned */}
+                      {/* Icons Right-Aligned *
                       <Box
                         display="flex"
                         justifyContent="flex-end" // Align buttons to the right
@@ -1448,7 +1449,7 @@ const Setting = () => {
                         <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
                       </Box>
 
-                      {/* Dropdown */}
+                      {/* Dropdown *
                       <Autocomplete
                         fullWidth // Makes the dropdown full width
                         options={mockDataAdminRole}
@@ -1485,7 +1486,7 @@ const Setting = () => {
               )}
             </Formik>
           </Box>
-        </CustomTabPanel>
+        </CustomTabPanel> */}
 
       </Box>
     </Box>
