@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
     Box,
-    Button,
     Divider,
     Typography,
     useMediaQuery,
@@ -17,17 +16,15 @@ const RolesDetailsView = () => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
     const isXlDevices = useMediaQuery("(min-width: 1260px)");
+    const location = useLocation();
     const [loading, setLoading] = useState(true);
     const [roleDetails, setRoleDetails] = useState(null);
-    const location = useLocation();
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            const fetchedroleDetails = location.state;
-            setRoleDetails(fetchedroleDetails);
-            setLoading(false);
-        }, 1500);
-        return () => clearTimeout(timer);
+        if (location.state) {
+            setRoleDetails(location.state);
+        }
+        setLoading(false);
     }, [location.state]);
 
     return (
@@ -64,7 +61,7 @@ const RolesDetailsView = () => {
                             Name
                         </Typography>
                         <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                            {roleDetails?.name}
+                            {roleDetails?.name || "-"}
                         </Typography>
                     </Box>
                     <Divider sx={{ bgcolor: colors.gray[300] }} />
@@ -73,7 +70,7 @@ const RolesDetailsView = () => {
                             Display Name
                         </Typography>
                         <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                            {roleDetails?.display_name}
+                            {roleDetails?.display_name || "-"}
                         </Typography>
                     </Box>
                 </Box>
