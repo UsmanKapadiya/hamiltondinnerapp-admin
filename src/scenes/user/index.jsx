@@ -8,7 +8,7 @@ import {
   SearchOutlined,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
 import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
 import { toast } from "react-toastify";
@@ -17,18 +17,30 @@ import { useSelector } from "react-redux";
 import { hasPermission } from "../../components/permissions";
 import NoPermissionMessage from "../../components/NoPermissionMessage";
 
+// Debounce hook for search input
+function useDebounce(value, delay) {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const handler = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+  return debounced;
+}
+
 const User = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const permissionList = useSelector((state) => state?.permissionState?.permissionsList);
+
   const [searchText, setSearchText] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const debouncedSearchText = useDebounce(searchText, 300);
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
-  const [selectedItemName, setselectedItemName] = useState("");
-  const [userListData, setUserListData] = useState([])
+  const [selectedItemName, setSelectedItemName] = useState("");
+  const [userListData, setUserListData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({
     page: 1,
@@ -37,59 +49,59 @@ const User = () => {
   });
 
   useEffect(() => {
-    fetchALLUserList()
+    fetchALLUserList();
+    // eslint-disable-next-line
   }, []);
 
   const fetchALLUserList = async () => {
+    setLoading(true);
     try {
       const response = await UserServices.getUserList();
       setUserListData(response.data);
+      setPagination((prev) => ({
+        ...prev,
+        total: response.count || response.data.length,
+      }));
     } catch (error) {
-      console.error("Error fetching menu list:", error);
+      console.error("Error fetching user list:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = (data) => {
-    setSelectedIds([])
+    setSelectedIds([]);
     setSelectedId(data?.id);
-    setselectedItemName(data?.name);
+    setSelectedItemName(data?.name);
     setDialogOpen(true);
   };
 
   const confirmDelete = () => {
     selectedIds.length > 0 && !selectedItemName
-      ? bulkDeleteUsers(selectedIds) : deleteUser(selectedId);
+      ? bulkDeleteUsers(selectedIds)
+      : deleteUser(selectedId);
     setDialogOpen(false);
   };
 
   const cancelDelete = () => {
     setDialogOpen(false);
     setSelectedId(null);
-    setselectedItemName()
+    setSelectedItemName("");
   };
 
   const handleView = (id) => {
-    navigate(`/users-details/${id}`, {
-      state: { id, }
-    });
+    navigate(`/users-details/${id}`, { state: { id } });
   };
 
   const handleEdit = (id) => {
     const selectedRow = userListData.find((row) => row.id === id);
-    navigate(`/users-details/${id}/edit`, {
-      state: {
-        selectedRow,
-      },
-    });
+    navigate(`/users-details/${id}/edit`, { state: { selectedRow } });
   };
-  const handleToggle = () => {
-    setShowDeleted((prev) => !prev);
-  };
+
   const handleAddNewClick = () => {
     navigate("/users-details/create");
   };
+
   const handleBulkDelete = () => {
     if (selectedIds.length > 0) {
       setDialogOpen(true);
@@ -97,31 +109,25 @@ const User = () => {
       toast.warning("Please select at least one User to delete.");
     }
   };
-  const handleOrderClick = () => {
-  };
 
   const handleRowSelection = (ids) => {
     setSelectedIds(ids);
   };
 
-
   const handlePaginationChange = (newPaginationModel) => {
     setPagination((prev) => ({
       ...prev,
-      page: newPaginationModel.page + 1, // DataGrid uses 0-based indexing for pages
+      page: newPaginationModel.page + 1,
       pageSize: newPaginationModel.pageSize,
     }));
-    setCurrentPage(newPaginationModel.page + 1,)
   };
 
   const bulkDeleteUsers = async (ids) => {
-    console.log("Selected IDs for deletion:", ids); // Debugging
-
     if (!ids || ids.length === 0) {
       toast.error("No users selected for deletion.");
       return;
     }
-
+    setLoading(true);
     try {
       const data = { ids };
       const response = await UserServices.bulkdeleteUser(data);
@@ -138,16 +144,16 @@ const User = () => {
       setLoading(false);
     }
   };
+
   const deleteUser = async (id) => {
+    setLoading(true);
     try {
-      const response = await UserServices.deleteUser(id);
-      // console.log(response)
-      setLoading(true)
+      await UserServices.deleteUser(id);
       toast.success("User Deleted successfully!");
       fetchALLUserList();
-      setselectedItemName();
+      setSelectedItemName("");
     } catch (error) {
-      console.error("Error fetching User list:", error);
+      console.error("Error deleting user:", error);
       toast.error("Failed to process User. Please try again.");
     } finally {
       setLoading(false);
@@ -160,85 +166,60 @@ const User = () => {
   const canDelete = hasPermission(permissionList, "delete_Users");
   const canBrowse = hasPermission(permissionList, "browse_Users");
 
-  // console.log("user",userListData)
   const columns = [
-    { field: "name", headerName: "Name", flex: 1, },
-    {
-      field: "user_name",
-      headerName: "User Name",
-      // flex: 1,
-    },
-    {
-      field: "email",
-      headerName: "Email",
-      flex: 1,
-    },
-    // {
-    //   field: "created_at",
-    //   headerName: "Created At",
-    //   flex: 1,
-    // },
-    // {
-    //   field: "email_verified_at",
-    //   headerName: "Email Verified At",
-    //   flex: 1,
-    // },
-    {
-      field: "avatar",
-      headerName: "Avtar",
-      //flex: 1,
-    },
-    {
-      field: "role",
-      headerName: "Role",
-      // flex: 1,
-    },
-    // {
-    //   field: "roles",
-    //   headerName: "Roles",
-    //   // flex: 1,
-    // },
+    { field: "name", headerName: "Name", flex: 1 },
+    { field: "user_name", headerName: "User Name" },
+    { field: "email", headerName: "Email", flex: 1 },
+    { field: "avatar", headerName: "Avatar" },
+    { field: "role", headerName: "Role" },
     {
       field: "actions",
       headerName: "Actions",
       flex: 1,
-      renderCell: ({ row }) => {
-        return (
-          <Box display="flex" gap={1}>
-            <Button
-              variant="contained"
-              color="info"
-              size="small"
-              onClick={() => handleView(row.id)}
-              disabled={!canView}
-            >
-              View
-            </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={() => handleEdit(row.id)}
-              disabled={!canEdit}
-            >
-              Edit
-            </Button>
-            <Button
-              variant="contained"
-              color="secondary"
-              size="small"
-              onClick={() => handleDelete(row)}
-              disabled={!canDelete}
-
-            >
-              Delete
-            </Button>
-
-          </Box>
-        );
-      },
+      renderCell: ({ row }) => (
+        <Box display="flex" gap={1}>
+          <Button
+            variant="contained"
+            color="info"
+            size="small"
+            onClick={() => handleView(row.id)}
+            disabled={!canView}
+          >
+            View
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            onClick={() => handleEdit(row.id)}
+            disabled={!canEdit}
+          >
+            Edit
+          </Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            size="small"
+            onClick={() => handleDelete(row)}
+            disabled={!canDelete}
+          >
+            Delete
+          </Button>
+        </Box>
+      ),
     },
   ];
+
+  // Memoized filtered rows
+  const filteredRows = useMemo(() => {
+    const search = debouncedSearchText.toLowerCase();
+    return userListData.filter(
+      (row) =>
+        row.name?.toLowerCase().includes(search) ||
+        row.user_name?.toLowerCase().includes(search) ||
+        row.email?.toLowerCase().includes(search)
+    );
+  }, [userListData, debouncedSearchText]);
 
   return (
     <Box m="20px">
@@ -247,8 +228,6 @@ const User = () => {
         icon={<PersonOutlined />}
         addNewClick={handleAddNewClick}
         addBulkDelete={handleBulkDelete}
-        orderClick={handleOrderClick}
-        showToggleClick={handleToggle}
         buttons={true}
         addButton={canAdd && canBrowse}
         deleteButton={canDelete && canBrowse}
@@ -259,15 +238,9 @@ const User = () => {
           height="75vh"
           flex={1}
           sx={{
-            "& .MuiDataGrid-root": {
-              border: "none",
-            },
-            "& .MuiDataGrid-cell": {
-              border: "none",
-            },
-            "& .name-column--cell": {
-              color: colors.greenAccent[300],
-            },
+            "& .MuiDataGrid-root": { border: "none" },
+            "& .MuiDataGrid-cell": { border: "none" },
+            "& .name-column--cell": { color: colors.greenAccent[300] },
             "& .MuiDataGrid-columnHeaders": {
               backgroundColor: colors.blueAccent[700],
               borderBottom: "none",
@@ -295,7 +268,8 @@ const User = () => {
             mb="10px"
           >
             <InputBase
-              placeholder="Search by Name, Username, or Email..." sx={{ ml: 2, flex: 1 }}
+              placeholder="Search by Name, Username, or Email..."
+              sx={{ ml: 2, flex: 1 }}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
             />
@@ -304,19 +278,11 @@ const User = () => {
               sx={{ p: 1 }}
               onClick={() => setSearchText("")}
             >
-              {searchText
-                ? <Close />
-                : <SearchOutlined />
-              }
+              {searchText ? <Close /> : <SearchOutlined />}
             </IconButton>
           </Box>
           <DataGrid
-            rows={userListData.filter(
-              (row) =>
-                row.name?.toLowerCase().includes(searchText.toLowerCase()) ||
-                row.user_name?.toLowerCase().includes(searchText.toLowerCase()) ||
-                row.email?.toLowerCase().includes(searchText.toLowerCase())
-            )}
+            rows={filteredRows}
             columns={columns}
             loading={loading}
             rowCount={pagination.total}
@@ -324,8 +290,9 @@ const User = () => {
               page: pagination.page - 1,
               pageSize: pagination.pageSize,
             }}
+            pageSizeOptions={[10, 20, 50, 100]}
             onPaginationModelChange={handlePaginationChange}
-            onRowSelectionModelChange={(ids) => handleRowSelection(ids)}
+            onRowSelectionModelChange={handleRowSelection}
             checkboxSelection
             components={{
               LoadingOverlay: CustomLoadingOverlay,
@@ -337,7 +304,7 @@ const User = () => {
             message={
               selectedIds.length > 0 && !selectedItemName
                 ? `Are you sure you want to delete ${selectedIds.length} Users?`
-                : `Are you sure you want to delete the Option "${selectedItemName}"?`
+                : `Are you sure you want to delete the User "${selectedItemName}"?`
             }
             onConfirm={confirmDelete}
             onCancel={cancelDelete}
@@ -354,4 +321,3 @@ const User = () => {
 };
 
 export default User;
-
