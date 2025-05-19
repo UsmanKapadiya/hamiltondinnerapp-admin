@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
     Box,
     Divider,
@@ -17,28 +17,28 @@ const ItemPreferencesView = () => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
     const isXlDevices = useMediaQuery("(min-width: 1260px)");
-    const [preferencesDetails, setPreferencesDetails] = useState('')
+    const [preferencesDetails, setPreferencesDetails] = useState(null);
     const [loading, setLoading] = useState(false);
 
     const location = useLocation();
-    const ItemPreferencesDetails = location.state.id
+    const ItemPreferencesDetails = location.state?.id;
 
-    useEffect(() => {
-        getPreferencesDetails(ItemPreferencesDetails)
-    }, [ItemPreferencesDetails])
-
-    const getPreferencesDetails = async (id) => {
+    const getPreferencesDetails = useCallback(async (id) => {
+        if (!id) return;
+        setLoading(true);
         try {
-            setLoading(true);
             const response = await ItemServices.getPreferencesDetails(id);
-            // console.log(response?.data)
             setPreferencesDetails(response?.data);
         } catch (error) {
             console.error("Error fetching menu list:", error);
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        getPreferencesDetails(ItemPreferencesDetails);
+    }, [ItemPreferencesDetails, getPreferencesDetails]);
 
     return (
         <Box m="20px">
@@ -69,7 +69,7 @@ const ItemPreferencesView = () => {
                             Preference name
                         </Typography>
                         <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                            {preferencesDetails?.pname}
+                            {preferencesDetails?.pname || "-"}
                         </Typography>
                     </Box>
                     <Divider sx={{ bgcolor: colors.gray[300] }} />
@@ -78,7 +78,7 @@ const ItemPreferencesView = () => {
                             Item Chinese Name
                         </Typography>
                         <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                            {preferencesDetails?.pname_cn}
+                            {preferencesDetails?.pname_cn || "-"}
                         </Typography>
                     </Box>
                 </Box>
