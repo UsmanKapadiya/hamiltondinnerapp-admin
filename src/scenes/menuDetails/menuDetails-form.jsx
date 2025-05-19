@@ -1,14 +1,12 @@
-import { Box, Button, TextField, useMediaQuery, Switch, FormGroup, FormControlLabel, Autocomplete, Typography } from "@mui/material";
+import { Box, Button, TextField, useMediaQuery, Switch, FormGroup, FormControlLabel, Typography } from "@mui/material";
 import { Header } from "../../components";
 import { Formik } from "formik";
 import * as yup from "yup";
-import { ClearAllOutlined, CreateOutlined, DvrOutlined, Home } from "@mui/icons-material";
+import { CreateOutlined } from "@mui/icons-material";
 import { useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { mockBreakFastAlternatives, mockBreakFastDailySpecial, mockDinnerAlternatives, mockDinnerDessert, mockDinnerEntree, mocklunchAlternatives, mocklunchDessert, mocklunchEntree, mockLunchSoups } from "../../data/mockData";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useTheme } from "@emotion/react";
 import { tokens } from "../../theme";
-
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -18,229 +16,226 @@ import MenuServices from "../../services/menuServices";
 import { toast } from "react-toastify";
 import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
 
-
 const validationSchema = yup.object().shape({
-    menu_name: yup.string().required("Menu  Name is required"),
-    date: yup.string().required("Date is required"),
-
-
+  menu_name: yup.string().required("Menu Name is required"),
+  date: yup.string().required("Date is required"),
 });
 
-
 const MenuDetailsForm = () => {
-    const theme = useTheme();
-    const colors = tokens(theme.palette.mode);
-    const location = useLocation();
-    const optionsDetails = location.state;
-    const isNonMobile = useMediaQuery("(min-width:600px)");
-    const [loading, setLoading] = useState(false);
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+  const location = useLocation();
+  const optionsDetails = location.state;
+  const isNonMobile = useMediaQuery("(min-width:600px)");
+  const [loading, setLoading] = useState(false);
 
-    const [categoryListData, setCategoryListData] = useState([])
+  const [categoryListData, setCategoryListData] = useState([]);
+  const [selected, setSelected] = useState("");
+  const [selectedItems, setSelectedItems] = useState(optionsDetails?.items?.breakfast || []);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedLunch, setSelectedLunch] = useState("");
+  const [selectedLunchItems, setSelectedLunchItems] = useState(optionsDetails?.items?.lunch || []);
+  const [lunchSearchTerm, setLunchSearchTerm] = useState("");
+  const [selectedDinner, setSelectedDinner] = useState("");
+  const [selectedDinnerItems, setSelectedDinnerItems] = useState(optionsDetails?.items?.dinner || []);
+  const [dinnerSearchTerm, setDinnerSearchTerm] = useState("");
 
-    const BreakFastOptions = categoryListData.filter((category) => category.type === 1);
-    const LunchOptions = categoryListData.filter((category) => category.type === 2);
-    const DinnerOptions = categoryListData.filter((category) => category.type === 3);
+  // Memoized category options
+  const BreakFastOptions = useMemo(
+    () => categoryListData.filter((category) => category.type === 1),
+    [categoryListData]
+  );
+  const LunchOptions = useMemo(
+    () => categoryListData.filter((category) => category.type === 2),
+    [categoryListData]
+  );
+  const DinnerOptions = useMemo(
+    () => categoryListData.filter((category) => category.type === 3),
+    [categoryListData]
+  );
 
-    const [selected, setSelected] = useState("");
-    const [selectedItems, setSelectedItems] = useState(optionsDetails?.items?.breakfast || []);
-    const [searchTerm, setSearchTerm] = useState("");
-
-    const [selectedLunch, setSelectedLunch] = useState("");
-    const [selectedLunchItems, setSelectedLunchItems] = useState(optionsDetails?.items?.lunch || []);
-    const [lunchSearchTerm, setLunchSearchTerm] = useState("");
-
-    const [selectedDinner, setSelectedDinner] = useState("");
-    const [selectedDinnerItems, setSelectedDinnerItems] = useState(optionsDetails?.items?.dinner || []);
-    const [dinnerSearchTerm, setDinnerSearchTerm] = useState("");
-
-    const initialValues = {
-        id: optionsDetails?.id && optionsDetails?.id,
-        menu_name: optionsDetails?.menu_name || "",
-        date: optionsDetails?.date || "",
-        breakfast: optionsDetails?.items?.breakfast?.length > 0 ? true : false,
-        lunch: optionsDetails?.items?.lunch?.length > 0 ? true : false,
-        dinner: optionsDetails?.items?.dinner?.length > 0 ? true : false,
-        BreakfastItems: optionsDetails?.items?.breakfast || [],
-        lunchItems: optionsDetails?.items?.lunch || [],
-        dinnerItems: optionsDetails?.items?.dinner || [],
-    };
-
-    useEffect(() => {
-        getCategoryListData()
-    }, [])
-
-    useEffect(() => {
-        if (categoryListData.length > 0) {
-            if (BreakFastOptions.length > 0 && !selected) {
-                setSelected(BreakFastOptions[0]?.cat_name);
-            }
-            if (LunchOptions.length > 0 && !selectedLunch) {
-                setSelectedLunch(LunchOptions[0]?.cat_name);
-            }
-            if (DinnerOptions.length > 0 && !selectedDinner) {
-                setSelectedDinner(DinnerOptions[0]?.cat_name);
-            }
-        }
-    }, [categoryListData, selected, selectedLunch, selectedDinner]);
-
-    const getCategoryListData = async () => {
-        try {
-            const response = await CategoryServices.getCategoryList();
-            setCategoryListData(response?.data)
-
-        } catch (error) {
-            console.error("Error fetching menu list:", error);
-        } finally {
-            //   setLoading(false);
-        }
-    };
-
-    const itemList = useSelector((state) => state.itemState.item);
-    // console.log("fetch Redux Data", itemList);
-
-    // Separate items by category
-    const categorizedItems = categoryListData.reduce((acc, category) => {
-        acc[category.cat_name] = itemList.filter((item) => item.cat_id === category.id);
-        return acc;
+  // Memoized categorized items
+  const itemList = useSelector((state) => state.itemState.item);
+  const categorizedItems = useMemo(() => {
+    return categoryListData.reduce((acc, category) => {
+      acc[category.cat_name] = itemList.filter((item) => item.cat_id === category.id);
+      return acc;
     }, {});
+  }, [categoryListData, itemList]);
 
-    // console.log("Categorized Items:", categorizedItems);
+  // Debounce search terms for performance
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+  const [debouncedLunchSearchTerm, setDebouncedLunchSearchTerm] = useState(lunchSearchTerm);
+  const [debouncedDinnerSearchTerm, setDebouncedDinnerSearchTerm] = useState(dinnerSearchTerm);
 
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedSearchTerm(searchTerm), 300);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedLunchSearchTerm(lunchSearchTerm), 300);
+    return () => clearTimeout(handler);
+  }, [lunchSearchTerm]);
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedDinnerSearchTerm(dinnerSearchTerm), 300);
+    return () => clearTimeout(handler);
+  }, [dinnerSearchTerm]);
 
-
-    const handleSelectCategory = (category) => {
-        setSelected(category);
-        setSearchTerm("");
+  // Fetch categories once
+  useEffect(() => {
+    const getCategoryListData = async () => {
+      try {
+        const response = await CategoryServices.getCategoryList();
+        setCategoryListData(response?.data);
+      } catch (error) {
+        console.error("Error fetching menu list:", error);
+      }
     };
+    getCategoryListData();
+  }, []);
 
-    const handleSelectLunch = (category) => {
-        setSelectedLunch(category);
-        setLunchSearchTerm("");
-    };
+  // Set default selected categories
+  useEffect(() => {
+    if (categoryListData.length > 0) {
+      if (BreakFastOptions.length > 0 && !selected) setSelected(BreakFastOptions[0]?.cat_name);
+      if (LunchOptions.length > 0 && !selectedLunch) setSelectedLunch(LunchOptions[0]?.cat_name);
+      if (DinnerOptions.length > 0 && !selectedDinner) setSelectedDinner(DinnerOptions[0]?.cat_name);
+    }
+  }, [categoryListData, BreakFastOptions, LunchOptions, DinnerOptions, selected, selectedLunch, selectedDinner]);
 
-    const handleSelectDinner = (category) => {
-        setSelectedDinner(category);
-        setDinnerSearchTerm("");
-    };
-
-    const handleSelectItem = (item) => {
-        if (selectedItems.includes(item.id)) {
-            setSelectedItems(selectedItems.filter((id) => id !== item.id));
-        } else {
-            setSelectedItems([...selectedItems, item.id]);
-        }
-    };
-    const handleSelectLunchItem = (item) => {
-        if (selectedLunchItems.includes(item.id)) {
-            setSelectedLunchItems(selectedLunchItems.filter((id) => id !== item.id));
-        } else {
-            setSelectedLunchItems([...selectedLunchItems, item.id]);
-        }
-    };
-    const handleSelectDinnerItem = (item) => {
-        if (selectedDinnerItems.includes(item.id)) {
-            setSelectedDinnerItems(selectedDinnerItems.filter((id) => id !== item.id));
-        } else {
-            setSelectedDinnerItems([...selectedDinnerItems, item.id]);
-        }
-    };
-
-    // SET BREAK FAST DATA
+  // Memoized filtered data
+  const filteredData = useMemo(() => {
     const renderData = categorizedItems[selected] || [];
-    const filteredData = renderData.filter((item) =>
-        item?.item_name?.toLowerCase().includes(searchTerm.toLowerCase())
+    return renderData.filter((item) =>
+      item?.item_name?.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
     );
+  }, [categorizedItems, selected, debouncedSearchTerm]);
 
-    // SET LUNCH DATA
+  const filtereLunchdData = useMemo(() => {
     const renderLunchData = categorizedItems[selectedLunch] || [];
-    const filtereLunchdData = renderLunchData.filter((item) =>
-        item.item_name.toLowerCase().includes(lunchSearchTerm.toLowerCase())
+    return renderLunchData.filter((item) =>
+      item.item_name.toLowerCase().includes(debouncedLunchSearchTerm.toLowerCase())
     );
+  }, [categorizedItems, selectedLunch, debouncedLunchSearchTerm]);
 
-    // SET DINNER DATA
+  const filtereDinnerData = useMemo(() => {
     const renderDinnerData = categorizedItems[selectedDinner] || [];
-    const filtereDinnerData = renderDinnerData.filter((item) =>
-        item.item_name.toLowerCase().includes(dinnerSearchTerm.toLowerCase())
+    return renderDinnerData.filter((item) =>
+      item.item_name.toLowerCase().includes(debouncedDinnerSearchTerm.toLowerCase())
     );
-    const handleFormSubmit = async (values) => {
-        setLoading(true)
-        const { BreakfastItems, dinnerItems, lunchItems, breakfast, dinner, lunch, ...restValues } = values;
-        const formData = {
-            ...restValues,
-            items: {
-                breakfast: selectedItems,
-                lunch: selectedLunchItems,
-                dinner: selectedDinnerItems,
-            },
-            is_allday: false,
-        };
+  }, [categorizedItems, selectedDinner, debouncedDinnerSearchTerm]);
 
-        console.log(formData);
-        try {
-            let response;
-            if (formData?.id) {
-                // Update menu if ID is available
-                response = await MenuServices.updateMenus(formData.id, formData);
-                toast.success("Menu updated successfully!");
-            } else {
-                // Create menu if ID is not available
-                console.log("formData", formData)
-                response = await MenuServices.createMenu(formData);
-                toast.success("Menu created successfully!");
-            }
+  // Memoized handlers
+  const handleSelectCategory = useCallback((category) => {
+    setSelected(category);
+    setSearchTerm("");
+  }, []);
+  const handleSelectLunch = useCallback((category) => {
+    setSelectedLunch(category);
+    setLunchSearchTerm("");
+  }, []);
+  const handleSelectDinner = useCallback((category) => {
+    setSelectedDinner(category);
+    setDinnerSearchTerm("");
+  }, []);
+  const handleSelectItem = useCallback((item) => {
+    setSelectedItems((prev) =>
+      prev.includes(item.id) ? prev.filter((id) => id !== item.id) : [...prev, item.id]
+    );
+  }, []);
+  const handleSelectLunchItem = useCallback((item) => {
+    setSelectedLunchItems((prev) =>
+      prev.includes(item.id) ? prev.filter((id) => id !== item.id) : [...prev, item.id]
+    );
+  }, []);
+  const handleSelectDinnerItem = useCallback((item) => {
+    setSelectedDinnerItems((prev) =>
+      prev.includes(item.id) ? prev.filter((id) => id !== item.id) : [...prev, item.id]
+    );
+  }, []);
 
-            console.log("response", response);
-        } catch (error) {
-            if (error.response && error.response.data && error.response.data.errors) {
-                const errors = error.response.data.errors;
-                Object.keys(errors).forEach((key) => {
-                    errors[key].forEach((message) => {
-                        toast.error(message);
-                    });
-                });
-            } else {
-                toast.error("Failed to process menu. Please try again.");
-            }
-        } finally {
-            setLoading(false);
-        }
+  const initialValues = useMemo(() => ({
+    id: optionsDetails?.id,
+    menu_name: optionsDetails?.menu_name || "",
+    date: optionsDetails?.date || "",
+    breakfast: optionsDetails?.items?.breakfast?.length > 0,
+    lunch: optionsDetails?.items?.lunch?.length > 0,
+    dinner: optionsDetails?.items?.dinner?.length > 0,
+    BreakfastItems: optionsDetails?.items?.breakfast || [],
+    lunchItems: optionsDetails?.items?.lunch || [],
+    dinnerItems: optionsDetails?.items?.dinner || [],
+  }), [optionsDetails]);
+
+  // Optimized error handling
+  const handleFormSubmit = async (values) => {
+    setLoading(true);
+    const { BreakfastItems, dinnerItems, lunchItems, breakfast, dinner, lunch, ...restValues } = values;
+    const formData = {
+      ...restValues,
+      items: {
+        breakfast: selectedItems,
+        lunch: selectedLunchItems,
+        dinner: selectedDinnerItems,
+      },
+      is_allday: false,
     };
+    try {
+      let response;
+      if (formData?.id) {
+        response = await MenuServices.updateMenus(formData.id, formData);
+        toast.success("Menu updated successfully!");
+      } else {
+        response = await MenuServices.createMenu(formData);
+        toast.success("Menu created successfully!");
+      }
+    } catch (error) {
+      const errors = error?.response?.data?.errors;
+      if (errors) {
+        Object.values(errors).flat().forEach((message) => toast.error(message));
+      } else {
+        toast.error("Failed to process menu. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    return (
-        <Box m="20px">
-            {loading && (
-                <Box
-                    position="fixed"
-                    top={0}
-                    left={0}
-                    width="100%"
-                    height="100%"
-                    display="flex"
-                    justifyContent="center"
-                    alignItems="center"
-                    zIndex={9999}
-                >
-                    <CustomLoadingOverlay />
-                </Box>
-            )}
-            <Header title="Add Menu Detail" icon={<CreateOutlined />} Buttons={false} />
-            <Formik
-                onSubmit={handleFormSubmit}
-                initialValues={initialValues}
-                validationSchema={validationSchema}
-                validateOnBlur={true}
-                validateOnChange={true}
-            >
-                {({
-                    values,
-                    errors,
-                    touched,
-                    handleBlur,
-                    handleChange,
-                    handleSubmit,
-                    setFieldValue,
-                }) => (
-                    <form onSubmit={handleSubmit}>
+  return (
+    <Box m="20px">
+      {loading && (
+        <Box
+          position="fixed"
+          top={0}
+          left={0}
+          width="100%"
+          height="100%"
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          zIndex={9999}
+        >
+          <CustomLoadingOverlay />
+        </Box>
+      )}
+      <Header title="Add Menu Detail" icon={<CreateOutlined />} Buttons={false} />
+      <Formik
+        onSubmit={handleFormSubmit}
+        initialValues={initialValues}
+        validationSchema={validationSchema}
+        enableReinitialize
+        validateOnBlur
+        validateOnChange
+      >
+        {({
+          values,
+          errors,
+          touched,
+          handleBlur,
+          handleChange,
+          handleSubmit,
+          setFieldValue,
+        }) => (
+           <form onSubmit={handleSubmit}>
                         <Box
                             display="grid"
                             gap="30px"
@@ -623,10 +618,10 @@ const MenuDetailsForm = () => {
                             </Button>
                         </Box>
                     </form>
-                )}
-            </Formik>
-        </Box>
-    );
+        )}
+      </Formik>
+    </Box>
+  );
 };
 
 export default MenuDetailsForm;

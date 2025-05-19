@@ -8,7 +8,7 @@ import {
   SearchOutlined,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
 import MenuServices from "../../services/menuServices";
 import { toast } from "react-toastify";
@@ -22,9 +22,9 @@ const MenuDetails = () => {
   const permissionList = useSelector((state) => state?.permissionState?.permissionsList);
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const perPageRecords = (10)
+
   const [searchText, setSearchText] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
@@ -36,14 +36,26 @@ const MenuDetails = () => {
     pageSize: 10,
     total: 0,
   });
+
+  // Debounce search input
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedSearch(searchText), 300);
+    return () => clearTimeout(handler);
+  }, [searchText]);
+
+  // Fetch menu list on mount, pagination, or search change
   useEffect(() => {
     fetchMenuList();
-    setLoading(true)
-  }, [pagination.page, pagination.pageSize]);
+  }, [pagination.page, pagination.pageSize, debouncedSearch]);
 
-  const fetchMenuList = async () => {
+  const fetchMenuList = useCallback(async () => {
+    setLoading(true);
     try {
-      const response = await MenuServices.getMenuList({ currentPage, perPageRecords });
+      const response = await MenuServices.getMenuList({
+        currentPage: pagination.page,
+        perPageRecords: pagination.pageSize,
+        search: debouncedSearch,
+      });
       setMenuList(response.data);
       setPagination((prev) => ({
         ...prev,
@@ -54,96 +66,98 @@ const MenuDetails = () => {
     } finally {
       setLoading(false);
     }
-  };
-  const bulkDeleteMenu = async (ids) => {
+  }, [pagination.page, pagination.pageSize, debouncedSearch]);
+
+  const bulkDeleteMenu = useCallback(async (ids) => {
     try {
-      let data = JSON.stringify({
-        "ids": ids
-      });
-      const response = await MenuServices.bulkdeleteMenus(data);
-      // console.log(response)
-      setLoading(true)
+      let data = JSON.stringify({ ids });
+      await MenuServices.bulkdeleteMenus(data);
       toast.success("Multiple Menus Deleted successfully!");
       fetchMenuList();
     } catch (error) {
-      console.error("Error fetching menu list:", error);
+      console.error("Error deleting menus:", error);
       toast.error("Failed to process menu. Please try again.");
     } finally {
       setLoading(false);
     }
-  };
-  const deleteMenu = async (id) => {
+  }, [fetchMenuList]);
+
+  const deleteMenu = useCallback(async (id) => {
     try {
       setLoading(true);
-      const response = await MenuServices.deleteMenus(id);
-      console.log(response)
+      await MenuServices.deleteMenus(id);
       toast.success("Menu Deleted successfully!");
       fetchMenuList();
       setSelectedMenuName("");
     } catch (error) {
-      console.error("Error fetching menu list:", error);
+      console.error("Error deleting menu:", error);
       toast.error("Failed to process menu. Please try again.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [fetchMenuList]);
 
-  const handleDelete = (data) => {
+  const handleDelete = useCallback((data) => {
     setSelectedId(data?.id);
     setSelectedMenuName(data?.menu_name);
     setDialogOpen(true);
-  };
+  }, []);
 
-  const confirmDelete = () => {
+  const confirmDelete = useCallback(() => {
     selectedIds.length > 0 && !selectedMenuName
-      ? bulkDeleteMenu(selectedIds) : deleteMenu(selectedId);
+      ? bulkDeleteMenu(selectedIds)
+      : deleteMenu(selectedId);
     setDialogOpen(false);
-    setLoading(true)
-  };
+  }, [selectedIds, selectedMenuName, selectedId, bulkDeleteMenu, deleteMenu]);
 
-  const cancelDelete = () => {
+  const cancelDelete = useCallback(() => {
     setDialogOpen(false);
     setSelectedId(null);
-  };
+    setSelectedMenuName("");
+  }, []);
 
-  const handleView = (id) => {
+  const handleView = useCallback((id) => {
     const selectedRow = menuList.find((row) => row.id === id);
     navigate(`/menu-details/${id}`, { state: selectedRow });
-  };
+  }, [navigate, menuList]);
 
-  const handleEdit = (id) => {
+  const handleEdit = useCallback((id) => {
     const selectedRow = menuList.find((row) => row.id === id);
     navigate(`/menu-details/${id}/edit`, { state: selectedRow });
-  };
-  const handleToggle = () => {
-    setShowDeleted((prev) => !prev);
-  };
-  const handleAddNewClick = () => {
+  }, [navigate, menuList]);
+
+  const handleAddNewClick = useCallback(() => {
     navigate("/menu-details/create");
-  };
-  const handleBulkDelete = () => {
+  }, [navigate]);
+
+  const handleBulkDelete = useCallback(() => {
     if (selectedIds.length > 0) {
       setDialogOpen(true);
     } else {
       toast.warning("Please select at least one Menu to delete.");
     }
-  };
-  const handleRowSelection = (ids) => {
+  }, [selectedIds]);
+
+  const handleRowSelection = useCallback((ids) => {
     setSelectedIds(ids);
-  };
+  }, []);
 
-  const handleOrderClick = () => {
-    // navigate("/item-details/order");
-  };
+  const handlePaginationChange = useCallback((newPaginationModel) => {
+    setPagination((prev) => ({
+      ...prev,
+      page: newPaginationModel.page + 1,
+      pageSize: newPaginationModel.pageSize,
+    }));
+  }, []);
 
-  const canAdd = hasPermission(permissionList, "add_Menus");
-  const canView = hasPermission(permissionList, "read_Menus");
-  const canEdit = hasPermission(permissionList, "edit_Menus");
-  const canDelete = hasPermission(permissionList, "delete_Menus");
-  const canBrowse = hasPermission(permissionList, "browse_Menus");
+  const canAdd = useMemo(() => hasPermission(permissionList, "add_Menus"), [permissionList]);
+  const canView = useMemo(() => hasPermission(permissionList, "read_Menus"), [permissionList]);
+  const canEdit = useMemo(() => hasPermission(permissionList, "edit_Menus"), [permissionList]);
+  const canDelete = useMemo(() => hasPermission(permissionList, "delete_Menus"), [permissionList]);
+  const canBrowse = useMemo(() => hasPermission(permissionList, "browse_Menus"), [permissionList]);
 
-  const columns = [
-    { field: "menu_name", headerName: "Menu Name", flex: 1, },
+  const columns = useMemo(() => [
+    { field: "menu_name", headerName: "Menu Name", flex: 1 },
     {
       field: "date",
       headerName: "Date",
@@ -154,59 +168,53 @@ const MenuDetails = () => {
           .toString()
           .padStart(2, "0")}-${date.getFullYear()}`;
       },
-      // cellClassName: "name-column--cell",
     },
     {
       field: "actions",
       headerName: "Actions",
       flex: 1,
-      renderCell: ({ row }) => {
-        return (
-          <Box display="flex" gap={1}>
-            <Button
-              variant="contained"
-              color="info"
-              size="small"
-              onClick={() => handleView(row.id)}
-              disabled={!canView}
-            >
-              View
-            </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={() => handleEdit(row.id)}
-              disabled={!canEdit}
-            >
-              Edit
-            </Button>
-            <Button
-              variant="contained"
-              color="secondary"
-              size="small"
-              onClick={() => handleDelete(row)}
-              disabled={!canDelete}
-
-            >
-              Delete
-            </Button>
-
-          </Box>
-        );
-      },
+      renderCell: ({ row }) => (
+        <Box display="flex" gap={1}>
+          <Button
+            variant="contained"
+            color="info"
+            size="small"
+            onClick={() => handleView(row.id)}
+            disabled={!canView}
+          >
+            View
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            onClick={() => handleEdit(row.id)}
+            disabled={!canEdit}
+          >
+            Edit
+          </Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            size="small"
+            onClick={() => handleDelete(row)}
+            disabled={!canDelete}
+          >
+            Delete
+          </Button>
+        </Box>
+      ),
     },
-  ];
+  ], [handleView, handleEdit, handleDelete, canView, canEdit, canDelete]);
 
-  const handlePaginationChange = (newPaginationModel) => {
-    setPagination((prev) => ({
-      ...prev,
-      page: newPaginationModel.page + 1, // DataGrid uses 0-based indexing for pages
-      pageSize: newPaginationModel.pageSize,
-    }));
-    setCurrentPage(newPaginationModel.page + 1,)
-
-  };
+  // Filtered rows for client-side search (if needed)
+  const filteredRows = useMemo(() => {
+    if (!debouncedSearch) return menuList;
+    return menuList.filter(
+      (row) =>
+        row.menu_name?.toLowerCase().includes(debouncedSearch.toLowerCase())
+    );
+  }, [menuList, debouncedSearch]);
 
   return (
     <Box m="20px">
@@ -215,8 +223,8 @@ const MenuDetails = () => {
         icon={<CreateOutlined />}
         addNewClick={handleAddNewClick}
         addBulkDelete={handleBulkDelete}
-        orderClick={handleOrderClick}
-        showToggleClick={handleToggle}
+        orderClick={() => {}}
+        showToggleClick={() => {}}
         buttons={true}
         addButton={canAdd && canBrowse}
         deleteButton={canDelete && canBrowse}
@@ -227,15 +235,9 @@ const MenuDetails = () => {
           height="75vh"
           flex={1}
           sx={{
-            "& .MuiDataGrid-root": {
-              border: "none",
-            },
-            "& .MuiDataGrid-cell": {
-              border: "none",
-            },
-            "& .name-column--cell": {
-              color: colors.greenAccent[300],
-            },
+            "& .MuiDataGrid-root": { border: "none" },
+            "& .MuiDataGrid-cell": { border: "none" },
+            "& .name-column--cell": { color: colors.greenAccent[300] },
             "& .MuiDataGrid-columnHeaders": {
               backgroundColor: colors.blueAccent[700],
               borderBottom: "none",
@@ -273,17 +275,11 @@ const MenuDetails = () => {
               sx={{ p: 1 }}
               onClick={() => setSearchText("")}
             >
-              {searchText
-                ? <Close />
-                : <SearchOutlined />
-              }
+              {searchText ? <Close /> : <SearchOutlined />}
             </IconButton>
           </Box>
           <DataGrid
-            rows={menuList.filter(
-              (row) =>
-                row.menu_name?.toLowerCase().includes(searchText.toLowerCase())
-            )}
+            rows={filteredRows}
             columns={columns}
             loading={loading}
             pagination
@@ -293,9 +289,10 @@ const MenuDetails = () => {
               page: pagination.page - 1,
               pageSize: pagination.pageSize,
             }}
+            pageSizeOptions={[10, 20, 50, 100]}
             onPaginationModelChange={handlePaginationChange}
             checkboxSelection
-            onRowSelectionModelChange={(ids) => handleRowSelection(ids)}
+            onRowSelectionModelChange={handleRowSelection}
             components={{
               LoadingOverlay: CustomLoadingOverlay,
             }}
@@ -323,4 +320,3 @@ const MenuDetails = () => {
 };
 
 export default MenuDetails;
-
