@@ -1,24 +1,12 @@
 import { Box, Typography, useTheme, Button, Tabs, Tab, useMediaQuery, TextField, Icon, Autocomplete } from "@mui/material";
 import { Header } from "../../components";
-import { DataGrid } from "@mui/x-data-grid";
-import { mockDataItems } from "../../data/mockData";
 import { tokens } from "../../theme";
-import {
-  AdminPanelSettingsOutlined,
-  ArrowDownwardOutlined,
-  ArrowUpwardOutlined,
-  DeleteOutlined,
-  DvrOutlined,
-  Home,
-  SecurityOutlined,
-  SettingsOutlined,
-} from "@mui/icons-material";
-
-import { useState } from "react";
+import { SettingsOutlined } from "@mui/icons-material";
+import { useCallback, useEffect, useState } from "react";
 import { Formik } from "formik";
 import * as yup from "yup";
-
-
+import SettingServices from "../../services/settingServices";
+import { toast } from "react-toastify";
 
 const CustomTabPanel = ({ children, value, index }) => {
   return (
@@ -29,106 +17,99 @@ const CustomTabPanel = ({ children, value, index }) => {
 };
 
 const validationSchema = yup.object().shape({
-  siteTitle: yup.string().required("Site Title is required"),
-  siteOptions: yup.string().required("Site Options is required"),
-
-  siteDescription: yup.string().required("Site Description is required"),
-  siteDescriptionOptions: yup.string().required("Site Description Options is required"),
-
-  siteLogo: yup.string().nullable(), // Optional field
-  siteLogoOptions: yup.string().required("Site Logo Options is required"),
-
-
-  siteGoogleAnalyticId: yup.string().nullable(), // Optional field
-  siteGoogleAnalyticIdOptions: yup.string().required("Site Googlea Analytics Options is required"),
-
   siteGuidelines: yup.string().required("Site Guidelines are required"),
-  siteGuidelinesOptions: yup.string().required("Site Guidelines Options are required"),
-
   siteGuidelinesChinese: yup.string().required("Site Guidelines (Chinese) are required"),
-  siteGuidelinesChineseOptions: yup.string().required("Site Guidelines (Chinese) Options are required"),
 });
-const adminValidationSchema = yup.object().shape({
-  adminTitle: yup.string().required("admin Title is required"),
-  adminOptions: yup.string().required("admin Options is required"),
 
-  adminGoogleAnalyticId: yup.string().nullable(),
-  adminGoogleAnalyticIdOptions: yup.string().required("Admin Googlea Analytics Options is required"),
-
-  adminDescription: yup.string().required("admin Description is required"),
-  adminDescriptionOptions: yup.string().required("admin Description Options is required"),
-
-  adminLoader: yup.string().nullable(),
-  adminLoaderOptions: yup.string().required("admin Loader Options is required"),
-
-  adminLogo: yup.string().nullable(),
-  adminLogoOptions: yup.string().required("admin Logo Options is required"),
-
-  adminBgImage: yup.string().nullable(),
-  adminBgImageOptions: yup.string().required("Admin Background Image Options is required")
-});
 const Setting = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const roomDetails = location.state;
-  const isNonMobile = useMediaQuery("(min-width:600px)");
-
   const [value, setValue] = useState(0);
-  const mockDataSiteRole = [{ id: 1, label: "Admin" }, { id: 2, label: "Site" }]
-  const mockDataAdminRole = [{ id: 1, label: "Admin" }, { id: 2, label: "Site" }]
+  const [setting, setSetting] = useState([])
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    fetchSettings();
+  }, []);
 
-  const initialValues = {
-    siteTitle: roomDetails?.siteTitle || "Dinning app",
-    siteOptions: roomDetails?.siteOptions || "Site",
+  // Add this state to hold your initial values
+  const [initialValues, setInitialValues] = useState({
+    siteGuidelines: "",
+    siteGuidelinesChinese: "",
+  });
 
-    siteDescription: roomDetails?.siteDescription || "Dinning app",
-    siteDescriptionOptions: roomDetails?.siteDescriptionOptions || "Site",
+  const fetchSettings = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await SettingServices.getSettings();
+      setSetting(response?.data)
+      const appMsg = response?.data.find(item => item.key === "site.app_msg");
+      const appMsgCn = response?.data.find(item => item.key === "site.app_msg_cn");
+      console.log(appMsg?.value)
+      console.log(appMsgCn?.value)
+      setInitialValues({
+        siteGuidelines: appMsg?.value || "test", //Chocolate Chip Cookies can served as snacks.
+        siteGuidelinesChinese: appMsgCn?.value || "dummy",//巧克力曲奇可以当零食吃。
+      });
+    } catch (error) {
+      console.error("Error fetching room list:", error);
+      toast.error("Failed to fetch room list. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-    siteLogo: roomDetails?.siteLogo || "",
-    siteLogoOptions: roomDetails?.siteLogoOptions || "Site",
+  const handleFormSubmit = async (values, actions) => {
+    setLoading(true);
+    const appMsg = setting.find(item => item.key === "site.app_msg");
+    const appMsgCn = setting.find(item => item.key === "site.app_msg_cn");
 
-    siteGoogleAnalyticId: roomDetails?.siteGoogleAnalyticId || "",
-    siteGoogleAnalyticIdOptions: roomDetails?.siteGoogleAnalyticIdOptions || "Site",
-
-    siteGuidelines: roomDetails?.siteGuidelines || "Chocolate Chip Cookies can served as snacks.",
-    siteGuidelinesOptions: roomDetails?.siteGuidelinesOptions || "Site",
-
-    siteGuidelinesChinese: roomDetails?.siteGuidelinesChinese || "巧克力曲奇可以当零食吃。",
-    siteGuidelinesChineseOptions: roomDetails?.siteGuidelinesChineseOptions || "Site",
+    const payload = [
+      {
+        "id": appMsg?.id || "",
+        "key": "site.app_msg",
+        "display_name": "Guidelines",
+        "value": values?.siteGuidelines,
+        "details": "The name of the application", //now static set because db in compalsary
+        "type": "text", //now static set because db in compalsary
+        "order": 1, //now static set because db in compalsary
+        "group": "general" //now static set because db in compalsary
+      }, {
+        "id": appMsgCn?.id || "",
+        "key": "site.app_msg_cn",
+        "display_name": "Guidelines Chinese",
+        "value": values?.siteGuidelinesChinese,
+        "details": "The name of the application",
+        "type": "text",
+        "order": 1,
+        "group": "general"
+      }]
+    console.log(payload)
+    try {
+      let response;
+      if (appMsg?.id && appMsgCn?.id) {
+        console.log("update call")
+        response = await SettingServices.updateSettings(payload);
+        toast.success("Setting updated successfully!");
+      } else {
+        console.log("create call")
+        response = await SettingServices.createSettings(payload);
+        toast.success("Setting created successfully!");
+      }
+    } catch (error) {
+      const errors = error?.response?.data?.errors;
+      if (errors) {
+        Object.values(errors).flat().forEach((message) => toast.error(message));
+      } else {
+        toast.error("Failed to process menu. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
+    // actions.resetForm({
+    //   values: initialValues,
+    // });
   };
-  const adminInitialValues = {
-    adminTitle: roomDetails?.adminTitle || "Dinning app",
-    adminOptions: roomDetails?.adminOptions || "Admin",
 
-    adminGoogleAnalyticId: roomDetails?.adminGoogleAnalyticId || "",
-    adminGoogleAnalyticIdOptions: roomDetails?.adminGoogleAnalyticIdOptions || "Admin",
-
-    adminDescription: roomDetails?.adminDescription || "Dinning app",
-    adminDescriptionOptions: roomDetails?.adminDescriptionOptions || "Admin",
-
-    adminLoader: roomDetails?.adminLoader || "",
-    adminLoaderOptions: roomDetails?.adminLoaderOptions || "Admin",
-
-    adminLogo: roomDetails?.adminLogo || "",
-    adminLogoOptions: roomDetails?.adminLogoOptions || "Admin",
-
-    adminBgImage: roomDetails?.adminBgImage || "",
-    adminBgImageOptions: roomDetails?.adminBgImageOptions || "Admin",
-
-  };
-
-  const handleFormSubmit = (values, actions) => {
-    console.log("Form Submitted:", values);
-    actions.resetForm({
-      values: initialValues,
-    });
-  };
-  const handleAdminFormSubmit = (values, actions) => {
-    console.log("Form Submitted:", values);
-    actions.resetForm({
-      values: adminInitialValues,
-    });
-  };
 
 
 
@@ -248,6 +229,7 @@ const Setting = () => {
               onSubmit={handleFormSubmit}
               initialValues={initialValues}
               validationSchema={validationSchema}
+              enableReinitialize
             >
               {({
                 values,
@@ -266,379 +248,19 @@ const Setting = () => {
                     mt="15px"
                     gridTemplateColumns="repeat(8, 1fr)"
                   >
-                    {/* Site Title Input */}
-                    {/* <Box
-                      display="flex"
-                      sx={{ gridColumn: "span 6" }}
-                      flexDirection="column"
-                      alignItems="flex-start" // Align content to the left
-                      justifyContent="center"
-                      flex={1}
-                    >
-                      <Typography color={colors.gray[100]} mb="20px" fontWeight="500">
-                        Site Title
-                        <Box
-                          component="span"
-                          ml="5px"
-                          sx={{
-                            color: `red`,
-                            padding: "2px 4px",
-                            borderRadius: "4px",
-                          }}
-                        >
-                          setting('site.title')
-                        </Box>
-                      </Typography>
-                      <TextField
-                        fullWidth
-                        variant="filled"
-                        type="text"
-                        onBlur={handleBlur}
-                        onChange={handleChange}
-                        value={values.siteTitle}
-                        name="siteTitle"
-                        error={touched.siteTitle && Boolean(errors.siteTitle)}
-                        helperText={touched.siteTitle && errors.siteTitle}
-                        sx={{ gridColumn: "span 2" }}
-                      />
-                    </Box> */}
 
-                    {/* Dropdown and Icons */}
-                    {/* <Box
-                      display="flex"
-                      flexDirection="column"
-                      alignItems="flex-end" // Align content to the left
-                      justifyContent="flex-end"
-                      sx={{ gridColumn: "span 2" }}
-                      flex={1}
-                    >
-                      <Box
-                        display="flex"
-                        justifyContent="flex-end" // Align buttons to the right
-                        alignItems="flex-end"
-                        gap="10px" // Small gap between buttons
-                        mb="10px"
-                      >
-                        <ArrowUpwardOutlined sx={{ color: colors.gray[100] }} />
-                        <ArrowDownwardOutlined sx={{ color: colors.gray[100] }} />
-                        <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
-                      </Box>
-
-                      /* Dropdown *
-                      <Autocomplete
-                        fullWidth // Makes the dropdown full width
-                        options={mockDataSiteRole}
-                        getOptionLabel={(option) => option.label} // Ensure proper label rendering
-                        value={mockDataSiteRole.find((option) => option.label === values.siteOptions) || null}
-                        onChange={(event, newValue) => {
-                          setFieldValue("siteOptions", newValue ? newValue.label : ""); // Fix selection issue
-                        }}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            variant="filled"
-                            error={touched.siteOptions && Boolean(errors.siteOptions)}
-                            helperText={touched.siteOptions && errors.siteOptions}
-                          />
-                        )}
-                        sx={{ gridColumn: "span 4" }}
-                      />
-                    </Box> */}
                   </Box>
-                  {/* Site Description */}
-                  {/* <Box
-                    display="grid"
-                    gap="20px"
-                    mt="20px"
-                    gridTemplateColumns="repeat(8, 1fr)"
-                  >
-                    <Box
-                      display="flex"
-                      sx={{ gridColumn: "span 6" }}
-                      flexDirection="column"
-                      alignItems="flex-start" // Align content to the left
-                      justifyContent="center"
-                      flex={1}
-                    >
-                      <Typography color={colors.gray[100]} mb="20px" fontWeight="500">
-                        Site Description
-                        <Box
-                          component="span"
-                          ml="5px"
-                          sx={{
-                            color: `red`,
-                            padding: "2px 4px",
-                            borderRadius: "4px",
-                          }}
-                        >
-                          setting('site.description')
-                        </Box>
-                      </Typography>
-                      <TextField
-                        fullWidth
-                        variant="filled"
-                        type="text"
-                        onBlur={handleBlur}
-                        onChange={handleChange}
-                        value={values.siteDescription}
-                        name="siteDescription"
-                        error={touched.siteDescription && Boolean(errors.siteDescription)}
-                        helperText={touched.siteDescription && errors.siteDescription}
-                        sx={{ gridColumn: "span 2" }}
-                      />
-                    </Box>
 
-                    <Box
-                      display="flex"
-                      flexDirection="column"
-                      alignItems="flex-end" // Align content to the left
-                      justifyContent="flex-end"
-                      sx={{ gridColumn: "span 2" }}
-                      flex={1}
-                    >
-                      <Box
-                        display="flex"
-                        justifyContent="flex-end" // Align buttons to the right
-                        alignItems="flex-end"
-                        gap="10px" // Small gap between buttons
-                        mb="10px"
-                      >
-                        <ArrowUpwardOutlined sx={{ color: colors.gray[100] }} />
-                        <ArrowDownwardOutlined sx={{ color: colors.gray[100] }} />
-                        <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
-                      </Box>
-
-                      <Autocomplete
-                        fullWidth // Makes the dropdown full width
-                        options={mockDataSiteRole}
-                        getOptionLabel={(option) => option.label} // Ensure proper label rendering
-                        value={mockDataSiteRole.find((option) => option.label === values.siteDescriptionOptions) || null}
-                        onChange={(event, newValue) => {
-                          setFieldValue("siteDescriptionOptions", newValue ? newValue.label : ""); // Fix selection issue
-                        }}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            variant="filled"
-                            error={touched.siteDescriptionOptions && Boolean(errors.siteDescriptionOptions)}
-                            helperText={touched.siteDescriptionOptions && errors.siteDescriptionOptions}
-                          />
-                        )}
-                        sx={{ gridColumn: "span 4" }}
-                      />
-                    </Box>
-                  </Box> */}
-                  {/* Site Logo */}
-                  {/* <Box
-                    display="grid"
-                    gap="20px"
-                    mt="20px"
-                    gridTemplateColumns="repeat(8, 1fr)"
-                  >
-                    <Box
-                      display="flex"
-                      sx={{ gridColumn: "span 6" }}
-                      flexDirection="column"
-                      alignItems="flex-start" // Align content to the left
-                      justifyContent="center"
-                      flex={1}
-                    >
-                      <Typography color={colors.gray[100]} mb="20px" fontWeight="500">
-                        Site Logo
-                        <Box
-                          component="span"
-                          ml="5px"
-                          sx={{
-                            color: `red`,
-                            padding: "2px 4px",
-                            borderRadius: "4px",
-                          }}
-                        >
-                          setting('site.logo')
-                        </Box>
-                      </Typography>
-
-                      {values.siteLogo && (
-                        <Box
-                          component="img"
-                          src={values.siteLogo}
-                          alt="Uploaded Logo"
-                          sx={{
-                            width: "150px",
-                            height: "150px",
-                            objectFit: "cover",
-                            borderRadius: "8px",
-                            marginBottom: "10px",
-                          }}
-                        />
-                      )}
-
-                      <Button
-                        variant="contained"
-                        component="label"
-                        sx={{
-                          backgroundColor: colors.primary[400],
-                          color: colors.gray[100],
-                          "&:hover": {
-                            backgroundColor: colors.primary[500],
-                          },
-                        }}
-                      >
-                        Upload Logo
-                        <input
-                          type="file"
-                          hidden
-                          accept="image/*"
-                          onChange={(event) => {
-                            const file = event.target.files[0];
-                            if (file) {
-                              const reader = new FileReader();
-                              reader.onload = (e) => {
-                                setFieldValue("siteLogo", e.target.result); // Set the uploaded image as base64
-                              };
-                              reader.readAsDataURL(file);
-                            }
-                          }}
-                        />
-                      </Button>
-                    </Box>
-
-                    {/* Dropdown and Icons *
-                    <Box
-                      display="flex"
-                      flexDirection="column"
-                      alignItems="flex-end" // Align content to the left
-                      justifyContent="flex-end"
-                      sx={{ gridColumn: "span 2" }}
-                      flex={1}
-                    >
-                      {/* Icons Right-Aligned *
-                      <Box
-                        display="flex"
-                        justifyContent="flex-end" // Align buttons to the right
-                        alignItems="flex-end"
-                        gap="10px" // Small gap between buttons
-                        mb="10px"
-                      >
-                        <ArrowUpwardOutlined sx={{ color: colors.gray[100] }} />
-                        <ArrowDownwardOutlined sx={{ color: colors.gray[100] }} />
-                        <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
-                      </Box>
-
-                      {/* Dropdown *
-                      <Autocomplete
-                        fullWidth // Makes the dropdown full width
-                        options={mockDataSiteRole}
-                        getOptionLabel={(option) => option.label} // Ensure proper label rendering
-                        value={mockDataSiteRole.find((option) => option.label === values.siteLogoOptions) || null}
-                        onChange={(event, newValue) => {
-                          setFieldValue("siteLogoOptions", newValue ? newValue.label : ""); // Fix selection issue
-                        }}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            variant="filled"
-                            error={touched.siteLogoOptions && Boolean(errors.siteLogoOptions)}
-                            helperText={touched.siteLogoOptions && errors.siteLogoOptions}
-                          />
-                        )}
-                        sx={{ gridColumn: "span 4" }}
-                      />
-                    </Box>
-                  </Box> */}
-                  {/* Site google Analytic  */}
-                  {/* <Box
-                    display="grid"
-                    gap="20px"
-                    mt="20px"
-                    gridTemplateColumns="repeat(8, 1fr)"
-                  >
-                    <Box
-                      display="flex"
-                      sx={{ gridColumn: "span 6" }}
-                      flexDirection="column"
-                      alignItems="flex-start" // Align content to the left
-                      justifyContent="center"
-                      flex={1}
-                    >
-                      <Typography color={colors.gray[100]} mb="20px" fontWeight="500">
-                        Google Analytics Tracking ID
-                        <Box
-                          component="span"
-                          ml="5px"
-                          sx={{
-                            color: `red`,
-                            padding: "2px 4px",
-                            borderRadius: "4px",
-                          }}
-                        >
-                          setting('site.google_analytics_tracking_id')
-                        </Box>
-                      </Typography>
-                      <TextField
-                        fullWidth
-                        variant="filled"
-                        type="text"
-                        onBlur={handleBlur}
-                        onChange={handleChange}
-                        value={values.siteGoogleAnalyticId}
-                        name="siteGoogleAnalyticId"
-                        error={touched.siteGoogleAnalyticId && Boolean(errors.siteGoogleAnalyticId)}
-                        helperText={touched.siteGoogleAnalyticId && errors.siteGoogleAnalyticId}
-                        sx={{ gridColumn: "span 2" }}
-                      />
-                    </Box>
-
-                    <Box
-                      display="flex"
-                      flexDirection="column"
-                      alignItems="flex-end" // Align content to the left
-                      justifyContent="flex-end"
-                      sx={{ gridColumn: "span 2" }}
-                      flex={1}
-                    >
-                      <Box
-                        display="flex"
-                        justifyContent="flex-end" // Align buttons to the right
-                        alignItems="flex-end"
-                        gap="10px" // Small gap between buttons
-                        mb="10px"
-                      >
-                        <ArrowUpwardOutlined sx={{ color: colors.gray[100] }} />
-                        <ArrowDownwardOutlined sx={{ color: colors.gray[100] }} />
-                        <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
-                      </Box>
-
-                      <Autocomplete
-                        fullWidth // Makes the dropdown full width
-                        options={mockDataSiteRole}
-                        getOptionLabel={(option) => option.label} // Ensure proper label rendering
-                        value={mockDataSiteRole.find((option) => option.label === values.siteGoogleAnalyticIdOptions) || null}
-                        onChange={(event, newValue) => {
-                          setFieldValue("siteGoogleAnalyticIdOptions", newValue ? newValue.label : ""); // Fix selection issue
-                        }}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            variant="filled"
-                            error={touched.siteGoogleAnalyticIdOptions && Boolean(errors.siteGoogleAnalyticIdOptions)}
-                            helperText={touched.siteGoogleAnalyticIdOptions && errors.siteGoogleAnalyticIdOptions}
-                          />
-                        )}
-                        sx={{ gridColumn: "span 4" }}
-                      />
-                    </Box>
-                  </Box> */}
                   {/* Site Guidelines   */}
                   <Box
                     display="grid"
                     gap="20px"
                     mt="20px"
-                    gridTemplateColumns="repeat(8, 1fr)"
+                    gridTemplateColumns="repeat(12, 1fr)"
                   >
                     <Box
                       display="flex"
-                      sx={{ gridColumn: "span 6" }}
+                      sx={{ gridColumn: "span 12" }}
                       flexDirection="column"
                       alignItems="flex-start" // Align content to the left
                       justifyContent="flex-start"
@@ -673,8 +295,8 @@ const Setting = () => {
                         sx={{ gridColumn: "span 2" }}
                       />
                     </Box>
-
-                    <Box
+                    {/* Right Side Dropdown */}
+                    {/* <Box
                       display="flex"
                       flexDirection="column"
                       alignItems="flex-end" // Align content to the left
@@ -713,18 +335,18 @@ const Setting = () => {
                         )}
                         sx={{ gridColumn: "span 4" }}
                       />
-                    </Box>
+                    </Box> */}
                   </Box>
                   {/* Site Guidelines Chinese  */}
                   <Box
                     display="grid"
                     gap="20px"
                     mt="20px"
-                    gridTemplateColumns="repeat(8, 1fr)"
+                    gridTemplateColumns="repeat(12, 1fr)" //8
                   >
                     <Box
                       display="flex"
-                      sx={{ gridColumn: "span 6" }}
+                      sx={{ gridColumn: "span 12" }} // "span 6"
                       flexDirection="column"
                       alignItems="flex-start" // Align content to the left
                       justifyContent="flex-start"
@@ -759,8 +381,8 @@ const Setting = () => {
                         sx={{ gridColumn: "span 2" }}
                       />
                     </Box>
-
-                    <Box
+                    {/* Right Side Dropdown */}
+                    {/* <Box
                       display="flex"
                       flexDirection="column"
                       alignItems="flex-end" // Align content to the left
@@ -800,7 +422,7 @@ const Setting = () => {
                         )}
                         sx={{ gridColumn: "span 4" }}
                       />
-                    </Box>
+                    </Box> */}
                   </Box>
                   <Box
                     display="flex"
@@ -817,677 +439,6 @@ const Setting = () => {
             </Formik>
           </Box>
         </CustomTabPanel>
-        {/* <CustomTabPanel value={value} index={1}>
-          <Box>
-            <Formik
-              onSubmit={handleAdminFormSubmit}
-              initialValues={adminInitialValues}
-              validationSchema={adminValidationSchema}
-            >
-              {({
-                values,
-                errors,
-                touched,
-                handleBlur,
-                handleChange,
-                handleAdminSubmit,
-                setFieldValue,
-              }) => (
-                <form onSubmit={handleAdminSubmit}>
-
-                  <Box
-                    display="grid"
-                    gap="20px"
-                    mt="15px"
-                    gridTemplateColumns="repeat(8, 1fr)"
-                  >
-                    /* Admin Title Input *
-                    <Box
-                      display="flex"
-                      sx={{ gridColumn: "span 6" }}
-                      flexDirection="column"
-                      alignItems="flex-start" // Align content to the left
-                      justifyContent="center"
-                      flex={1}
-                    >
-                      <Typography color={colors.gray[100]} mb="20px" fontWeight="500">
-                        Admin Title
-                        <Box
-                          component="span"
-                          ml="5px"
-                          sx={{
-                            color: `red`,
-                            padding: "2px 4px",
-                            borderRadius: "4px",
-                          }}
-                        >
-                          setting('admin.title')
-                        </Box>
-                      </Typography>
-                      <TextField
-                        fullWidth
-                        variant="filled"
-                        type="text"
-                        onBlur={handleBlur}
-                        onChange={handleChange}
-                        value={values.adminTitle}
-                        name="adminTitle"
-                        error={touched.adminTitle && Boolean(errors.adminTitle)}
-                        helperText={touched.adminTitle && errors.adminTitle}
-                        sx={{ gridColumn: "span 2" }}
-                      />
-                    </Box>
-
-                    {/* Dropdown and Icons
-                    <Box
-                      display="flex"
-                      flexDirection="column"
-                      alignItems="flex-end" // Align content to the left
-                      justifyContent="end"
-                      sx={{ gridColumn: "span 2" }}
-                      flex={1}
-                    >
-                      {/* Icons Right-Aligned *
-                      <Box
-                        display="flex"
-                        justifyContent="flex-end" // Align buttons to the right
-                        alignItems="flex-end"
-                        gap="10px" // Small gap between buttons
-                        mb="10px"
-                      >
-                        <ArrowUpwardOutlined sx={{ color: colors.gray[100] }} />
-                        <ArrowDownwardOutlined sx={{ color: colors.gray[100] }} />
-                        <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
-                      </Box>
-
-                      {/* Dropdown *
-                      <Autocomplete
-                        fullWidth // Makes the dropdown full width
-                        options={mockDataAdminRole}
-                        getOptionLabel={(option) => option.label} // Ensure proper label rendering
-                        value={mockDataAdminRole.find((option) => option.label === values.adminOptions) || null}
-                        onChange={(event, newValue) => {
-                          setFieldValue("adminOptions", newValue ? newValue.label : ""); // Fix selection issue
-                        }}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            variant="filled"
-                            error={touched.adminOptions && Boolean(errors.adminOptions)}
-                            helperText={touched.adminOptions && errors.adminOptions}
-                          />
-                        )}
-                        sx={{ gridColumn: "span 4" }}
-                      />
-                    </Box>
-                  </Box>
-                  {/* Admin google Analytic  *
-                  <Box
-                    display="grid"
-                    gap="20px"
-                    mt="20px"
-                    gridTemplateColumns="repeat(8, 1fr)"
-                  >
-                    {/* Admin Title Input *
-                    <Box
-                      display="flex"
-                      sx={{ gridColumn: "span 6" }}
-                      flexDirection="column"
-                      alignItems="flex-start" // Align content to the left
-                      justifyContent="center"
-                      flex={1}
-                    >
-                      <Typography color={colors.gray[100]} mb="10px" fontWeight="500">
-                        Google Analytics Client ID (used for admin dashboard)
-                        <Box
-                          component="span"
-                          ml="5px"
-                          sx={{
-                            color: `red`,
-                            padding: "2px 4px",
-                            borderRadius: "4px",
-                          }}
-                        >
-                          setting('admin.google_analytics_tracking_id')
-                        </Box>
-                      </Typography>
-                      <TextField
-                        fullWidth
-                        variant="filled"
-                        type="text"
-                        onBlur={handleBlur}
-                        onChange={handleChange}
-                        value={values.adminGoogleAnalyticId}
-                        name="adminGoogleAnalyticId"
-                        error={touched.adminGoogleAnalyticId && Boolean(errors.adminGoogleAnalyticId)}
-                        helperText={touched.adminGoogleAnalyticId && errors.adminGoogleAnalyticId}
-                        sx={{ gridColumn: "span 2" }}
-                      />
-                    </Box>
-
-                    {/* Dropdown and Icons *
-                    <Box
-                      display="flex"
-                      flexDirection="column"
-                      alignItems="flex-end" // Align content to the left
-                      justifyContent="center"
-                      sx={{ gridColumn: "span 2" }}
-                      flex={1}
-                    >
-                      {/* Icons Right-Aligned *
-                      <Box
-                        display="flex"
-                        justifyContent="flex-end" // Align buttons to the right
-                        alignItems="flex-end"
-                        gap="10px" // Small gap between buttons
-                        mb="10px"
-                      >
-                        <ArrowUpwardOutlined sx={{ color: colors.gray[100] }} />
-                        <ArrowDownwardOutlined sx={{ color: colors.gray[100] }} />
-                        <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
-                      </Box>
-
-                      {/* Dropdown *
-                      <Autocomplete
-                        fullWidth // Makes the dropdown full width
-                        options={mockDataAdminRole}
-                        getOptionLabel={(option) => option.label} // Ensure proper label rendering
-                        value={mockDataAdminRole.find((option) => option.label === values.adminGoogleAnalyticIdOptions) || null}
-                        onChange={(event, newValue) => {
-                          setFieldValue("adminGoogleAnalyticIdOptions", newValue ? newValue.label : ""); // Fix selection issue
-                        }}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            variant="filled"
-                            error={touched.adminGoogleAnalyticIdOptions && Boolean(errors.adminGoogleAnalyticIdOptions)}
-                            helperText={touched.adminGoogleAnalyticIdOptions && errors.adminGoogleAnalyticIdOptions}
-                          />
-                        )}
-                        sx={{ gridColumn: "span 4" }}
-                      />
-                    </Box>
-                  </Box>
-                  {/* Admin Description *
-                  <Box
-                    display="grid"
-                    gap="20px"
-                    mt="20px"
-                    gridTemplateColumns="repeat(8, 1fr)"
-                  >
-                    {/* Admin Title Input *
-                    <Box
-                      display="flex"
-                      sx={{ gridColumn: "span 6" }}
-                      flexDirection="column"
-                      alignItems="flex-start" // Align content to the left
-                      justifyContent="center"
-                      flex={1}
-                    >
-                      <Typography color={colors.gray[100]} mb="10px" fontWeight="500">
-                        Admin Description
-                        <Box
-                          component="span"
-                          ml="5px"
-                          sx={{
-                            color: `red`,
-                            padding: "2px 4px",
-                            borderRadius: "4px",
-                          }}
-                        >
-                          setting('admin.description')
-                        </Box>
-                      </Typography>
-                      <TextField
-                        fullWidth
-                        variant="filled"
-                        type="text"
-                        onBlur={handleBlur}
-                        onChange={handleChange}
-                        value={values.adminDescription}
-                        name="adminDescription"
-                        error={touched.adminDescription && Boolean(errors.adminDescription)}
-                        helperText={touched.adminDescription && errors.adminDescription}
-                        sx={{ gridColumn: "span 2" }}
-                      />
-                    </Box>
-
-                    {/* Dropdown and Icons *
-                    <Box
-                      display="flex"
-                      flexDirection="column"
-                      alignItems="flex-end" // Align content to the left
-                      justifyContent="flex-ends"
-                      sx={{ gridColumn: "span 2" }}
-                      flex={1}
-                    >
-                      {/* Icons Right-Aligned *
-                      <Box
-                        display="flex"
-                        justifyContent="flex-end" // Align buttons to the right
-                        alignItems="flex-end"
-                        gap="10px" // Small gap between buttons
-                        mb="10px"
-                      >
-
-                        <ArrowUpwardOutlined sx={{ color: colors.gray[100] }} />
-
-
-                        <ArrowDownwardOutlined sx={{ color: colors.gray[100] }} />
-
-
-                        <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
-
-                      </Box>
-
-                      {/* Dropdown *
-                      <Autocomplete
-                        fullWidth // Makes the dropdown full width
-                        options={mockDataAdminRole}
-                        getOptionLabel={(option) => option.label} // Ensure proper label rendering
-                        value={mockDataAdminRole.find((option) => option.label === values.adminDescriptionOptions) || null}
-                        onChange={(event, newValue) => {
-                          setFieldValue("adminDescriptionOptions", newValue ? newValue.label : ""); // Fix selection issue
-                        }}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            variant="filled"
-                            error={touched.adminDescriptionOptions && Boolean(errors.adminDescriptionOptions)}
-                            helperText={touched.adminDescriptionOptions && errors.adminDescriptionOptions}
-                          />
-                        )}
-                        sx={{ gridColumn: "span 4" }}
-                      />
-                    </Box>
-                  </Box>
-                  {/* Admin Loader Logo *
-                  <Box
-                    display="grid"
-                    gap="20px"
-                    mt="20px"
-                    gridTemplateColumns="repeat(8, 1fr)"
-                  >
-                    {/* Admin Title Input *
-                    <Box
-                      display="flex"
-                      sx={{ gridColumn: "span 6" }}
-                      flexDirection="column"
-                      alignItems="flex-start" // Align content to the left
-                      justifyContent="center"
-                      flex={1}
-                    >
-                      <Typography color={colors.gray[100]} mb="20px" fontWeight="500">
-                        Admin Loader
-                        <Box
-                          component="span"
-                          ml="5px"
-                          sx={{
-                            color: `red`,
-                            padding: "2px 4px",
-                            borderRadius: "4px",
-                          }}
-                        >
-                          setting('admin.loader')
-                        </Box>
-                      </Typography>
-
-                      {/* Uploaded Image Preview *
-                      {values.adminLoader && (
-                        <Box
-                          component="img"
-                          src={values.adminLoader}
-                          alt="Uploaded Loader"
-                          sx={{
-                            width: "150px",
-                            height: "150px",
-                            objectFit: "cover",
-                            borderRadius: "8px",
-                            marginBottom: "10px",
-                          }}
-                        />
-                      )}
-
-                      {/* Image Uploader *
-                      <Button
-                        variant="contained"
-                        component="label"
-                        sx={{
-                          backgroundColor: colors.primary[400],
-                          color: colors.gray[100],
-                          "&:hover": {
-                            backgroundColor: colors.primary[500],
-                          },
-                        }}
-                      >
-                        Upload Logo
-                        <input
-                          type="file"
-                          hidden
-                          accept="image/*"
-                          onChange={(event) => {
-                            const file = event.target.files[0];
-                            if (file) {
-                              const reader = new FileReader();
-                              reader.onload = (e) => {
-                                setFieldValue("adminLoader", e.target.result); // Set the uploaded image as base64
-                              };
-                              reader.readAsDataURL(file);
-                            }
-                          }}
-                        />
-                      </Button>
-                    </Box>
-
-                    {/* Dropdown and Icons *
-                    <Box
-                      display="flex"
-                      flexDirection="column"
-                      alignItems="flex-end" // Align content to the left
-                      justifyContent="flex-start"
-                      sx={{ gridColumn: "span 2" }}
-                      flex={1}
-                    >
-                      {/* Icons Right-Aligned *
-                      <Box
-                        display="flex"
-                        justifyContent="flex-end" // Align buttons to the right
-                        alignItems="flex-end"
-                        gap="10px" // Small gap between buttons
-                        mb="10px"
-                      >
-
-                        <ArrowUpwardOutlined sx={{ color: colors.gray[100] }} />
-
-
-                        <ArrowDownwardOutlined sx={{ color: colors.gray[100] }} />
-
-
-                        <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
-
-                      </Box>
-
-                      {/* Dropdown *
-                      <Autocomplete
-                        fullWidth // Makes the dropdown full width
-                        options={mockDataAdminRole}
-                        getOptionLabel={(option) => option.label} // Ensure proper label rendering
-                        value={mockDataAdminRole.find((option) => option.label === values.adminLoaderOptions) || null}
-                        onChange={(event, newValue) => {
-                          setFieldValue("adminLoaderOptions", newValue ? newValue.label : ""); // Fix selection issue
-                        }}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            variant="filled"
-                            error={touched.adminLoaderOptions && Boolean(errors.adminLoaderOptions)}
-                            helperText={touched.adminLoaderOptions && errors.adminLoaderOptions}
-                          />
-                        )}
-                        sx={{ gridColumn: "span 4" }}
-                      />
-                    </Box>
-                  </Box>
-                  {/* Admin Logo *
-                  <Box
-                    display="grid"
-                    gap="20px"
-                    mt="20px"
-                    gridTemplateColumns="repeat(8, 1fr)"
-                  >
-                    {/* Admin Title Input *
-                    <Box
-                      display="flex"
-                      sx={{ gridColumn: "span 6" }}
-                      flexDirection="column"
-                      alignItems="flex-start" // Align content to the left
-                      justifyContent="center"
-                      flex={1}
-                    >
-                      <Typography color={colors.gray[100]} mb="20px" fontWeight="500">
-                        Admin Logo
-                        <Box
-                          component="span"
-                          ml="5px"
-                          sx={{
-                            color: `red`,
-                            padding: "2px 4px",
-                            borderRadius: "4px",
-                          }}
-                        >
-                          setting('admin.logo')
-                        </Box>
-                      </Typography>
-
-                      {/* Uploaded Image Preview *
-                      {values.adminLogo && (
-                        <Box
-                          component="img"
-                          src={values.adminLogo}
-                          alt="Uploaded Logo"
-                          sx={{
-                            width: "150px",
-                            height: "150px",
-                            objectFit: "cover",
-                            borderRadius: "8px",
-                            marginBottom: "10px",
-                          }}
-                        />
-                      )}
-
-                      {/* Image Uploader *
-                      <Button
-                        variant="contained"
-                        component="label"
-                        sx={{
-                          backgroundColor: colors.primary[400],
-                          color: colors.gray[100],
-                          "&:hover": {
-                            backgroundColor: colors.primary[500],
-                          },
-                        }}
-                      >
-                        Upload Logo
-                        <input
-                          type="file"
-                          hidden
-                          accept="image/*"
-                          onChange={(event) => {
-                            const file = event.target.files[0];
-                            if (file) {
-                              const reader = new FileReader();
-                              reader.onload = (e) => {
-                                setFieldValue("adminLogo", e.target.result); // Set the uploaded image as base64
-                              };
-                              reader.readAsDataURL(file);
-                            }
-                          }}
-                        />
-                      </Button>
-                    </Box>
-
-                    {/* Dropdown and Icons *
-                    <Box
-                      display="flex"
-                      flexDirection="column"
-                      alignItems="flex-end" // Align content to the left
-                      justifyContent="flex-ss"
-                      sx={{ gridColumn: "span 2" }}
-                      flex={1}
-                    >
-                      {/* Icons Right-Aligned *
-                      <Box
-                        display="flex"
-                        justifyContent="flex-end" // Align buttons to the right
-                        alignItems="flex-end"
-                        gap="10px" // Small gap between buttons
-                        mb="10px"
-                      >
-                        <ArrowUpwardOutlined sx={{ color: colors.gray[100] }} />
-                        <ArrowDownwardOutlined sx={{ color: colors.gray[100] }} />
-                        <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
-                      </Box>
-
-                      {/* Dropdown *
-                      <Autocomplete
-                        fullWidth // Makes the dropdown full width
-                        options={mockDataAdminRole}
-                        getOptionLabel={(option) => option.label} // Ensure proper label rendering
-                        value={mockDataAdminRole.find((option) => option.label === values.adminLogoOptions) || null}
-                        onChange={(event, newValue) => {
-                          setFieldValue("adminLogoOptions", newValue ? newValue.label : ""); // Fix selection issue
-                        }}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            variant="filled"
-                            error={touched.adminLogoOptions && Boolean(errors.adminLogoOptions)}
-                            helperText={touched.adminLogoOptions && errors.adminLogoOptions}
-                          />
-                        )}
-                        sx={{ gridColumn: "span 4" }}
-                      />
-                    </Box>
-                  </Box>
-                  {/* Admin Background Image *
-                  <Box
-                    display="grid"
-                    gap="20px"
-                    mt="20px"
-                    gridTemplateColumns="repeat(8, 1fr)"
-                  >
-                    {/* Admin Title Input *
-                    <Box
-                      display="flex"
-                      sx={{ gridColumn: "span 6" }}
-                      flexDirection="column"
-                      alignItems="flex-start" // Align content to the left
-                      justifyContent="center"
-                      flex={1}
-                    >
-                      <Typography color={colors.gray[100]} mb="20px" fontWeight="500">
-                        Admin Background Image
-                        <Box
-                          component="span"
-                          ml="5px"
-                          sx={{
-                            color: `red`,
-                            padding: "2px 4px",
-                            borderRadius: "4px",
-                          }}
-                        >
-                          setting('admin.logo')
-                        </Box>
-                      </Typography>
-
-                      {/* Uploaded Image Preview *
-                      {values.adminBgImage && (
-                        <Box
-                          component="img"
-                          src={values.adminBgImage}
-                          alt="Uploaded Background Image"
-                          sx={{
-                            width: "150px",
-                            height: "150px",
-                            objectFit: "cover",
-                            borderRadius: "8px",
-                            marginBottom: "10px",
-                          }}
-                        />
-                      )}
-
-                      {/* Image Uploader *
-                      <Button
-                        variant="contained"
-                        component="label"
-                        sx={{
-                          backgroundColor: colors.primary[400],
-                          color: colors.gray[100],
-                          "&:hover": {
-                            backgroundColor: colors.primary[500],
-                          },
-                        }}
-                      >
-                        Upload Logo
-                        <input
-                          type="file"
-                          hidden
-                          accept="image/*"
-                          onChange={(event) => {
-                            const file = event.target.files[0];
-                            if (file) {
-                              const reader = new FileReader();
-                              reader.onload = (e) => {
-                                setFieldValue("adminBgImage", e.target.result); // Set the uploaded image as base64
-                              };
-                              reader.readAsDataURL(file);
-                            }
-                          }}
-                        />
-                      </Button>
-                    </Box>
-
-                    {/* Dropdown and Icons *
-                    <Box
-                      display="flex"
-                      flexDirection="column"
-                      alignItems="flex-end" // Align content to the left
-                      justifyContent="flex-end"
-                      sx={{ gridColumn: "span 2" }}
-                      flex={1}
-                    >
-                      {/* Icons Right-Aligned *
-                      <Box
-                        display="flex"
-                        justifyContent="flex-end" // Align buttons to the right
-                        alignItems="flex-end"
-                        gap="10px" // Small gap between buttons
-                        mb="10px"
-                      >
-                        <ArrowUpwardOutlined sx={{ color: colors.gray[100] }} />
-                        <ArrowDownwardOutlined sx={{ color: colors.gray[100] }} />
-                        <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
-                      </Box>
-
-                      {/* Dropdown *
-                      <Autocomplete
-                        fullWidth // Makes the dropdown full width
-                        options={mockDataAdminRole}
-                        getOptionLabel={(option) => option.label} // Ensure proper label rendering
-                        value={mockDataAdminRole.find((option) => option.label === values.adminBgImageOptions) || null}
-                        onChange={(event, newValue) => {
-                          setFieldValue("adminBgImageOptions", newValue ? newValue.label : ""); // Fix selection issue
-                        }}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            variant="filled"
-                            error={touched.adminBgImageOptions && Boolean(errors.adminBgImageOptions)}
-                            helperText={touched.adminBgImageOptions && errors.adminBgImageOptions}
-                          />
-                        )}
-                        sx={{ gridColumn: "span 4" }}
-                      />
-                    </Box>
-                  </Box>
-
-
-                  <Box
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="end"
-                    mt="20px"
-                  >
-                    <Button type="submit" color="secondary" variant="contained">
-                      Save Admin Settings
-                    </Button>
-                  </Box>
-                </form>
-              )}
-            </Formik>
-          </Box>
-        </CustomTabPanel> */}
-
       </Box>
     </Box>
   );
