@@ -146,9 +146,17 @@ const ItemDetailsView = () => {
             <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
               Item Image
             </Typography>
-            <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-              {itemDetails?.image || "N/A"}
-            </Typography>
+            {itemDetails?.item_image ? (
+              <img
+                src={itemDetails.item_image}
+                alt="Item"
+                style={{ maxWidth: "200px", maxHeight: "200px", borderRadius: 8, marginTop: 8 }}
+              />
+            ) : (
+              <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
+                N/A
+              </Typography>
+            )}
           </Box>
           <Divider sx={{ bgcolor: colors.gray[300] }} />
           <Box p="10px">

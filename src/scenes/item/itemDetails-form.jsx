@@ -27,6 +27,13 @@ const validationSchema = yup.object().shape({
     .of(yup.string().required("Each preference must be a string"))
     .min(1, "At least one preference is required")
     .required("Preference is required"),
+  // item_image: yup
+  // .mixed()
+  // .test("fileType", "Unsupported File Format", (value) => {
+  //   if (!value) return true;
+  //   return ["image/jpeg", "image/png", "image/jpg", "image/gif"].includes(value.type);
+  // }),
+
 });
 
 const ItemDetailsForm = () => {
@@ -102,46 +109,62 @@ const ItemDetailsForm = () => {
         return [];
       }
     })(),
-    image: null,
+    item_image: itemDetails?.item_image ? itemDetails?.item_image : null,
   });
 
-const handleFormSubmit = async (values, { resetForm, setFieldValue }) => {
-  setLoading(true);
-  const payload = {
-    ...values,
-    options: JSON.stringify(values.options),
-    preference: JSON.stringify(values.preference),
+  const handleFormSubmit = async (values, { resetForm, setFieldValue }) => {
+    setLoading(true);
+
+    const formData = new FormData();
+    formData.append("item_name", values.item_name);
+    formData.append("item_chinese_name", values.item_chinese_name);
+    formData.append("cat_id", values.cat_id);
+    formData.append("is_allday", values.is_allday ? 1 : 0);
+    formData.append("options", JSON.stringify(values.options));
+    formData.append("preference", JSON.stringify(values.preference));
+    if (
+      values.item_image &&
+      values.item_image instanceof File &&
+      ["image/jpeg", "image/png", "image/jpg", "image/gif"].includes(values.item_image.type)
+    ) {
+      formData.append("item_image", values.item_image);
+    } else {
+      console.warn("Not a valid image file. Skipping append.");
+    }
+
+    if (values.id) {
+      formData.append("id", values.id);
+    }
+
+    try {
+      let response;
+      if (values.id) {
+        response = await ItemServices.updatetItems(values.id, formData);
+        setItemDetails(response.data);
+        toast.success("Items updated successfully!");
+      } else {
+        response = await ItemServices.createItems(formData);
+        setItemDetails(response.data || null);
+        toast.success("Items created successfully!");
+        resetForm();
+      }
+    } catch (error) {
+      console.error("Error processing menu:", error);
+      toast.error("Failed to process menu. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  try {
-    if (payload?.id) {
-      const updatedItems = await ItemServices.updatetItems(payload.id, payload);
-      setItemDetails(updatedItems.data);
-      toast.success("Items updated successfully!");
-    } else {
-      const created = await ItemServices.createItems(payload);
-      setItemDetails(created.data || null);
-      toast.success("Items created successfully!");
-      resetForm();
-    }
-    setFieldValue("image", null);
-  } catch (error) {
-    console.error("Error processing menu:", error);
-    toast.error("Failed to process menu. Please try again.");
-  } finally {
-    setLoading(false);
-  }
-};
-
-return (
+  return (
     <Box m="20px">
       <Header
         title={
           loading
             ? ""
             : itemDetails?.id
-            ? "Update Item Detail"
-            : "Add Item Detail"
+              ? "Update Item Detail"
+              : "Add Item Detail"
         }
         icon={<DvrOutlined />}
         Buttons={false}
@@ -256,19 +279,56 @@ return (
                   />
                 </FormGroup>
 
-                {/* Image Upload */}
-                <TextField
-                  fullWidth
-                  type="file"
-                  variant="filled"
-                  label="Upload Image"
-                  InputLabelProps={{ shrink: true }}
-                  inputProps={{ accept: "image/*" }}
-                  onChange={(event) =>
-                    setFieldValue("image", event.currentTarget.files[0])
-                  }
-                  sx={{ gridColumn: "span 4" }}
-                />
+                <Box sx={{ gridColumn: "span 4" }}>
+                  <input
+                    accept="image/jpeg, image/png, image/jpg, image/gif"
+                    style={{ display: 'none' }}
+                    id="item-image-upload"
+                    name="item_image"
+                    type="file"
+                    onChange={(event) => {
+                      const file = event.currentTarget.files[0];
+                      if (file) {
+                        setFieldValue("item_image", file);
+                        // Optionally, set a preview URL
+                        setFieldValue("item_image_preview", URL.createObjectURL(file));
+                      }
+                    }}
+                  />
+                  <label htmlFor="item-image-upload">
+                    <Button variant="contained" component="span">
+                      Upload Image
+                    </Button>
+                  </label>
+
+                  {/* Show selected file name */}
+                  {values.item_image && values.item_image.name && (
+                    <Box mt={1}>
+                      <span>Selected: {values.item_image.name}</span>
+                    </Box>
+                  )}
+
+                  {/* Show image preview */}
+                  <Box mt={2}>
+                    {values.item_image && values.item_image instanceof File && (
+                      <img
+                        src={values.item_image_preview || URL.createObjectURL(values.item_image)}
+                        alt="Preview"
+                        style={{ maxWidth: 200, maxHeight: 200 }}
+                      />
+                    )}
+                    {!values.item_image?.name && itemDetails?.item_image && (
+                      <img
+                        src={itemDetails.item_image}
+                        alt="Current"
+                        style={{ maxWidth: 200, maxHeight: 200 }}
+                      />
+                    )}
+                  </Box>
+                </Box>
+
+
+
 
                 {/* Options Multi-Select */}
                 <Autocomplete

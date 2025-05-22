@@ -9,10 +9,10 @@ const ItemServices = {
     return requests.get(`/item-details/${id}`);
   },
   createItems: async (formData) => {
-    return requests.post(`/item-details`, formData);
+    return requests.uploadPosts(`/item-details`, formData);
   },
   updatetItems: async (id, formData) => {
-    return requests.put(`/item-details/${id}`, formData);
+    return requests.uploadPut(`/item-details/${id}`, formData);
   },
   deleteItems: async (id) => {
     return requests.delete(`/item-details/${id}`);
