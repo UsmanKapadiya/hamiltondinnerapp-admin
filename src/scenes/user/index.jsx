@@ -170,8 +170,21 @@ const User = () => {
     { field: "name", headerName: "Name", flex: 1 },
     { field: "user_name", headerName: "User Name" },
     { field: "email", headerName: "Email", flex: 1 },
-    { field: "avatar", headerName: "Avatar" },
-    { field: "role", headerName: "Role" },
+    {
+      field: "avatar",
+      headerName: "Avatar",
+      width: 100,
+      renderCell: (params) =>
+        params.value ? (
+          <img
+            src={params.value}
+            alt="avatar"
+            style={{ width: 40, height: 40, borderRadius: "50%", objectFit: "cover" }}
+          />
+        ) : (
+          <span>No Image</span>
+        ),
+    }, { field: "role", headerName: "Role" },
     {
       field: "actions",
       headerName: "Actions",

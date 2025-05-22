@@ -70,7 +70,7 @@ const UserDetailsForm = () => {
     user_name: userData?.user_name || "",
     email: userData?.email || "",
     password: "",
-    avatar: null,
+    avatar: userData?.avatar ? userData?.avatar : null,
     role: userData?.role || "",
     role_id: userData?.role_id || "",
     is_admin: userData?.is_admin || false,
@@ -165,7 +165,7 @@ const UserDetailsForm = () => {
                 ))}
 
                 {/* Avatar Upload */}
-                <TextField
+                {/* <TextField
                   fullWidth
                   type="file"
                   variant="filled"
@@ -175,7 +175,55 @@ const UserDetailsForm = () => {
                     setFieldValue("avatar", e.currentTarget.files[0])
                   }
                   sx={{ gridColumn: "span 4" }}
-                />
+                /> */}
+
+                <Box sx={{ gridColumn: "span 4" }}>
+                  <input
+                    accept="image/jpeg, image/png, image/jpg, image/gif"
+                    style={{ display: 'none' }}
+                    id="avatar-upload" // <-- changed here
+                    name="avatar"
+                    type="file"
+                    onChange={(event) => {
+                      const file = event.currentTarget.files[0];
+                      if (file) {
+                        setFieldValue("avatar", file);
+                        // Optionally, set a preview URL
+                        setFieldValue("avatar_preview", URL.createObjectURL(file));
+                      }
+                    }}
+                  />
+                  <label htmlFor="avatar-upload">
+                    <Button variant="contained" component="span">
+                      Upload Image
+                    </Button>
+                  </label>
+
+                  {/* Show selected file name */}
+                  {values.avatar && values.avatar.name && (
+                    <Box mt={1}>
+                      <span>Selected: {values.avatar.name}</span>
+                    </Box>
+                  )}
+
+                  {/* Show image preview */}
+                  <Box mt={2}>
+                    {values.avatar && values.avatar instanceof File && (
+                      <img
+                        src={values.avatar_preview || URL.createObjectURL(values.avatar)}
+                        alt="Preview"
+                        style={{ maxWidth: 200, maxHeight: 200 }}
+                      />
+                    )}
+                    {!values.avatar?.name && userData?.avatar && (
+                      <img
+                        src={values.avatar}
+                        alt="Current"
+                        style={{ maxWidth: 200, maxHeight: 200 }}
+                      />
+                    )}
+                  </Box>
+                </Box>
 
                 {/* Role Selector */}
                 <Autocomplete
