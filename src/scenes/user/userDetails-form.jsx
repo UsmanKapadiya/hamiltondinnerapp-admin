@@ -77,20 +77,33 @@ const UserDetailsForm = () => {
   };
 
   const handleFormSubmit = async (values) => {
-    const payload = { ...values };
+  setLoading(true);
+  try {
+    const formData = new FormData();
+    formData.append("name", values.name);
+    formData.append("user_name", values.user_name);
+    formData.append("email", values.email);
+    if (values.password) formData.append("password", values.password);
+    formData.append("role", values.role);
+    formData.append("role_id", values.role_id);
+    formData.append("is_admin", values.is_admin);
 
-    if (payload.id && !payload.password) delete payload.password;
+    if (
+      values.avatar &&
+      values.avatar instanceof File &&
+      ["image/jpeg", "image/png", "image/jpg", "image/gif"].includes(values.avatar.type)
+    ) {
+      formData.append("avatar", values.avatar);
+    } else  {
+      // formData.append("avatar", values.avatar);
+    }
+    if (values.id) formData.append("id", values.id);
+    const response = values.id
+      ? await UserServices.updatetUser(values.id, formData)
+      : await UserServices.createUser(formData);
 
-    try {
-      const response = payload.id
-        ? await UserServices.updatetUser(payload.id, payload)
-        : await UserServices.createUser(payload);
-
-      toast.success(`User ${payload.id ? "updated" : "created"} successfully!`);
-    } catch (error) {
-      console.error("Submission error:", error);
-      const apiErrors = error?.response?.data?.errors;
-
+    if (!response || response.success === false) {
+      const apiErrors = response?.errors;
       if (apiErrors) {
         Object.entries(apiErrors).forEach(([field, messages]) => {
           messages.forEach((msg) => toast.error(msg));
@@ -98,10 +111,29 @@ const UserDetailsForm = () => {
       } else {
         toast.error("Failed to process user. Please try again.");
       }
-    } finally {
-      setLoading(false);
+      return; // Stop here if error
     }
-  };
+
+    toast.success(`User ${values.id ? "updated" : "created"} successfully!`);
+
+    if (values.id) {
+      setUserData(response?.data);
+    }
+  } catch (error) {
+    console.error("Submission error:", error);
+    const apiErrors = error?.response?.data?.errors;
+    if (apiErrors) {
+      Object.entries(apiErrors).forEach(([field, messages]) => {
+        messages.forEach((msg) => toast.error(msg));
+      });
+    } else {
+      toast.error("Failed to process user. Please try again.");
+    }
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <Box m="20px">
