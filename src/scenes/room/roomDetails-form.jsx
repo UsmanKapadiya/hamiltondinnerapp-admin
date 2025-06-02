@@ -56,7 +56,7 @@ const RoomDetailsForm = () => {
       language: roomDetails?.language?.toString() || "",
       food_texture: roomDetails?.food_texture || "",
       special_instrucations: roomDetails?.special_instrucations || "",
-      is_active: roomDetails?.is_active === 1 || roomDetails?.is_active === true,
+      is_active: roomDetails?.is_active === "1" || roomDetails?.is_active === true,
     }),
     [roomDetails]
   );
