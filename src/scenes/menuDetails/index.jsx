@@ -33,7 +33,7 @@ const MenuDetails = () => {
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({
     page: 1,
-    pageSize: 10,
+    pageSize: 100,
     total: 0,
   });
 
@@ -210,10 +210,19 @@ const MenuDetails = () => {
   // Filtered rows for client-side search (if needed)
   const filteredRows = useMemo(() => {
     if (!debouncedSearch) return menuList;
-    return menuList.filter(
-      (row) =>
-        row.menu_name?.toLowerCase().includes(debouncedSearch.toLowerCase())
-    );
+    const search = debouncedSearch.toLowerCase();
+    return menuList.filter((row) => {
+      const menuNameMatch = row.menu_name?.toLowerCase().includes(search);
+      let dateMatch = false;
+      if (row.date) {
+        const dateObj = new Date(row.date);
+        const formattedDate = `${dateObj.getDate().toString().padStart(2, "0")}-${(dateObj.getMonth() + 1)
+          .toString()
+          .padStart(2, "0")}-${dateObj.getFullYear()}`;
+        dateMatch = formattedDate.includes(search);
+      }
+      return menuNameMatch || dateMatch;
+    });
   }, [menuList, debouncedSearch]);
 
   return (
