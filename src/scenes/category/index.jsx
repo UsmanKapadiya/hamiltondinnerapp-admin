@@ -148,8 +148,9 @@ const Category = () => {
       field: "categoryType",
       headerName: "Category Type",
       valueGetter: (params) => {
+        console.log(params)
         const typeId = params.row.type;
-        const typeObj = type.find((t) => t.id === typeId);
+        const typeObj = type.find((t) => t.id === JSON.parse(typeId));
         return typeObj ? typeObj.type_name : "N/A";
       },
     },
@@ -158,7 +159,7 @@ const Category = () => {
       headerName: "Parent Id",
       valueGetter: (params) => {
         const parentId = params.row.parent_id;
-        const parentObj = categoryListData.find((t) => t.id === parentId);
+        const parentObj = categoryListData.find((t) => t.id === JSON.parse(parentId));
         return parentObj ? parentObj.cat_name : "No results";
       },
       flex: 1,

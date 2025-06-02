@@ -45,12 +45,12 @@ const CategoryDetailsView = () => {
     };
 
     const getTypeName = (typeId) => {
-        const typeObj = type.find((t) => t.id === typeId);
+        const typeObj = type.find((t) => t.id == typeId);
         return typeObj ? typeObj.type_name : "N/A";
     };
 
     const getParentName = (parentId) => {
-        const parentObj = categoryListData.find((t) => t.id === parentId);
+        const parentObj = categoryListData.find((t) => t.id == parentId);
         return parentObj ? parentObj.cat_name : "No results";
     };
 
