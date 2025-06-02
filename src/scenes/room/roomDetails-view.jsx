@@ -131,11 +131,11 @@ const RoomDetailsView = () => {
             </Typography>
             <Button
               variant="contained"
-              color={roomDetails?.is_active === "1" || roomDetails?.is_active === true ? "info" : "inherit"}
+              color={roomDetails?.is_active === 1 || roomDetails?.is_active === true ? "info" : "inherit"}
               size="small"
               sx={{ mt: "10px" }}
             >
-              {roomDetails?.is_active === "1" || roomDetails?.is_active === true ? "Active" : "Inactive"}
+              {roomDetails?.is_active === 1 || roomDetails?.is_active === true ? "Active" : "Inactive"}
             </Button>
           </Box>
         </Box>

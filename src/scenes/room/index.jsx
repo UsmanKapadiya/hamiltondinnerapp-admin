@@ -119,7 +119,7 @@ const Room = () => {
           borderRadius={1}
         >
           <Typography textTransform="capitalize">
-            {is_active === "1" ? "Active" : "Inactive"}
+            {is_active === 1 ? "Active" : "Inactive"}
           </Typography>
         </Box>
       ),
