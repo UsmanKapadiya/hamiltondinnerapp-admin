@@ -148,7 +148,6 @@ const Category = () => {
       field: "categoryType",
       headerName: "Category Type",
       valueGetter: (params) => {
-        console.log(params)
         const typeId = params.row.type;
         const typeObj = type.find((t) => t.id === JSON.parse(typeId));
         return typeObj ? typeObj.type_name : "N/A";
