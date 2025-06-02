@@ -79,9 +79,13 @@ function Dashboard() {
   };
   return (
     <Box m="20px">
-      <Box display="flex" justifyContent="space-between">
+       <Box display="flex" justifyContent="space-between">
         <Header title="DASHBOARD" subtitle="Welcome to your dashboard" />
-        {!isXsDevices && (
+        </Box>
+      
+     {/*   <Box display="flex" justifyContent="space-between">
+        <Header title="DASHBOARD" subtitle="Welcome to your dashboard" />
+       {!isXsDevices && (
           <Box>
             <Button
               variant="contained"
@@ -105,7 +109,6 @@ function Dashboard() {
         )}
       </Box>
 
-      {/* GRID & CHARTS */}
       <Box
         display="grid"
         gridTemplateColumns={
@@ -118,7 +121,6 @@ function Dashboard() {
         gridAutoRows="140px"
         gap="20px"
       >
-        {/* Statistic Items */}
         <Box
           gridColumn="span 3"
           bgcolor={colors.primary[400]}
@@ -196,9 +198,7 @@ function Dashboard() {
           />
         </Box>
 
-        {/* ---------------- Row 2 ---------------- */}
-
-        {/* Line Chart */}
+        
         <Box
           gridColumn={
             isXlDevices ? "span 8" : isMdDevices ? "span 6" : "span 3"
@@ -239,7 +239,6 @@ function Dashboard() {
           </Box>
         </Box>
 
-        {/* Transaction Data */}
         <Box
           gridColumn={isXlDevices ? "span 4" : "span 3"}
           gridRow="span 2"
@@ -287,7 +286,7 @@ function Dashboard() {
           ))}
         </Box>
 
-        {/* Revenue Details */}
+      
         <Box
           gridColumn={isXlDevices ? "span 4" : "span 3"}
           gridRow="span 2"
@@ -318,7 +317,7 @@ function Dashboard() {
           </Box>
         </Box>
 
-        {/* Bar Chart */}
+       
         <Box
           gridColumn={isXlDevices ? "span 4" : "span 3"}
           gridRow="span 2"
@@ -342,7 +341,7 @@ function Dashboard() {
           </Box>
         </Box>
 
-        {/* Geography Chart */}
+     
         <Box
           gridColumn={isXlDevices ? "span 4" : "span 3"}
           gridRow="span 2"
@@ -361,7 +360,7 @@ function Dashboard() {
             <GeographyChart isDashboard={true} />
           </Box>
         </Box>
-      </Box>
+      </Box> */}
     </Box>
   );
 }
