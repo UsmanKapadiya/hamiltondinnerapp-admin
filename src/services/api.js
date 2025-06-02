@@ -62,6 +62,13 @@ const requests = {
         'Content-Type': 'multipart/form-data',
       },
     }).then(responseBody),
+    
+  uploadPut: (url, body) =>
+    instance.post(url, body, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }).then(responseBody),
 
   customPost: (url, body, token) => {
     return instance.post(url, body, {

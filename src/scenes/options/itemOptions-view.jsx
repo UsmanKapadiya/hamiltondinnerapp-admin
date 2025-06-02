@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
     Box,
     Divider,
@@ -17,28 +17,27 @@ const ItemOptionsView = () => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
     const isXlDevices = useMediaQuery("(min-width: 1260px)");
-    const [optionsDetails, setOptionsDetails] = useState('')
+    const [optionsDetails, setOptionsDetails] = useState(null);
     const [loading, setLoading] = useState(false);
     const location = useLocation();
-    const ItemoptionsDetails = location.state;
+    const itemOptionsDetails = location.state;
 
-
-    useEffect(() => {
-        getOptionsDetails(ItemoptionsDetails?.id)
-    }, [location.state])
-
-    const getOptionsDetails = async (id) => {
+    const getOptionsDetails = useCallback(async (id) => {
+        if (!id) return;
+        setLoading(true);
         try {
-            setLoading(true);
             const response = await ItemServices.getOptionDetails(id);
-            // console.log(response?.data)
             setOptionsDetails(response?.data);
         } catch (error) {
             console.error("Error fetching menu list:", error);
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        getOptionsDetails(itemOptionsDetails?.id);
+    }, [getOptionsDetails, itemOptionsDetails?.id]);
 
     return (
         <Box m="20px">
@@ -69,7 +68,7 @@ const ItemOptionsView = () => {
                             Item Name
                         </Typography>
                         <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                            {optionsDetails?.option_name}
+                            {optionsDetails?.option_name || "-"}
                         </Typography>
                     </Box>
                     <Divider sx={{ bgcolor: colors.gray[300] }} />
@@ -78,11 +77,10 @@ const ItemOptionsView = () => {
                             Item Chinese Name
                         </Typography>
                         <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                            {optionsDetails?.option_name_cn}
+                            {optionsDetails?.option_name_cn || "-"}
                         </Typography>
                     </Box>
                     <Divider sx={{ bgcolor: colors.gray[300] }} />
-
                     <Box p="10px">
                         <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
                             Is Paid Item

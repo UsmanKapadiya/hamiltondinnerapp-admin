@@ -2,7 +2,7 @@ import { Box, Button, TextField, useMediaQuery, MenuItem, Autocomplete } from "@
 import { Header } from "../../components";
 import { Formik } from "formik";
 import * as yup from "yup";
-import { DvrOutlined, Home } from "@mui/icons-material";
+import { DvrOutlined } from "@mui/icons-material";
 import { useLocation } from "react-router-dom";
 import { type } from "../../data/mockData";
 import CategoryServices from "../../services/categoryServices";
@@ -10,20 +10,17 @@ import { toast } from "react-toastify";
 import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
 import { useEffect, useState } from "react";
 
-
-
 const validationSchema = yup.object().shape({
     cat_name: yup.string().required("Category Name is required"),
     category_chinese_name: yup.string().required("Category Chinese Name is required"),
     type: yup.string().required("Category Type is required"),
-    // parent_id: yup.string().required("Parent Id is required"),
+    parent_id: yup.string().required("Parent Id is required"),
 });
-
 
 const CategoryDetailsForm = () => {
     const location = useLocation();
-    const [categoryDetails, setcCategoryDetails] = useState(true);
-    const categoryListData = location.state?.categoryListData;
+    const [categoryDetails, setCategoryDetails] = useState(null);
+    const categoryListData = location.state?.categoryListData || [];
     const isNonMobile = useMediaQuery("(min-width:600px)");
     const [loading, setLoading] = useState(true);
     const [filteredParentOptions, setFilteredParentOptions] = useState([]);
@@ -31,68 +28,50 @@ const CategoryDetailsForm = () => {
     useEffect(() => {
         const timer = setTimeout(() => {
             const fetchedDetails = location.state?.selectedCategory;
-            setcCategoryDetails(fetchedDetails);
+            setCategoryDetails(fetchedDetails);
             setLoading(false);
-        }, 1500);
+        }, 500); // Reduced timeout for better UX
         return () => clearTimeout(timer);
     }, [location.state]);
 
     useEffect(() => {
         if (categoryDetails?.type) {
             const filteredOptions = categoryListData
-                ?.filter((category) => category.type === categoryDetails.type && category.id !== categoryDetails.id)
+                .filter(
+                    (category) =>
+                        category.type === categoryDetails.type &&
+                        category.id !== categoryDetails.id
+                )
                 .map((category) => ({
                     label: category.cat_name,
                     value: category.id,
-                    type: category?.type,
-                })) || [];
+                    type: category.type,
+                }));
             setFilteredParentOptions(filteredOptions);
         }
-    }, [categoryDetails?.type, categoryListData]);
+    }, [categoryDetails?.type, categoryDetails?.id, categoryListData]);
 
     const initialValues = {
         id: categoryDetails?.id || "",
         cat_name: categoryDetails?.cat_name || "",
         category_chinese_name: categoryDetails?.category_chinese_name || "",
-        type: (() => {
-            if (!categoryDetails) return "";
-            const typeId = categoryDetails?.type;
-            const typeObj = type.find((t) => t.id === typeId);
-            return typeObj ? typeObj.id : "";
-        })(),
-        parent_id: (() => {
-            if (!categoryDetails) return 0;
-            const parentId = categoryDetails?.parent_id;
-            const parentObj = categoryListData.find((t) => t.id === parentId);
-            return parentObj ? parentObj.id : 0;
-        })(),
+        type: categoryDetails?.type || "",
+        parent_id: categoryDetails?.parent_id || "",
     };
 
     const handleFormSubmit = async (values, actions) => {
         setLoading(true);
-
-        const payload = {
-            ...values,
-        };
-
         try {
             let response;
-            if (payload?.id) {
-                // Update category if ID is available
-                response = await CategoryServices.updateCategoryDetails(payload.id, payload);
+            if (values.id) {
+                response = await CategoryServices.updateCategoryDetails(values.id, values);
                 toast.success("Category updated successfully!");
-                setcCategoryDetails(response?.data); // Update categoryDetails with the new data
             } else {
-                // Create category if ID is not available
-                response = await CategoryServices.createCategoryDetails(payload);
+                response = await CategoryServices.createCategoryDetails(values);
                 toast.success("Category created successfully!");
-                setcCategoryDetails(response?.data); // Set categoryDetails with the created data
             }
-            actions.resetForm({
-                values: {
-                    ...response?.data, // Reset form with updated values
-                },
-            });
+            setCategoryDetails(response?.data);
+            actions.resetForm({ values: { ...response?.data } });
         } catch (error) {
             toast.error("Failed to process category. Please try again.");
         } finally {
@@ -102,7 +81,17 @@ const CategoryDetailsForm = () => {
 
     return (
         <Box m="20px">
-            <Header title={loading ? "" : categoryDetails?.id ? "Update Category Detail" : "Add Category Detail"} icon={<DvrOutlined />} Buttons={false} />
+            <Header
+                title={
+                    loading
+                        ? ""
+                        : categoryDetails?.id
+                        ? "Update Category Detail"
+                        : "Add Category Detail"
+                }
+                icon={<DvrOutlined />}
+                Buttons={false}
+            />
             {loading ? (
                 <Box
                     display="flex"
@@ -114,6 +103,7 @@ const CategoryDetailsForm = () => {
                 </Box>
             ) : (
                 <Formik
+                    enableReinitialize
                     onSubmit={handleFormSubmit}
                     initialValues={initialValues}
                     validationSchema={validationSchema}
@@ -160,8 +150,14 @@ const CategoryDetailsForm = () => {
                                     onChange={handleChange}
                                     value={values.category_chinese_name}
                                     name="category_chinese_name"
-                                    error={touched.category_chinese_name && Boolean(errors.category_chinese_name)}
-                                    helperText={touched.category_chinese_name && errors.category_chinese_name}
+                                    error={
+                                        touched.category_chinese_name &&
+                                        Boolean(errors.category_chinese_name)
+                                    }
+                                    helperText={
+                                        touched.category_chinese_name &&
+                                        errors.category_chinese_name
+                                    }
                                     sx={{ gridColumn: "span 4" }}
                                 />
                                 <TextField
@@ -172,17 +168,21 @@ const CategoryDetailsForm = () => {
                                     onBlur={handleBlur}
                                     onChange={(e) => {
                                         handleChange(e);
-                                        const selectedType = e.target.value;
+                                        const selectedType = JSON.stringify(e.target.value);
                                         setFieldValue("type", selectedType);
-                                        // Filter parent options based on the selected type
                                         const filteredOptions = categoryListData
-                                            ?.filter((category) => category.type === selectedType && category.id !== values.id)
+                                            .filter(
+                                                (category) =>
+                                                    category.type === selectedType &&
+                                                    category.id !== values.id
+                                            )
                                             .map((category) => ({
                                                 label: category.cat_name,
                                                 value: category.id,
-                                                type: category?.type,
-                                            })) || [];
+                                                type: category.type,
+                                            }));
                                         setFilteredParentOptions(filteredOptions);
+                                        setFieldValue("parent_id", ""); // Reset parent_id when type changes
                                     }}
                                     value={values.type}
                                     name="type"
@@ -198,10 +198,14 @@ const CategoryDetailsForm = () => {
                                 </TextField>
                                 <Autocomplete
                                     options={filteredParentOptions}
-                                    getOptionLabel={(option) => option.label}
-                                    value={filteredParentOptions?.find((option) => option.value === values.parent_id) || null}
-                                    onChange={(event, newValue) => {
-                                        setFieldValue("parent_id", newValue ? newValue.value : ""); // Update parent_id correctly
+                                    getOptionLabel={(option) => option.label || ""}
+                                    value={
+                                        filteredParentOptions.find(
+                                            (option) => option.value === values.parent_id
+                                        ) || null
+                                    }
+                                    onChange={(_, newValue) => {
+                                        setFieldValue("parent_id", newValue ? newValue.value : "");
                                     }}
                                     renderInput={(params) => (
                                         <TextField

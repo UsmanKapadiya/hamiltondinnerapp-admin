@@ -8,7 +8,7 @@ import {
   SearchOutlined,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
 import RoomServices from "../../services/roomServices";
 import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
@@ -26,104 +26,62 @@ const Room = () => {
   const [selectedId, setSelectedId] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
   const [selectedRoomName, setSelectedRoomName] = useState("");
-  const [roomListData, setroomListData] = useState([])
+  const [roomListData, setRoomListData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const permissionList = useSelector((state) => state?.permissionState?.permissionsList);
-  console.log(permissionList)
   const [pagination, setPagination] = useState({
     page: 1,
     pageSize: 10,
     total: 0,
   });
 
+  // Memoize permissions for performance
+  const canAdd = useMemo(() => hasPermission(permissionList, "add_RoomDetails"), [permissionList]);
+  const canView = useMemo(() => hasPermission(permissionList, "read_RoomDetails"), [permissionList]);
+  const canEdit = useMemo(() => hasPermission(permissionList, "edit_RoomDetails"), [permissionList]);
+  const canDelete = useMemo(() => hasPermission(permissionList, "delete_RoomDetails"), [permissionList]);
+  const canBrowseRoom = useMemo(() => hasPermission(permissionList, "browse_Room"), [permissionList]);
 
-  useEffect(() => {
-    fetchALLRoomList()
-  }, []);
-
-  const fetchALLRoomList = async () => {
+  // Fetch room list
+  const fetchALLRoomList = useCallback(async () => {
+    setLoading(true);
     try {
       const response = await RoomServices.getRoomList();
-      setroomListData(response.data);
+      setRoomListData(response.data);
       setPagination((prev) => ({
         ...prev,
         total: response.count,
       }));
     } catch (error) {
-      console.error("Error fetching menu list:", error);
+      console.error("Error fetching room list:", error);
+      toast.error("Failed to fetch room list. Please try again.");
     } finally {
       setLoading(false);
     }
-  };
-  const handleRowSelection = (ids) => {
-    setSelectedIds(ids);
-  };
-  const handleDelete = (data) => {
-    setSelectedIds([])
-    setSelectedId(data?.id);
-    setSelectedRoomName(data?.room_name);
-    setDialogOpen(true);
-  };
-  const confirmDelete = () => {
-    selectedIds.length > 0 && !selectedRoomName
-      ? bulkDeleteRoom(selectedIds) : deleteRoom(selectedId);
-    setDialogOpen(false);
-  };
-  const cancelDelete = () => {
-    setDialogOpen(false);
-    setSelectedId(null);
-    setSelectedRoomName("");
-  };
-  const handleView = (id) => {
-    navigate(`/room-details/${id}`, { state: { id } });
-  };
-  const handleEdit = (id) => {
-    const selectedRow = roomListData.find((row) => row.id === id);
-    navigate(`/room-details/${id}/edit`, { state: selectedRow });
-  };
-  const handleToggle = () => {
-    setShowDeleted((prev) => !prev);
-  };
-  const handleAddNewClick = () => {
-    navigate("/room-details/create");
-  };
-  const handleBulkDelete = () => {
-    if (selectedIds.length > 0) {
-      setDialogOpen(true);
-    } else {
-      toast.warning("Please select at least one Room to delete.");
-    }
-  };
-  const handleOrderClick = () => {
-    navigate("/room-details/order");
-  };
-  const handlePaginationChange = (newPaginationModel) => {
-    setPagination((prev) => ({
-      ...prev,
-      page: newPaginationModel.page + 1,
-      pageSize: newPaginationModel.pageSize,
-    }));
-    setCurrentPage(newPaginationModel.page + 1,)
-  };
+  }, []);
 
+  useEffect(() => {
+    fetchALLRoomList();
+  }, [fetchALLRoomList]);
 
+  // Memoize filtered rows for DataGrid
+  const filteredRows = useMemo(() => {
+    const search = searchText.toLowerCase();
+    return roomListData.filter(
+      (row) =>
+        row.room_name?.toLowerCase().includes(search) ||
+        row.resident_name?.toLowerCase().includes(search)
+    );
+  }, [roomListData, searchText]);
 
-  // Usage example in your component:
-  const canAdd = hasPermission(permissionList, "add_RoomDetails");
-  const canView = hasPermission(permissionList, "read_RoomDetails");
-  const canEdit = hasPermission(permissionList, "edit_RoomDetails");
-  const canDelete = hasPermission(permissionList, "delete_RoomDetails");
-  const canBrowseRoom = hasPermission(permissionList, "browse_Room");
-
-
-  const columns = [
+  // Memoize columns to avoid unnecessary re-renders
+  const columns = useMemo(() => [
     { field: "room_name", headerName: "Unit Number" },
     {
       field: "resident_name",
       headerName: "Resident Name",
       flex: 1,
-      // cellClassName: "name-column--cell",
     },
     {
       field: "occupancy",
@@ -133,117 +91,157 @@ const Room = () => {
       align: "left",
     },
     {
-      field: "language", headerName: "Language Preference",
-      renderCell: ({ value }) => {
-        return (
-          <Typography>
-            {value === "0" || value === 0 ? "Chinese" : "English"}
-          </Typography>
-        );
-      },
+      field: "language",
+      headerName: "Language Preference",
+      renderCell: ({ value }) => (
+        <Typography>
+          {value === "0" || value === 0 ? "Chinese" : "English"}
+        </Typography>
+      ),
     },
     {
       field: "is_active",
       headerName: "Active",
       flex: 1,
-      renderCell: ({ row: { is_active } }) => {
-        return (
-          <Box
-            width="120px"
-            p={1}
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            gap={1}
-            bgcolor={
-              is_active === 1
-                ? colors.greenAccent[600]
-                : colors.greenAccent[700]
-            }
-            borderRadius={1}
-          >
-            {/* {is_active === 1 && <AdminPanelSettingsOutlined />}
-            {is_active === 0 && <SecurityOutlined />} */}
-            <Typography textTransform="capitalize">
-              {is_active === 1 ? "active" : "Inactive"}
-            </Typography>
-          </Box>
-        );
-      },
+      renderCell: ({ row: { is_active } }) => (
+        <Box
+          width="120px"
+          p={1}
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          gap={1}
+          bgcolor={
+            is_active === 1
+              ? colors.greenAccent[600]
+              : colors.greenAccent[700]
+          }
+          borderRadius={1}
+        >
+          <Typography textTransform="capitalize">
+            {is_active === "1" ? "Active" : "Inactive"}
+          </Typography>
+        </Box>
+      ),
     },
     {
       field: "actions",
       headerName: "Actions",
       flex: 1,
-      renderCell: ({ row }) => {
-        return (
-          <Box display="flex" gap={1}>
-            <Button
-              variant="contained"
-              color="info"
-              size="small"
-              onClick={() => handleView(row.id)}
-              disabled={!canView}
-            >
-              View
-            </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={() => handleEdit(row.id)}
-              disabled={!canEdit}
-            >
-              Edit
-            </Button>
-            <Button
-              variant="contained"
-              color="secondary"
-              size="small"
-              onClick={() => handleDelete(row)}
-              disabled={!canDelete}
-
-            >
-              Delete
-            </Button>
-
-          </Box>
-        );
-      },
+      renderCell: ({ row }) => (
+        <Box display="flex" gap={1}>
+          <Button
+            variant="contained"
+            color="info"
+            size="small"
+            onClick={() => handleView(row.id)}
+            disabled={!canView}
+          >
+            View
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            onClick={() => handleEdit(row.id)}
+            disabled={!canEdit}
+          >
+            Edit
+          </Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            size="small"
+            onClick={() => handleDelete(row)}
+            disabled={!canDelete}
+          >
+            Delete
+          </Button>
+        </Box>
+      ),
     },
-  ];
+  ], [canView, canEdit, canDelete, colors]);
 
-  const bulkDeleteRoom = async (ids) => {
+  // Handlers
+  const handleRowSelection = useCallback((ids) => setSelectedIds(ids), []);
+  const handleDelete = useCallback((data) => {
+    setSelectedIds([]);
+    setSelectedId(data?.id);
+    setSelectedRoomName(data?.room_name);
+    setDialogOpen(true);
+  }, []);
+  
+  const confirmDelete = useCallback(() => {
+    selectedIds.length > 0 && !selectedRoomName
+      ? bulkDeleteRoom(selectedIds)
+      : deleteRoom(selectedId);
+    setDialogOpen(false);
+  }, [selectedIds, selectedRoomName, selectedId]);
+
+  const cancelDelete = useCallback(() => {
+    setDialogOpen(false);
+    setSelectedId(null);
+    setSelectedRoomName("");
+  }, []);
+
+  const handleView = useCallback((id) => {
+    navigate(`/room-details/${id}`, { state: { id } });
+  }, [navigate]);
+
+  const handleEdit = useCallback((id) => {
+    const selectedRow = roomListData.find((row) => row.id === id);
+    navigate(`/room-details/${id}/edit`, { state: selectedRow });
+  }, [navigate, roomListData]);
+
+  const handleAddNewClick = useCallback(() => {
+    navigate("/room-details/create");
+  }, [navigate]);
+  const handleBulkDelete = useCallback(() => {
+    if (selectedIds.length > 0) {
+      setDialogOpen(true);
+    } else {
+      toast.warning("Please select at least one Room to delete.");
+    }
+  }, [selectedIds]);
+  const handlePaginationChange = useCallback((newPaginationModel) => {
+    setPagination((prev) => ({
+      ...prev,
+      page: newPaginationModel.page + 1,
+      pageSize: newPaginationModel.pageSize,
+    }));
+    setCurrentPage(newPaginationModel.page + 1);
+  }, []);
+
+  // Bulk delete and single delete
+  const bulkDeleteRoom = useCallback(async (ids) => {
     try {
-      let data = JSON.stringify({
-        "ids": ids
-      });
-      const response = await RoomServices.bulkdeleteRooms(data);
-      setLoading(true)
+      let data = JSON.stringify({ ids });
+      await RoomServices.bulkdeleteRooms(data);
+      setLoading(true);
       toast.success("Multiple Rooms Deleted successfully!");
       fetchALLRoomList();
     } catch (error) {
-      console.error("Error fetching menu list:", error);
-      toast.error("Failed to process menu. Please try again.");
+      console.error("Error deleting rooms:", error);
+      toast.error("Failed to process rooms. Please try again.");
     } finally {
       setLoading(false);
     }
-  };
-  const deleteRoom = async (id) => {
+  }, [fetchALLRoomList]);
+  const deleteRoom = useCallback(async (id) => {
     try {
-      const response = await RoomServices.deleteRooms(id);
-      // console.log(response)
-      setLoading(true)
-      toast.success("Rooms Deleted successfully!");
+      await RoomServices.deleteRooms(id);
+      setLoading(true);
+      toast.success("Room Deleted successfully!");
       fetchALLRoomList();
       setSelectedRoomName("");
     } catch (error) {
-      console.error("Error fetching menu list:", error);
-      toast.error("Failed to process menu. Please try again.");
+      console.error("Error deleting room:", error);
+      toast.error("Failed to process room. Please try again.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [fetchALLRoomList]);
+
   return (
     <Box m="20px">
       <Header
@@ -251,8 +249,6 @@ const Room = () => {
         icon={<Home />}
         addNewClick={handleAddNewClick}
         addBulkDelete={handleBulkDelete}
-        orderClick={handleOrderClick}
-        showToggleClick={handleToggle}
         buttons={true}
         addButton={canAdd && canBrowseRoom}
         deleteButton={canDelete && canBrowseRoom}
@@ -263,15 +259,9 @@ const Room = () => {
           height="75vh"
           flex={1}
           sx={{
-            "& .MuiDataGrid-root": {
-              border: "none",
-            },
-            "& .MuiDataGrid-cell": {
-              border: "none",
-            },
-            "& .name-column--cell": {
-              color: colors.greenAccent[300],
-            },
+            "& .MuiDataGrid-root": { border: "none" },
+            "& .MuiDataGrid-cell": { border: "none" },
+            "& .name-column--cell": { color: colors.greenAccent[300] },
             "& .MuiDataGrid-columnHeaders": {
               backgroundColor: colors.blueAccent[700],
               borderBottom: "none",
@@ -297,10 +287,9 @@ const Room = () => {
             bgcolor={colors.primary[400]}
             borderRadius="3px"
             mb="10px"
-          // sx={{ display: `${isXsDevices ? "none" : "flex"}` }}
           >
             <InputBase
-              placeholder="Search by Unit Number, or Resident Name..."
+              placeholder="Search by Unit Number or Resident Name..."
               sx={{ ml: 2, flex: 1 }}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
@@ -309,19 +298,13 @@ const Room = () => {
               type="button"
               sx={{ p: 1 }}
               onClick={() => setSearchText("")}
+              aria-label={searchText ? "Clear search" : "Search"}
             >
-              {searchText
-                ? <Close />
-                : <SearchOutlined />
-              }
+              {searchText ? <Close /> : <SearchOutlined />}
             </IconButton>
           </Box>
           <DataGrid
-            rows={roomListData.filter(
-              (row) =>
-                row.room_name?.toLowerCase().includes(searchText.toLowerCase()) ||
-                row.resident_name?.toLowerCase().includes(searchText.toLowerCase())
-            )}
+            rows={filteredRows}
             columns={columns}
             loading={loading}
             rowCount={pagination.total}
@@ -331,10 +314,11 @@ const Room = () => {
             }}
             onPaginationModelChange={handlePaginationChange}
             checkboxSelection
-            onRowSelectionModelChange={(ids) => handleRowSelection(ids)}
+            onRowSelectionModelChange={handleRowSelection}
             components={{
               LoadingOverlay: CustomLoadingOverlay,
             }}
+            pageSizeOptions={[10, 20, 50, 100]} 
           />
 
           <ConfirmationDialog
@@ -342,13 +326,12 @@ const Room = () => {
             title="Confirm Delete"
             message={
               selectedIds.length > 0 && !selectedRoomName
-                ? `Are you sure you want to delete ${selectedIds.length} Room${selectedIds.length > 1 ? 's' : ''}?` // Handles singular/plural for multiple room delete
-                : `Are you sure you want to delete the Room "${selectedRoomName}"?` // Single room delete message
+                ? `Are you sure you want to delete ${selectedIds.length} Room${selectedIds.length > 1 ? "s" : ""}?`
+                : `Are you sure you want to delete the Room "${selectedRoomName}"?`
             }
             onConfirm={confirmDelete}
             onCancel={cancelDelete}
           />
-
         </Box>
       ) : (
         <NoPermissionMessage
@@ -361,4 +344,3 @@ const Room = () => {
 };
 
 export default Room;
-

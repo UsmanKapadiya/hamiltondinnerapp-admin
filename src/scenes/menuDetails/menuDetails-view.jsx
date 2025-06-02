@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
     Box,
-    Button,
     Divider,
     Typography,
     useMediaQuery,
@@ -19,18 +18,25 @@ const MenuDetailsView = () => {
     const colors = tokens(theme.palette.mode);
     const isXlDevices = useMediaQuery("(min-width: 1260px)");
     const [loading, setLoading] = useState(true);
-    const [menuDetails, setMenuDetails] = useState(null); // State for menu details
+    const [menuDetails, setMenuDetails] = useState(null);
     const itemList = useSelector((state) => state.itemState.item);
     const location = useLocation();
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            const fetchedMenuDetails = location.state;
-            setMenuDetails(fetchedMenuDetails);
-            setLoading(false);
-        }, 1500);
-        return () => clearTimeout(timer);
+        if (location.state) {
+            setMenuDetails(location.state);
+        }
+        setLoading(false);
     }, [location.state]);
+
+    // Memoized item lookup for performance
+    const itemMap = useMemo(() => {
+        const map = {};
+        itemList.forEach((item) => {
+            map[item.id] = item.item_name;
+        });
+        return map;
+    }, [itemList]);
 
     return (
         <Box m="20px">
@@ -89,7 +95,6 @@ const MenuDetailsView = () => {
                         <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
                             Item
                         </Typography>
-
                         {/* Breakfast Section */}
                         {menuDetails?.items?.breakfast?.length > 0 && (
                             <Box ml="10px" mt="15px">
@@ -97,120 +102,113 @@ const MenuDetailsView = () => {
                                     Breakfast:
                                 </Typography>
                                 <Box ml="20px" mt="10px">
-                                    {menuDetails.items.breakfast.map((id) => {
-                                        const item = itemList.find((item) => item.id === id);
-                                        return (
-                                            <Typography key={id} color={colors.gray[100]} variant="body1">
-                                                - {item ? item?.item_name : "Item not found"}
-                                            </Typography>
-                                        );
-                                    })}
+                                    {menuDetails.items.breakfast.map((id) => (
+                                        <Typography key={id} color={colors.gray[100]} variant="body1">
+                                            - {itemMap[id] || "Item not found"}
+                                        </Typography>
+                                    ))}
                                 </Box>
                             </Box>
                         )}
+                        {/* Lunch Section */}
                         {menuDetails?.items?.lunch?.length > 0 && (
                             <Box ml="10px" mt="15px">
                                 <Typography color={colors.gray[100]} variant="h4" fontWeight="600">
                                     Lunch:
                                 </Typography>
                                 <Box ml="20px" mt="10px">
-                                    {menuDetails.items.lunch.map((id) => {
-                                        const item = itemList.find((item) => item.id === id);
-                                        return (
-                                            <Typography key={id} color={colors.gray[100]} variant="body1">
-                                                - {item ? item?.item_name : "Item not found"}
-                                            </Typography>
-                                        );
-                                    })}
+                                    {menuDetails.items.lunch.map((id) => (
+                                        <Typography key={id} color={colors.gray[100]} variant="body1">
+                                            - {itemMap[id] || "Item not found"}
+                                        </Typography>
+                                    ))}
                                 </Box>
                             </Box>
                         )}
+                        {/* Dinner Section */}
                         {menuDetails?.items?.dinner?.length > 0 && (
                             <Box ml="10px" mt="15px">
                                 <Typography color={colors.gray[100]} variant="h4" fontWeight="600">
                                     Dinner:
                                 </Typography>
                                 <Box ml="20px" mt="10px">
-                                    {menuDetails.items.dinner.map((id) => {
-                                        const item = itemList.find((item) => item.id === id);
-                                        return (
-                                            <Typography key={id} color={colors.gray[100]} variant="body1">
-                                                - {item ? item?.item_name : "Item not found"}
-                                            </Typography>
-                                        );
-                                    })}
+                                    {menuDetails.items.dinner.map((id) => (
+                                        <Typography key={id} color={colors.gray[100]} variant="body1">
+                                            - {itemMap[id] || "Item not found"}
+                                        </Typography>
+                                    ))}
                                 </Box>
                             </Box>
                         )}
-                        {/* Lunch Section */}
+                        {/* Advanced Lunch Section */}
                         {(menuDetails?.selectedLunchItems?.lunchSoup?.length > 0 ||
                             menuDetails?.selectedLunchItems?.lunchEntree?.length > 0 ||
                             menuDetails?.selectedLunchItems?.lunchDessert?.length > 0 ||
                             menuDetails?.selectedLunchItems?.lunchAlternatives?.length > 0) && (
-                                <Box ml="10px" mt="15px">
-                                    <Typography color={colors.gray[100]} variant="h4" fontWeight="600">
-                                        Lunch:
-                                    </Typography>
-                                    <Box ml="20px">
-                                        {menuDetails?.selectedLunchItems?.lunchSoup?.length > 0 && (
-                                            <Box mt="10px">
-                                                <Typography color={colors.gray[100]} variant="h5" fontWeight="600">
-                                                    Lunch Soup:
-                                                </Typography>
-                                                <Box ml="20px" mt="10px">
-                                                    {menuDetails?.selectedLunchItems?.lunchSoup?.map((item) => (
-                                                        <Typography key={item.id} color={colors.gray[100]} variant="body1">
-                                                            - {item.label}
-                                                        </Typography>
-                                                    ))}
-                                                </Box>
+                            <Box ml="10px" mt="15px">
+                                <Typography color={colors.gray[100]} variant="h4" fontWeight="600">
+                                    Lunch:
+                                </Typography>
+                                <Box ml="20px">
+                                    {menuDetails?.selectedLunchItems?.lunchSoup?.length > 0 && (
+                                        <Box mt="10px">
+                                            <Typography color={colors.gray[100]} variant="h5" fontWeight="600">
+                                                Lunch Soup:
+                                            </Typography>
+                                            <Box ml="20px" mt="10px">
+                                                {menuDetails.selectedLunchItems.lunchSoup.map((item) => (
+                                                    <Typography key={item.id} color={colors.gray[100]} variant="body1">
+                                                        - {item.label}
+                                                    </Typography>
+                                                ))}
                                             </Box>
-                                        )}
-                                        {menuDetails?.selectedLunchItems?.lunchEntree?.length > 0 && (
-                                            <Box mt="10px">
-                                                <Typography color={colors.gray[100]} variant="h5" fontWeight="600">
-                                                    Lunch Entree:
-                                                </Typography>
-                                                <Box ml="20px" mt="10px">
-                                                    {menuDetails?.selectedLunchItems?.lunchEntree?.map((item) => (
-                                                        <Typography key={item.id} color={colors.gray[100]} variant="body1">
-                                                            - {item.label}
-                                                        </Typography>
-                                                    ))}
-                                                </Box>
+                                        </Box>
+                                    )}
+                                    {menuDetails?.selectedLunchItems?.lunchEntree?.length > 0 && (
+                                        <Box mt="10px">
+                                            <Typography color={colors.gray[100]} variant="h5" fontWeight="600">
+                                                Lunch Entree:
+                                            </Typography>
+                                            <Box ml="20px" mt="10px">
+                                                {menuDetails.selectedLunchItems.lunchEntree.map((item) => (
+                                                    <Typography key={item.id} color={colors.gray[100]} variant="body1">
+                                                        - {item.label}
+                                                    </Typography>
+                                                ))}
                                             </Box>
-                                        )}
-                                        {menuDetails?.selectedLunchItems?.lunchDessert?.length > 0 && (
-                                            <Box mt="10px">
-                                                <Typography color={colors.gray[100]} variant="h5" fontWeight="600">
-                                                    Lunch Dessert:
-                                                </Typography>
-                                                <Box ml="20px" mt="10px">
-                                                    {menuDetails?.selectedLunchItems?.lunchDessert?.map((item) => (
-                                                        <Typography key={item.id} color={colors.gray[100]} variant="body1">
-                                                            - {item.label}
-                                                        </Typography>
-                                                    ))}
-                                                </Box>
+                                        </Box>
+                                    )}
+                                    {menuDetails?.selectedLunchItems?.lunchDessert?.length > 0 && (
+                                        <Box mt="10px">
+                                            <Typography color={colors.gray[100]} variant="h5" fontWeight="600">
+                                                Lunch Dessert:
+                                            </Typography>
+                                            <Box ml="20px" mt="10px">
+                                                {menuDetails.selectedLunchItems.lunchDessert.map((item) => (
+                                                    <Typography key={item.id} color={colors.gray[100]} variant="body1">
+                                                        - {item.label}
+                                                    </Typography>
+                                                ))}
                                             </Box>
-                                        )}
-                                        {menuDetails?.selectedLunchItems?.lunchAlternatives?.length > 0 && (
-                                            <Box mt="10px">
-                                                <Typography color={colors.gray[100]} variant="h5" fontWeight="600">
-                                                    Lunch Alternatives:
-                                                </Typography>
-                                                <Box ml="20px" mt="10px">
-                                                    {menuDetails?.selectedLunchItems?.lunchAlternatives?.map((item) => (
-                                                        <Typography key={item.id} color={colors.gray[100]} variant="body1">
-                                                            - {item.label}
-                                                        </Typography>
-                                                    ))}
-                                                </Box>
+                                        </Box>
+                                    )}
+                                    {menuDetails?.selectedLunchItems?.lunchAlternatives?.length > 0 && (
+                                        <Box mt="10px">
+                                            <Typography color={colors.gray[100]} variant="h5" fontWeight="600">
+                                                Lunch Alternatives:
+                                            </Typography>
+                                            <Box ml="20px" mt="10px">
+                                                {menuDetails.selectedLunchItems.lunchAlternatives.map((item) => (
+                                                    <Typography key={item.id} color={colors.gray[100]} variant="body1">
+                                                        - {item.label}
+                                                    </Typography>
+                                                ))}
                                             </Box>
-                                        )}
-                                    </Box>
+                                        </Box>
+                                    )}
                                 </Box>
-                            )}
+                            </Box>
+                        )}
                     </Box>
                 </Box>
             )}

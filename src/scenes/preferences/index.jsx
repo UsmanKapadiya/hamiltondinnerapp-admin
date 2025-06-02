@@ -1,7 +1,6 @@
 import { Box, Typography, useTheme, Button, InputBase, IconButton } from "@mui/material";
 import { Header } from "../../components";
 import { DataGrid } from "@mui/x-data-grid";
-import { mockPreferences } from "../../data/mockData";
 import { tokens } from "../../theme";
 import {
   AdminPanelSettingsOutlined,
@@ -14,7 +13,7 @@ import {
   SecurityOutlined,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
 import ItemServices from "../../services/itemServices";
 import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
@@ -28,12 +27,13 @@ const ItemPreferences = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [searchText, setSearchText] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
   const [selectedPreferenceName, setSelectedPreferenceName] = useState("");
-  const [preferencesListData, setpPeferencesListData] = useState([])
+  const [preferencesListData, setPreferencesListData] = useState([]);
   const permissionList = useSelector((state) => state?.permissionState?.permissionsList);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({
@@ -42,15 +42,27 @@ const ItemPreferences = () => {
     total: 0,
   });
 
+  // Debounce search input
   useEffect(() => {
-    fetchALLPreferenceList()
-  }, []);
+    const handler = setTimeout(() => setDebouncedSearch(searchText), 300);
+    return () => clearTimeout(handler);
+  }, [searchText]);
 
-  const fetchALLPreferenceList = async () => {
+  // Fetch data on mount, pagination, or search change
+  useEffect(() => {
+    fetchALLPreferenceList();
+    // eslint-disable-next-line
+  }, [pagination.page, pagination.pageSize, debouncedSearch]);
+
+  const fetchALLPreferenceList = useCallback(async () => {
+    setLoading(true);
     try {
-      const response = await ItemServices.getPreferencesList();
-      console.log(response)
-      setpPeferencesListData(response.data);
+      const response = await ItemServices.getPreferencesList({
+        page: pagination.page,
+        pageSize: pagination.pageSize,
+        search: debouncedSearch,
+      });
+      setPreferencesListData(response.data);
       setPagination((prev) => ({
         ...prev,
         total: response.count,
@@ -60,154 +72,152 @@ const ItemPreferences = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [pagination.page, pagination.pageSize, debouncedSearch]);
 
-  const handleRowSelection = (ids) => {
+  const handleRowSelection = useCallback((ids) => {
     setSelectedIds(ids);
-  };
+  }, []);
 
-  const handleDelete = (data) => {
-    console.log(data)
-    setSelectedIds([])
+  const handleDelete = useCallback((data) => {
+    setSelectedIds([]);
     setSelectedId(data?.id);
     setSelectedPreferenceName(data?.pname);
     setDialogOpen(true);
-  };
+  }, []);
 
-  const confirmDelete = () => {
+  const confirmDelete = useCallback(() => {
     selectedIds.length > 0 && !selectedPreferenceName
-      ? bulkDeletePreference(selectedIds) : deletePreference(selectedId);
+      ? bulkDeletePreference(selectedIds)
+      : deletePreference(selectedId);
     setDialogOpen(false);
-  };
+  }, [selectedIds, selectedPreferenceName, selectedId]);
 
-  const cancelDelete = () => {
+  const cancelDelete = useCallback(() => {
     setDialogOpen(false);
     setSelectedId(null);
-    setSelectedPreferenceName("")
-  };
+    setSelectedPreferenceName("");
+  }, []);
 
-  const handleView = (id) => {
+  const handleView = useCallback((id) => {
     navigate(`/item-preferences/${id}`, { state: { id } });
-  };
+  }, [navigate]);
 
-  const handleEdit = (id) => {
+  const handleEdit = useCallback((id) => {
     const selectedRow = preferencesListData.find((row) => row.id === id);
     navigate(`/item-preferences/${id}/edit`, { state: selectedRow });
-  };
-  const handleToggle = () => {
-    setShowDeleted((prev) => !prev);
-  };
-  const handleAddNewClick = () => {
+  }, [navigate, preferencesListData]);
+
+  const handleAddNewClick = useCallback(() => {
     navigate("/item-preferences/create");
-  };
-  const handleBulkDelete = () => {
+  }, [navigate]);
+
+  const handleBulkDelete = useCallback(() => {
     if (selectedIds.length > 0) {
       setDialogOpen(true);
     } else {
       toast.warning("Please select at least one Option to delete.");
     }
-  };
-  const handleOrderClick = () => {
-    // navigate("/item-details/order");
-  };
+  }, [selectedIds]);
 
-  const handlePaginationChange = (newPaginationModel) => {
+  const handlePaginationChange = useCallback((newPaginationModel) => {
     setPagination((prev) => ({
       ...prev,
-      page: newPaginationModel.page + 1, // DataGrid uses 0-based indexing for pages
+      page: newPaginationModel.page + 1,
       pageSize: newPaginationModel.pageSize,
     }));
-    setCurrentPage(newPaginationModel.page + 1,)
-  };
+    setCurrentPage(newPaginationModel.page + 1);
+  }, []);
 
-  const bulkDeletePreference = async (ids) => {
+  const bulkDeletePreference = useCallback(async (ids) => {
     try {
-      let data = JSON.stringify({
-        "ids": ids
-      });
-      const response = await ItemServices.bulkdeletePreferences(data);
-      setLoading(true)
+      let data = JSON.stringify({ ids });
+      await ItemServices.bulkdeletePreferences(data);
+      setLoading(true);
       toast.success("Multiple Preferences Deleted successfully!");
       fetchALLPreferenceList();
     } catch (error) {
-      console.error("Error fetching menu list:", error);
+      console.error("Error deleting preferences:", error);
       toast.error("Failed to process menu. Please try again.");
     } finally {
       setLoading(false);
     }
-  };
-  const deletePreference = async (id) => {
+  }, [fetchALLPreferenceList]);
+
+  const deletePreference = useCallback(async (id) => {
     try {
       setLoading(true);
-      const response = await ItemServices.deletePreferences(id);
-      console.log(response)
+      await ItemServices.deletePreferences(id);
       toast.success("Preference Deleted successfully!");
       fetchALLPreferenceList();
       setSelectedPreferenceName("");
     } catch (error) {
-      console.error("Error fetching Preference list:", error);
+      console.error("Error deleting preference:", error);
       toast.error("Failed to process Preference. Please try again.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [fetchALLPreferenceList]);
 
-  const canAdd = hasPermission(permissionList, "add_ItemPreference");
-  const canView = hasPermission(permissionList, "read_ItemPreference");
-  const canEdit = hasPermission(permissionList, "edit_ItemPreference");
-  const canDelete = hasPermission(permissionList, "delete_ItemPreference");
-  const canBrowse = hasPermission(permissionList, "browse_Preference");
+  const canAdd = useMemo(() => hasPermission(permissionList, "add_ItemPreference"), [permissionList]);
+  const canView = useMemo(() => hasPermission(permissionList, "read_ItemPreference"), [permissionList]);
+  const canEdit = useMemo(() => hasPermission(permissionList, "edit_ItemPreference"), [permissionList]);
+  const canDelete = useMemo(() => hasPermission(permissionList, "delete_ItemPreference"), [permissionList]);
+  const canBrowse = useMemo(() => hasPermission(permissionList, "browse_Preference"), [permissionList]);
 
+  // Memoize filtered rows
+  const filteredRows = useMemo(() => {
+    if (!debouncedSearch) return preferencesListData;
+    return preferencesListData.filter(
+      (row) =>
+        row.pname?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        row.pname_cn?.toLowerCase().includes(debouncedSearch.toLowerCase())
+    );
+  }, [preferencesListData, debouncedSearch]);
 
-  const columns = [
-    { field: "pname", headerName: "Preferences Name", flex: 1, },
+  const columns = useMemo(() => [
+    { field: "pname", headerName: "Preferences Name", flex: 1 },
     {
       field: "pname_cn",
       headerName: "Preferences Chinese Name",
       flex: 1,
-      // cellClassName: "name-column--cell",
     },
     {
       field: "actions",
       headerName: "Actions",
       flex: 1,
-      renderCell: ({ row }) => {
-        return (
-          <Box display="flex" gap={1}>
-            <Button
-              variant="contained"
-              color="info"
-              size="small"
-              onClick={() => handleView(row.id)}
-              disabled={!canView}
-            >
-              View
-            </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={() => handleEdit(row.id)}
-              disabled={!canEdit}
-            >
-              Edit
-            </Button>
-            <Button
-              variant="contained"
-              color="secondary"
-              size="small"
-              onClick={() => handleDelete(row)}
-              disabled={!canDelete}
-
-            >
-              Delete
-            </Button>
-
-          </Box>
-        );
-      },
+      renderCell: ({ row }) => (
+        <Box display="flex" gap={1}>
+          <Button
+            variant="contained"
+            color="info"
+            size="small"
+            onClick={() => handleView(row.id)}
+            disabled={!canView}
+          >
+            View
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            onClick={() => handleEdit(row.id)}
+            disabled={!canEdit}
+          >
+            Edit
+          </Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            size="small"
+            onClick={() => handleDelete(row)}
+            disabled={!canDelete}
+          >
+            Delete
+          </Button>
+        </Box>
+      ),
     },
-  ];
+  ], [handleView, handleEdit, handleDelete, canView, canEdit, canDelete]);
 
   return (
     <Box m="20px">
@@ -216,8 +226,8 @@ const ItemPreferences = () => {
         icon={<ClearAllOutlined />}
         addNewClick={handleAddNewClick}
         addBulkDelete={handleBulkDelete}
-        orderClick={handleOrderClick}
-        showToggleClick={handleToggle}
+        orderClick={() => {}}
+        showToggleClick={() => {}}
         buttons={true}
         addButton={canAdd && canBrowse}
         deleteButton={canDelete && canBrowse}
@@ -228,15 +238,9 @@ const ItemPreferences = () => {
           height="75vh"
           flex={1}
           sx={{
-            "& .MuiDataGrid-root": {
-              border: "none",
-            },
-            "& .MuiDataGrid-cell": {
-              border: "none",
-            },
-            "& .name-column--cell": {
-              color: colors.greenAccent[300],
-            },
+            "& .MuiDataGrid-root": { border: "none" },
+            "& .MuiDataGrid-cell": { border: "none" },
+            "& .name-column--cell": { color: colors.greenAccent[300] },
             "& .MuiDataGrid-columnHeaders": {
               backgroundColor: colors.blueAccent[700],
               borderBottom: "none",
@@ -274,18 +278,11 @@ const ItemPreferences = () => {
               sx={{ p: 1 }}
               onClick={() => setSearchText("")}
             >
-              {searchText
-                ? <Close />
-                : <SearchOutlined />
-              }
+              {searchText ? <Close /> : <SearchOutlined />}
             </IconButton>
           </Box>
           <DataGrid
-            rows={preferencesListData.filter(
-              (row) =>
-                row.pname?.toLowerCase().includes(searchText.toLowerCase()) ||
-                row.pname_cn?.toLowerCase().includes(searchText.toLowerCase())
-            )}
+            rows={filteredRows}
             columns={columns}
             loading={loading}
             rowCount={pagination.total}
@@ -294,7 +291,7 @@ const ItemPreferences = () => {
               pageSize: pagination.pageSize,
             }}
             onPaginationModelChange={handlePaginationChange}
-            onRowSelectionModelChange={(ids) => handleRowSelection(ids)}
+            onRowSelectionModelChange={handleRowSelection}
             checkboxSelection
             components={{
               LoadingOverlay: CustomLoadingOverlay,
@@ -305,7 +302,7 @@ const ItemPreferences = () => {
             title="Confirm Delete"
             message={
               selectedIds.length > 0 && !selectedPreferenceName
-                ? `Are you sure you want to Preference ${selectedIds.length}  items?`
+                ? `Are you sure you want to delete ${selectedIds.length} Preferences?`
                 : `Are you sure you want to delete the Preference "${selectedPreferenceName}"?`
             }
             onConfirm={confirmDelete}
@@ -323,4 +320,3 @@ const ItemPreferences = () => {
 };
 
 export default ItemPreferences;
-

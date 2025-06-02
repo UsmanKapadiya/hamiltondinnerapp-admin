@@ -8,7 +8,7 @@ import {
   SearchOutlined,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
 import { useSelector } from "react-redux";
 import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
@@ -18,20 +18,30 @@ import { toast } from "react-toastify";
 import { hasPermission } from "../../components/permissions";
 import NoPermissionMessage from "../../components/NoPermissionMessage";
 
+function useDebounce(value, delay) {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const handler = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+  return debounced;
+}
+
 const Item = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+
   const [searchText, setSearchText] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const debouncedSearch = useDebounce(searchText, 300);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
-  const [selectedItemName, setselectedItemName] = useState("");
-  const [itemListData, setItemListData] = useState([])
-  const [categoryListData, setCategoryListData] = useState([])
-  const [optionsListData, setpOptionsListData] = useState([])
-  const [peferencesListData, setpPeferencesListData] = useState([])
+  const [selectedItemName, setSelectedItemName] = useState("");
+  const [itemListData, setItemListData] = useState([]);
+  const [categoryListData, setCategoryListData] = useState([]);
+  const [optionsListData, setOptionsListData] = useState([]);
+  const [preferencesListData, setPreferencesListData] = useState([]);
   const [loading, setLoading] = useState(true);
   const permissionList = useSelector((state) => state?.permissionState?.permissionsList);
   const [pagination, setPagination] = useState({
@@ -40,91 +50,137 @@ const Item = () => {
     total: 0,
   });
 
+  // Permissions
+  const canAdd = hasPermission(permissionList, "add_ItemDetails");
+  const canView = hasPermission(permissionList, "read_ItemDetails");
+  const canEdit = hasPermission(permissionList, "edit_ItemDetails");
+  const canDelete = hasPermission(permissionList, "delete_ItemDetails");
+  const canBrowse = hasPermission(permissionList, "browse_Item");
+
   useEffect(() => {
-    fetchALLItemsList()
-    getCategoryListData()
-    fetchALLOptionsList()
-    fetchALLPreferenceList()
+    setLoading(true);
+    Promise.all([
+      ItemServices.getItemList(),
+      CategoryServices.getCategoryList(),
+      ItemServices.getOptionList(),
+      ItemServices.getPreferencesList(),
+    ])
+      .then(([itemRes, catRes, optRes, prefRes]) => {
+        setItemListData(itemRes.data);
+        setPagination((prev) => ({
+          ...prev,
+          total: itemRes.count,
+        }));
+        setCategoryListData(catRes?.data || []);
+        setOptionsListData(optRes.data || []);
+        setPreferencesListData(prefRes.data || []);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+        toast.error("Failed to fetch data. Please try again.");
+      })
+      .finally(() => setLoading(false));
   }, []);
 
-  const fetchALLPreferenceList = async () => {
-    try {
-      const response = await ItemServices.getPreferencesList();
-      setpPeferencesListData(response.data);
-    } catch (error) {
-      console.error("Error fetching menu list:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Memoized filtered rows
+  const filteredRows = useMemo(() => {
+    if (!debouncedSearch) return itemListData;
+    const search = debouncedSearch.toLowerCase();
+    return itemListData.filter(
+      (row) =>
+        row.item_name?.toLowerCase().includes(search) ||
+        row.item_chinese_name?.toLowerCase().includes(search)
+    );
+  }, [itemListData, debouncedSearch]);
 
-  const fetchALLOptionsList = async () => {
-    try {
-      const response = await ItemServices.getOptionList();
-      setpOptionsListData(response.data);
-    } catch (error) {
-      console.error("Error fetching menu list:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Memoized columns
+  const columns = useMemo(() => [
+    { field: "item_name", headerName: "Item Name", flex: 1 },
+    {
+      field: "item_chinese_name",
+      headerName: "Item Chinese Name",
+      flex: 1,
+    },
+    {
+      field: "category",
+      headerName: "Category",
+      valueGetter: (params) => {
+        const typeId = params?.row?.cat_id;
+        const typeObj = categoryListData.find((t) => t.id === typeId);
+        return typeObj ? typeObj.cat_name : "N/A";
+      },
+      flex: 1,
+    },
+    { field: "is_allday", headerName: "Is Allday" },
+    {
+      field: "actions",
+      headerName: "Actions",
+      flex: 1,
+      renderCell: ({ row }) => (
+        <Box display="flex" gap={1}>
+          <Button
+            variant="contained"
+            color="info"
+            size="small"
+            onClick={() => handleView(row.id)}
+            disabled={!canView}
+          >
+            View
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            onClick={() => handleEdit(row.id)}
+            disabled={!canEdit}
+          >
+            Edit
+          </Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            size="small"
+            onClick={() => handleDelete(row)}
+            disabled={!canDelete}
+          >
+            Delete
+          </Button>
+        </Box>
+      ),
+    },
+  ], [categoryListData, canView, canEdit, canDelete]);
 
-
-  const getCategoryListData = async () => {
-    try {
-      setLoading(true);
-      const response = await CategoryServices.getCategoryList();
-      setCategoryListData(response?.data)
-    } catch (error) {
-      console.error("Error fetching menu list:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchALLItemsList = async () => {
-    try {
-      const response = await ItemServices.getItemList();
-      setItemListData(response.data);
-      setPagination((prev) => ({
-        ...prev,
-        total: response.count,
-      }));
-    } catch (error) {
-      console.error("Error fetching menu list:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-
-  const handleDelete = (data) => {
-    setSelectedIds([])
+  // Handlers
+  const handleDelete = useCallback((data) => {
+    setSelectedIds([]);
     setSelectedId(data?.id);
-    setselectedItemName(data?.item_name);
+    setSelectedItemName(data?.item_name);
     setDialogOpen(true);
-  };
+  }, []);
 
-  const confirmDelete = () => {
-    selectedIds.length > 0 && !selectedItemName
-      ? bulkdeleteItem(selectedIds) : deleteItem(selectedId);
+  const confirmDelete = useCallback(() => {
+    if (selectedIds.length > 0 && !selectedItemName) {
+      bulkDeleteItems(selectedIds);
+    } else {
+      deleteItem(selectedId);
+    }
     setDialogOpen(false);
-  };
+  }, [selectedIds, selectedItemName, selectedId]);
 
   const cancelDelete = () => {
     setDialogOpen(false);
     setSelectedId(null);
-    setselectedItemName()
+    setSelectedItemName("");
   };
 
   const handleView = (id) => {
     navigate(`/item-details/${id}`, {
       state: {
         id,
-        categoryListData: categoryListData,
+        categoryListData,
         optionsList: optionsListData,
-        peferencesList: peferencesListData
-      }
+        preferencesList: preferencesListData,
+      },
     });
   };
 
@@ -135,23 +191,21 @@ const Item = () => {
         selectedRow,
         categoryListData,
         optionsList: optionsListData,
-        peferencesList: peferencesListData,
+        preferencesList: preferencesListData,
       },
     });
   };
-  const handleToggle = () => {
-    setShowDeleted((prev) => !prev);
-  };
+
   const handleAddNewClick = () => {
     navigate("/item-details/create", {
-      state:
-      {
-        categoryListData: categoryListData,
+      state: {
+        categoryListData,
         optionsList: optionsListData,
-        peferencesList: peferencesListData
-      }
+        preferencesList: preferencesListData,
+      },
     });
   };
+
   const handleBulkDelete = () => {
     if (selectedIds.length > 0) {
       setDialogOpen(true);
@@ -159,6 +213,7 @@ const Item = () => {
       toast.warning("Please select at least one Item to delete.");
     }
   };
+
   const handleOrderClick = () => {
     navigate("/item-details/order");
   };
@@ -167,126 +222,64 @@ const Item = () => {
     setSelectedIds(ids);
   };
 
-
   const handlePaginationChange = (newPaginationModel) => {
     setPagination((prev) => ({
       ...prev,
-      page: newPaginationModel.page + 1, // DataGrid uses 0-based indexing for pages
+      page: newPaginationModel.page + 1,
       pageSize: newPaginationModel.pageSize,
     }));
-    setCurrentPage(newPaginationModel.page + 1,)
   };
 
-  const bulkdeleteItem = async (ids) => {
+  // API calls
+  const bulkDeleteItems = async (ids) => {
+    setLoading(true);
     try {
-      let data = JSON.stringify({
-        "ids": ids
-      });
-      const response = await ItemServices.bulkdeleteItems(data);
-      // console.log(response)
-      setLoading(true)
+      await ItemServices.bulkdeleteItems(JSON.stringify({ ids }));
       toast.success("Multiple Items Deleted successfully!");
-      fetchALLItemsList();
+      // Refresh list
+      const response = await ItemServices.getItemList();
+      setItemListData(response.data);
+      setPagination((prev) => ({
+        ...prev,
+        total: response.count,
+      }));
     } catch (error) {
-      console.error("Error fetching menu list:", error);
-      toast.error("Failed to process menu. Please try again.");
+      console.error("Error deleting items:", error);
+      toast.error("Failed to delete items. Please try again.");
     } finally {
       setLoading(false);
     }
   };
+
   const deleteItem = async (id) => {
+    setLoading(true);
     try {
-      const response = await ItemServices.deleteItems(id);
-      // console.log(response)
-      setLoading(true)
+      await ItemServices.deleteItems(id);
       toast.success("Item Deleted successfully!");
-      fetchALLItemsList();
-      setselectedItemName("");
+      // Refresh list
+      const response = await ItemServices.getItemList();
+      setItemListData(response.data);
+      setPagination((prev) => ({
+        ...prev,
+        total: response.count,
+      }));
+      setSelectedItemName("");
     } catch (error) {
-      console.error("Error fetching menu list:", error);
-      toast.error("Failed to process menu. Please try again.");
+      console.error("Error deleting item:", error);
+      toast.error("Failed to delete item. Please try again.");
     } finally {
       setLoading(false);
     }
   };
-
-  const canAdd = hasPermission(permissionList, "add_ItemDetails");
-  const canView = hasPermission(permissionList, "read_ItemDetails");
-  const canEdit = hasPermission(permissionList, "edit_ItemDetails");
-  const canDelete = hasPermission(permissionList, "delete_ItemDetails");
-  const canBrowse = hasPermission(permissionList, "browse_Item");
-
-  const columns = [
-    { field: "item_name", headerName: "item Name", flex: 1, },
-    {
-      field: "item_chinese_name",
-      headerName: "item Chinese Name",
-      flex: 1,
-      // cellClassName: "name-column--cell",
-    },
-    {
-      field: "category", headerName: "Category",
-      valueGetter: (params) => {
-        const typeId = params?.row?.cat_id;
-        const typeObj = categoryListData.find((t) => t.id === typeId);
-        return typeObj ? typeObj.cat_name : "N/A";
-      },
-      flex: 1,
-
-    },
-    // Temperory Comments
-    { field: "is_allday", headerName: "Is Allday" },
-    {
-      field: "actions",
-      headerName: "Actions",
-      flex: 1,
-      renderCell: ({ row }) => {
-        return (
-          <Box display="flex" gap={1}>
-            <Button
-              variant="contained"
-              color="info"
-              size="small"
-              onClick={() => handleView(row.id)}
-              disabled={!canView}
-            >
-              View
-            </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={() => handleEdit(row.id)}
-              disabled={!canEdit}
-            >
-              Edit
-            </Button>
-            <Button
-              variant="contained"
-              color="secondary"
-              size="small"
-              onClick={() => handleDelete(row)}
-              disabled={!canDelete}
-
-            >
-              Delete
-            </Button>
-
-          </Box>
-        );
-      },
-    },
-  ];
 
   return (
     <Box m="20px">
       <Header
-        title="item Details"
+        title="Item Details"
         icon={<DvrOutlined />}
         addNewClick={handleAddNewClick}
         addBulkDelete={handleBulkDelete}
         orderClick={handleOrderClick}
-        showToggleClick={handleToggle}
         buttons={true}
         addButton={canAdd && canBrowse}
         deleteButton={canDelete && canBrowse}
@@ -297,15 +290,9 @@ const Item = () => {
           height="75vh"
           flex={1}
           sx={{
-            "& .MuiDataGrid-root": {
-              border: "none",
-            },
-            "& .MuiDataGrid-cell": {
-              border: "none",
-            },
-            "& .name-column--cell": {
-              color: colors.greenAccent[300],
-            },
+            "& .MuiDataGrid-root": { border: "none" },
+            "& .MuiDataGrid-cell": { border: "none" },
+            "& .name-column--cell": { color: colors.greenAccent[300] },
             "& .MuiDataGrid-columnHeaders": {
               backgroundColor: colors.blueAccent[700],
               borderBottom: "none",
@@ -343,18 +330,11 @@ const Item = () => {
               sx={{ p: 1 }}
               onClick={() => setSearchText("")}
             >
-              {searchText
-                ? <Close />
-                : <SearchOutlined />
-              }
+              {searchText ? <Close /> : <SearchOutlined />}
             </IconButton>
           </Box>
           <DataGrid
-            rows={itemListData.filter(
-              (row) =>
-                row.item_name?.toLowerCase().includes(searchText.toLowerCase()) ||
-                row.item_chinese_name?.toLowerCase().includes(searchText.toLowerCase())
-            )}
+            rows={filteredRows}
             columns={columns}
             loading={loading}
             rowCount={pagination.total}
@@ -363,7 +343,7 @@ const Item = () => {
               pageSize: pagination.pageSize,
             }}
             onPaginationModelChange={handlePaginationChange}
-            onRowSelectionModelChange={(ids) => handleRowSelection(ids)}
+            onRowSelectionModelChange={handleRowSelection}
             checkboxSelection
             components={{
               LoadingOverlay: CustomLoadingOverlay,
@@ -392,4 +372,3 @@ const Item = () => {
 };
 
 export default Item;
-

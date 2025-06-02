@@ -9,10 +9,10 @@ const UserServices = {
     return requests.get(`/users/${id}`);
   },
   createUser: async (formData) => {
-    return requests.post(`/users`, formData);
+    return requests.uploadPosts(`/users`, formData);
   },
   updatetUser: async (id, formData) => {
-    return requests.put(`/users/${id}`, formData);
+    return requests.uploadPosts(`/users/${id}`, formData);
   },
   deleteUser: async (id) => {
     return requests.delete(`/users/${id}`);

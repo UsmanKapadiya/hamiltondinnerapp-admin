@@ -1,14 +1,21 @@
-import { Box, Typography, useTheme, Button, InputBase, IconButton } from "@mui/material";
-import { Header } from "../../components";
-import { DataGrid } from "@mui/x-data-grid";
-import { tokens } from "../../theme";
+import {
+  Box,
+  Typography,
+  useTheme,
+  Button,
+  InputBase,
+  IconButton,
+} from "@mui/material";
 import {
   Close,
   LockOutlined,
   SearchOutlined,
 } from "@mui/icons-material";
+import { Header } from "../../components";
+import { DataGrid } from "@mui/x-data-grid";
+import { tokens } from "../../theme";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
 import { toast } from "react-toastify";
 import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
@@ -21,9 +28,8 @@ const Roles = () => {
   const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
   const permissionList = useSelector((state) => state?.permissionState?.permissionsList);
-  const perPageRecords = (10)
+
   const [searchText, setSearchText] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
@@ -35,55 +41,59 @@ const Roles = () => {
     pageSize: 10,
     total: 0,
   });
+
+  const canAdd = hasPermission(permissionList, "add_Roles");
+  const canView = hasPermission(permissionList, "read_Roles");
+  const canEdit = hasPermission(permissionList, "edit_Roles");
+  const canDelete = hasPermission(permissionList, "delete_Roles");
+  const canBrowse = hasPermission(permissionList, "browse_Roles");
+  const canModify = canAdd && canBrowse;
+  const canRemove = canDelete && canBrowse;
+
   useEffect(() => {
     fetchAllRolelist();
-    // setLoading(true)
   }, []);
 
   const fetchAllRolelist = async () => {
     try {
-      setLoading(true)
+      setLoading(true);
       const response = await RoleServices.getRoleList();
-      // console.log(response)
       setRoleList(response.data);
       setPagination((prev) => ({
         ...prev,
         total: response.count,
       }));
     } catch (error) {
-      console.error("Error fetching menu list:", error);
+      console.error("Error fetching role list:", error);
     } finally {
       setLoading(false);
     }
   };
+
   const bulkDeleteMenu = async (ids) => {
     try {
-      let data = JSON.stringify({
-        "ids": ids
-      });
-      const response = await RoleServices.bulkdeleteRole(data);
-      // console.log(response)
-      setLoading(true)
-      toast.success("Multiple Roles Deleted successfully!");
+      const data = JSON.stringify({ ids });
+      await RoleServices.bulkdeleteRole(data);
+      toast.success("Multiple Roles deleted successfully!");
       fetchAllRolelist();
     } catch (error) {
-      console.error("Error fetching menu list:", error);
-      toast.error("Failed to process menu. Please try again.");
+      console.error("Error deleting roles:", error);
+      toast.error("Failed to delete roles. Please try again.");
     } finally {
       setLoading(false);
     }
   };
+
   const deleteRole = async (id) => {
     try {
-      setLoading(true)
-      const response = await RoleServices.deleteRole(id);
-      console.log(response)
-      toast.success("Role Deleted successfully!");
+      setLoading(true);
+      await RoleServices.deleteRole(id);
+      toast.success("Role deleted successfully!");
       fetchAllRolelist();
       setSelectedRoleName("");
     } catch (error) {
-      console.error("Error fetching Role list:", error);
-      toast.error("Failed to process Role. Please try again.");
+      console.error("Error deleting role:", error);
+      toast.error("Failed to delete role. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -96,10 +106,9 @@ const Roles = () => {
   };
 
   const confirmDelete = () => {
-    selectedIds.length > 0 && !selectedRoleName
-      ? bulkDeleteMenu(selectedIds) : deleteRole(selectedId);
+    const isBulk = selectedIds.length > 0 && selectedId === null;
+    isBulk ? bulkDeleteMenu(selectedIds) : deleteRole(selectedId);
     setDialogOpen(false);
-    setLoading(true)
   };
 
   const cancelDelete = () => {
@@ -107,23 +116,18 @@ const Roles = () => {
     setSelectedId(null);
   };
 
-
-
-  const handleView = (id) => {
+  const handleView = useCallback((id) => {
     const selectedRow = roleList.find((row) => row.id === id);
     navigate(`/roles-details/${id}`, { state: selectedRow });
-  };
+  }, [navigate, roleList]);
 
-  const handleEdit = (id) => {
+  const handleEdit = useCallback((id) => {
     const selectedRow = roleList.find((row) => row.id === id);
     navigate(`/roles-details/${id}/edit`, { state: selectedRow });
-  };
-  const handleToggle = () => {
-    setShowDeleted((prev) => !prev);
-  };
-  const handleAddNewClick = () => {
-    navigate("/roles-details/create");
-  };
+  }, [navigate, roleList]);
+
+  const handleAddNewClick = () => navigate("/roles-details/create");
+
   const handleBulkDelete = () => {
     if (selectedIds.length > 0) {
       setDialogOpen(true);
@@ -131,74 +135,65 @@ const Roles = () => {
       toast.warning("Please select at least one Role to delete.");
     }
   };
-  const handleRowSelection = (ids) => {
-    setSelectedIds(ids);
-  };
 
-  const handleOrderClick = () => {
-    // navigate("/item-details/order");
-  };
-
-  const canAdd = hasPermission(permissionList, "add_Roles");
-  const canView = hasPermission(permissionList, "read_Roles");
-  const canEdit = hasPermission(permissionList, "edit_Roles");
-  const canDelete = hasPermission(permissionList, "delete_Roles");
-  const canBrowse = hasPermission(permissionList, "browse_Roles");
-
-  const columns = [
-    { field: "name", headerName: "Name", flex: 1, },
-    { field: "display_name", headerName: "Display", flex: 1, }, // Fixed the typo
-    {
-      field: "actions",
-      headerName: "Actions",
-      flex: 1,
-      renderCell: ({ row }) => {
-        return (
-          <Box display="flex" gap={1}>
-            <Button
-              variant="contained"
-              color="info"
-              size="small"
-              onClick={() => handleView(row.id)}
-              disabled={!canView}
-            >
-              View
-            </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={() => handleEdit(row.id)}
-              disabled={!canEdit}
-            >
-              Edit
-            </Button>
-            <Button
-              variant="contained"
-              color="secondary"
-              size="small"
-              onClick={() => handleDelete(row)}
-              disabled={!canDelete}
-
-            >
-              Delete
-            </Button>
-
-          </Box>
-        );
-      },
-    },
-  ];
+  const handleRowSelection = (ids) => setSelectedIds(ids);
 
   const handlePaginationChange = (newPaginationModel) => {
     setPagination((prev) => ({
       ...prev,
-      page: newPaginationModel.page + 1, // DataGrid uses 0-based indexing for pages
+      page: newPaginationModel.page + 1,
       pageSize: newPaginationModel.pageSize,
     }));
-    setCurrentPage(newPaginationModel.page + 1,)
-
   };
+
+  const filteredRoles = useMemo(() => {
+    return roleList.filter(
+      (row) =>
+        row.name?.toLowerCase().includes(searchText.toLowerCase()) ||
+        row.display_name?.toLowerCase().includes(searchText.toLowerCase())
+    );
+  }, [roleList, searchText]);
+
+  const columns = useMemo(() => [
+    { field: "name", headerName: "Name", flex: 1 },
+    { field: "display_name", headerName: "Display", flex: 1 },
+    {
+      field: "actions",
+      headerName: "Actions",
+      flex: 1,
+      renderCell: ({ row }) => (
+        <Box display="flex" gap={1}>
+          <Button
+            variant="contained"
+            color="info"
+            size="small"
+            onClick={() => handleView(row.id)}
+            disabled={!canView}
+          >
+            View
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            onClick={() => handleEdit(row.id)}
+            disabled={!canEdit}
+          >
+            Edit
+          </Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            size="small"
+            onClick={() => handleDelete(row)}
+            disabled={!canDelete}
+          >
+            Delete
+          </Button>
+        </Box>
+      ),
+    },
+  ], [handleView, handleEdit, canView, canEdit, canDelete]);
 
   return (
     <Box m="20px">
@@ -208,75 +203,45 @@ const Roles = () => {
         Buttons={true}
         addNewClick={handleAddNewClick}
         addBulkDelete={handleBulkDelete}
-        orderClick={handleOrderClick}
-        showToggleClick={handleToggle}
         buttons={true}
-        addButton={canAdd && canBrowse}
-        deleteButton={canDelete && canBrowse}
+        addButton={canModify}
+        deleteButton={canRemove}
       />
-      <Box
-        mt="40px"
-        height="75vh"
-        flex={1}
-        sx={{
-          "& .MuiDataGrid-root": {
-            border: "none",
-          },
-          "& .MuiDataGrid-cell": {
-            border: "none",
-          },
-          "& .name-column--cell": {
-            color: colors.greenAccent[300],
-          },
-          "& .MuiDataGrid-columnHeaders": {
-            backgroundColor: colors.blueAccent[700],
-            borderBottom: "none",
-          },
-          "& .MuiDataGrid-virtualScroller": {
-            backgroundColor: colors.primary[400],
-          },
-          "& .MuiDataGrid-footerContainer": {
-            borderTop: "none",
-            backgroundColor: colors.blueAccent[700],
-          },
-          "& .MuiCheckbox-root": {
-            color: `${colors.greenAccent[200]} !important`,
-          },
-          "& .MuiDataGrid-iconSeparator": {
-            color: colors.primary[100],
-          },
-        }}
-      >
-        <Box
-          display="flex"
-          alignItems="center"
-          bgcolor={colors.primary[400]}
-          borderRadius="3px"
-          mb="10px"
-        >
+      <Box mt="40px" height="75vh" flex={1} sx={{
+        "& .MuiDataGrid-root": { border: "none" },
+        "& .MuiDataGrid-cell": { border: "none" },
+        "& .name-column--cell": { color: colors.greenAccent[300] },
+        "& .MuiDataGrid-columnHeaders": {
+          backgroundColor: colors.blueAccent[700],
+          borderBottom: "none",
+        },
+        "& .MuiDataGrid-virtualScroller": {
+          backgroundColor: colors.primary[400],
+        },
+        "& .MuiDataGrid-footerContainer": {
+          borderTop: "none",
+          backgroundColor: colors.blueAccent[700],
+        },
+        "& .MuiCheckbox-root": {
+          color: `${colors.greenAccent[200]} !important`,
+        },
+        "& .MuiDataGrid-iconSeparator": {
+          color: colors.primary[100],
+        },
+      }}>
+        <Box display="flex" alignItems="center" bgcolor={colors.primary[400]} borderRadius="3px" mb="10px">
           <InputBase
             placeholder="Search by Role Name, or Display Name..."
             sx={{ ml: 2, flex: 1 }}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
           />
-          <IconButton
-            type="button"
-            sx={{ p: 1 }}
-            onClick={() => setSearchText("")}
-          >
-            {searchText
-              ? <Close />
-              : <SearchOutlined />
-            }
+          <IconButton type="button" sx={{ p: 1 }} onClick={() => setSearchText("")}>
+            {searchText ? <Close /> : <SearchOutlined />}
           </IconButton>
         </Box>
         <DataGrid
-          rows={roleList.filter(
-            (row) =>
-              row.name?.toLowerCase().includes(searchText.toLowerCase()) ||
-              row.display_name?.toLowerCase().includes(searchText.toLowerCase())
-          )}
+          rows={filteredRoles}
           columns={columns}
           loading={loading}
           pagination
@@ -287,11 +252,10 @@ const Roles = () => {
             pageSize: pagination.pageSize,
           }}
           onPaginationModelChange={handlePaginationChange}
+          pageSizeOptions={[10, 20, 50, 100]}
           checkboxSelection
           onRowSelectionModelChange={(ids) => handleRowSelection(ids)}
-          components={{
-            LoadingOverlay: CustomLoadingOverlay,
-          }}
+          components={{ LoadingOverlay: CustomLoadingOverlay }}
         />
         <ConfirmationDialog
           open={dialogOpen}
@@ -310,4 +274,3 @@ const Roles = () => {
 };
 
 export default Roles;
-

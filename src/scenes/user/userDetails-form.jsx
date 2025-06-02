@@ -1,326 +1,312 @@
-import { Box, Button, TextField, useMediaQuery, MenuItem, Switch, FormGroup, FormControlLabel, Autocomplete } from "@mui/material";
-import { Header } from "../../components";
+import React, { useEffect, useState } from "react";
+import {
+  Box,
+  Button,
+  TextField,
+  useMediaQuery,
+  FormGroup,
+  FormControlLabel,
+  Switch,
+} from "@mui/material";
+import { useLocation } from "react-router-dom";
+import { DvrOutlined } from "@mui/icons-material";
 import { Formik } from "formik";
 import * as yup from "yup";
-import { DvrOutlined } from "@mui/icons-material";
-import { useLocation } from "react-router-dom";
+import { Autocomplete } from "@mui/material";
 import { toast } from "react-toastify";
+
+import Header from "../../components/Header";
 import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
-import { useEffect, useState } from "react";
-import RoleServices from "../../services/roleServices";
-import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
-import dayjs from "dayjs";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import UserServices from "../../services/userServices";
+import RoleServices from "../../services/roleServices";
 
-
-
-const validationSchema = (isUpdate = false) => {
-    return yup.object().shape({
-        name: yup.string().required("Name is required"),
-        user_name: yup.string().required("User Name is required"),
-        email: yup.string().email("Invalid email format").required("Email is required"),
-        password: yup
-            .string()
-            .min(6, "Password must be at least 6 characters")
-            .when([], {
-                is: () => !isUpdate,
-                then: schema => schema.required("Password is required"),
-                otherwise: schema => schema.notRequired(),
-            }),
-        // email_verified_at: yup
-        //     .date()
-        //     .nullable()
-        //     .typeError("Invalid date format"),
-        // avatar: yup
-        //     .mixed()
-        //     .nullable()
-        //     .test("fileSize", "File size is too large", (value) =>
-        //         value ? value.size <= 2 * 1024 * 1024 : true // Max size: 2MB
-        //     )
-        //     .test("fileType", "Unsupported file format", (value) =>
-        //         value ? ["image/jpeg", "image/png"].includes(value.type) : true
-        //     ),
-        role_id: yup
-            .number()
-            .typeError("Role is required")
-            .required("Role is required"),
-    });
-}
+const getValidationSchema = (isUpdate = false) =>
+  yup.object().shape({
+    name: yup.string().required("Name is required"),
+    user_name: yup.string().required("User Name is required"),
+    email: yup.string().email("Invalid email format").required("Email is required"),
+    password: yup
+      .string()
+      .min(6, "Password must be at least 6 characters")
+      .when([], {
+        is: () => !isUpdate,
+        then: (schema) => schema.required("Password is required"),
+        otherwise: (schema) => schema.notRequired(),
+      }),
+    role_id: yup.number().typeError("Role is required").required("Role is required"),
+  });
 
 const UserDetailsForm = () => {
-    const location = useLocation();
-    const isNonMobile = useMediaQuery("(min-width:600px)");
-    const [loading, setLoading] = useState(true);
-    const [userList, setUserList] = useState('');
-    const [roleListData, setRoleListData] = useState([]);
+  const location = useLocation();
+  const isNonMobile = useMediaQuery("(min-width:600px)");
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            const fetchedItemDetails = location.state?.selectedRow;
-            setUserList(fetchedItemDetails);
-            setLoading(false);
-        }, 1500);
-        return () => clearTimeout(timer);
-    }, [location.state])
+  const [loading, setLoading] = useState(true);
+  const [userData, setUserData] = useState(null);
+  const [roles, setRoles] = useState([]);
+
+  const user = location?.state?.selectedRow;
+
+  useEffect(() => {
+    setUserData(user || null);
+    setLoading(false);
+  }, [user]);
+
+  useEffect(() => {
+    fetchRoles();
+  }, []);
+
+  const fetchRoles = async () => {
+    try {
+      const response = await RoleServices.getRoleList();
+      setRoles(response?.data || []);
+    } catch (error) {
+      console.error("Error fetching roles:", error);
+    }
+  };
+
+  const initialValues = {
+    id: userData?.id || "",
+    name: userData?.name || "",
+    user_name: userData?.user_name || "",
+    email: userData?.email || "",
+    password: "",
+    avatar: userData?.avatar ? userData?.avatar : null,
+    role: userData?.role || "",
+    role_id: userData?.role_id || "",
+    is_admin: userData?.is_admin || false,
+  };
+
+  const handleFormSubmit = async (values) => {
+  setLoading(true);
+  try {
+    const formData = new FormData();
+    formData.append("name", values.name);
+    formData.append("user_name", values.user_name);
+    formData.append("email", values.email);
+    if (values.password) formData.append("password", values.password);
+    formData.append("role", values.role);
+    formData.append("role_id", values.role_id);
+    formData.append("is_admin", values.is_admin);
+
+    if (
+      values.avatar &&
+      values.avatar instanceof File &&
+      ["image/jpeg", "image/png", "image/jpg", "image/gif"].includes(values.avatar.type)
+    ) {
+      formData.append("avatar", values.avatar);
+    } else  {
+      // formData.append("avatar", values.avatar);
+    }
+    if (values.id) formData.append("id", values.id);
+    const response = values.id
+      ? await UserServices.updatetUser(values.id, formData)
+      : await UserServices.createUser(formData);
+
+    if (!response || response.success === false) {
+      const apiErrors = response?.errors;
+      if (apiErrors) {
+        Object.entries(apiErrors).forEach(([field, messages]) => {
+          messages.forEach((msg) => toast.error(msg));
+        });
+      } else {
+        toast.error("Failed to process user. Please try again.");
+      }
+      return; // Stop here if error
+    }
+
+    toast.success(`User ${values.id ? "updated" : "created"} successfully!`);
+
+    if (values.id) {
+      setUserData(response?.data);
+    }
+  } catch (error) {
+    console.error("Submission error:", error);
+    const apiErrors = error?.response?.data?.errors;
+    if (apiErrors) {
+      Object.entries(apiErrors).forEach(([field, messages]) => {
+        messages.forEach((msg) => toast.error(msg));
+      });
+    } else {
+      toast.error("Failed to process user. Please try again.");
+    }
+  } finally {
+    setLoading(false);
+  }
+};
 
 
-    const initialValues = {
-        id: userList?.id || "", // Ensure `id` is included
-        name: userList?.name || "",
-        user_name: userList?.user_name || "",
-        email: userList?.email || "",
-        password: "", // Password should be empty by default
-        avatar: null,
-        role: userList?.role || "",
-        role_id: userList?.role_id || "",
-        is_admin: userList?.is_admin || false,
-    };
-    useEffect(() => {
-        roleList()
-    }, [])
-    const roleList = async (id) => {
-        try {
-            setLoading(true);
-            const response = await RoleServices.getRoleList();
-            setRoleListData(response?.data);
-        } catch (error) {
-            console.error("Error fetching menu list:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-    // console.log("roleListData", roleListData);
+  return (
+    <Box m="20px">
+      <Header
+        title={loading ? "" : userData?.id ? "Update User Detail" : "Add User Detail"}
+        icon={<DvrOutlined />}
+        Buttons={false}
+      />
 
-    const handleFormSubmit = async (values) => {
-
-        const payload = {
-            ...values,
-        };
-        // console.log("Form Submitted:", payload);
-        if (payload.id && !payload.password) {
-            delete payload.password;
-        }
-
-        try {
-            let response;
-            if (payload?.id) {
-                // Update User if ID is available
-                response = await UserServices.updatetUser(payload.id, payload);
-                toast.success("User updated successfully!");
-            } else {
-                // Create User if ID is not available
-                response = await UserServices.createUser(payload);
-                toast.success("User created successfully!");
-            }
-        } catch (error) {
-            console.error("Error processing user:", error);
-            if (error.response && error.response.data && error.response.data.errors) {
-                const errors = error.response.data.errors;
-                Object.keys(errors).forEach((key) => {
-                    errors[key].forEach((message) => {
-                        toast.error(message);
-                    });
-                });
-            } else {
-                toast.error("Failed to process user. Please try again.");
-            }
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    return (
-        <Box m="20px">
-
-            <Header title={loading ? "" : userList?.id ? "Update User Detail" : "Add User Detail"} icon={<DvrOutlined />} Buttons={false} />
-            {loading ? (
-                <Box
-                    display="flex"
-                    justifyContent="center"
-                    alignItems="center"
-                    height="calc(100vh - 100px)"
-                >
-                    <CustomLoadingOverlay />
-                </Box>
-            ) : (
-                <Formik
-                    enableReinitialize
-                    initialValues={initialValues} // Pass the corrected `initialValues`
-                    validationSchema={validationSchema(userList?.id ? true : false)} // Pass the correct
-                    onSubmit={handleFormSubmit}
-                    validateOnBlur={true}
-                    validateOnChange={true}
-                >
-                    {({
-                        values,
-                        errors,
-                        touched,
-                        handleBlur,
-                        handleChange,
-                        handleSubmit,
-                        setFieldValue,
-                    }) => (
-                        <form onSubmit={handleSubmit}>
-                            <Box
-                                display="grid"
-                                gap="30px"
-                                gridTemplateColumns="repeat(4, minmax(0, 1fr))"
-                                sx={{
-                                    "& > div": {
-                                        gridColumn: isNonMobile ? undefined : "span 4",
-                                    },
-                                }}
-                            >
-                                {/* Item Name */}
-                                <TextField
-                                    fullWidth
-                                    variant="filled"
-                                    type="text"
-                                    label="Name"
-                                    onBlur={handleBlur}
-                                    onChange={handleChange}
-                                    value={values.name}
-                                    name="name"
-                                    error={touched.name && Boolean(errors.name)}
-                                    helperText={touched.name && errors.name}
-                                    sx={{ gridColumn: "span 4" }}
-                                />
-
-                                {/* Item Chinese Name */}
-                                <TextField
-                                    fullWidth
-                                    variant="filled"
-                                    type="text"
-                                    label="User Name"
-                                    onBlur={handleBlur}
-                                    onChange={handleChange}
-                                    value={values.user_name}
-                                    name="user_name"
-                                    error={
-                                        touched.user_name && Boolean(errors.user_name)
-                                    }
-                                    helperText={touched.user_name && errors.user_name}
-                                    sx={{ gridColumn: "span 4" }}
-                                />
-                                <TextField
-                                    fullWidth
-                                    variant="filled"
-                                    type="email"
-                                    label="Email"
-                                    onBlur={handleBlur}
-                                    onChange={handleChange}
-                                    value={values.email}
-                                    name="email"
-                                    error={
-                                        touched.email && Boolean(errors.email)
-                                    }
-                                    helperText={touched.email && errors.email}
-                                    sx={{ gridColumn: "span 4" }}
-                                />
-                                <TextField
-                                    fullWidth
-                                    variant="filled"
-                                    type="password"
-                                    label="password"
-                                    onBlur={handleBlur}
-                                    onChange={handleChange}
-                                    value={values.password}
-                                    name="password"
-                                    error={
-                                        touched.password && Boolean(errors.password)
-                                    }
-                                    helperText={touched.password && errors.password}
-                                    sx={{ gridColumn: "span 4" }}
-                                />
-                                {/* Remove  Email Verified At*/}
-                                {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                    <DatePicker
-                                        label="Email Verified At"
-                                        value={values.email_verified_at ? dayjs(values.email_verified_at) : null}
-                                        onChange={(newValue) => setFieldValue("email_verified_at", newValue ? newValue.format("YYYY-MM-DD") : null)} // Use setFieldValue to update the form state
-                                        renderInput={(params) => (
-                                            <TextField
-                                                {...params}
-                                                fullWidth
-                                                variant="filled"
-                                                error={touched.email_verified_at && Boolean(errors.email_verified_at)}
-                                                helperText={touched.email_verified_at && errors.email_verified_at}
-                                                sx={{ gridColumn: "span 1" }}
-                                            />
-                                        )}
-                                    />
-                                </LocalizationProvider> */}
-                                {/* avatar Upload */}
-                                <TextField
-                                    fullWidth
-                                    type="file"
-                                    variant="filled"
-                                    label="Upload avatar"
-                                    InputLabelProps={{ shrink: true }}
-                                    onChange={(event) =>
-                                        setFieldValue("avatar", event.currentTarget.files[0])
-                                    }
-                                    sx={{ gridColumn: "span 4" }}
-                                />
-
-                                {/* Role Dropdown */}
-                                <Autocomplete
-                                    options={roleListData}
-                                    getOptionLabel={(option) => option.name}
-                                    value={
-                                        roleListData.find((option) => option.id === values.role_id) || null
-                                    }
-                                    onChange={(event, newValue) => {
-                                        setFieldValue("role_id", newValue ? newValue.id : 0);
-                                        setFieldValue("role", newValue ? newValue.name : "");
-                                    }}
-                                    renderInput={(params) => (
-                                        <TextField
-                                            {...params}
-                                            label="Role"
-                                            variant="filled"
-                                            error={touched.role_id && Boolean(errors.role_id)}
-                                            helperText={touched.role_id && errors.role_id}
-                                        />
-                                    )}
-                                    sx={{ gridColumn: "span 4" }}
-                                />
-                                <FormGroup>
-                                    <FormControlLabel
-                                        control={
-                                            <Switch
-                                                color="secondary"
-                                                checked={values.is_admin}
-                                                onChange={(e) =>
-                                                    setFieldValue("is_admin", e.target.checked)
-                                                }
-                                                name="is_admin"
-                                            />
-                                        }
-                                        label="Is Admin"
-                                        sx={{ gridColumn: "span 4" }}
-                                    />
-                                </FormGroup>
-                            </Box>
-                            <Box
-                                display="flex"
-                                alignItems="center"
-                                justifyContent="end"
-                                mt="20px"
-                            >
-                                <Button type="submit" color="secondary" variant="contained">
-                                    Save User Details
-                                </Button>
-                            </Box>
-                        </form>
-                    )}
-                </Formik>
-            )}
+      {loading ? (
+        <Box display="flex" justifyContent="center" alignItems="center" height="70vh">
+          <CustomLoadingOverlay />
         </Box>
-    );
+      ) : (
+        <Formik
+          enableReinitialize
+          initialValues={initialValues}
+          validationSchema={getValidationSchema(Boolean(userData?.id))}
+          onSubmit={handleFormSubmit}
+        >
+          {({
+            values,
+            errors,
+            touched,
+            handleChange,
+            handleBlur,
+            handleSubmit,
+            setFieldValue,
+          }) => (
+            <form onSubmit={handleSubmit}>
+              <Box
+                display="grid"
+                gap="30px"
+                gridTemplateColumns="repeat(4, minmax(0, 1fr))"
+                sx={{
+                  "& > div": {
+                    gridColumn: isNonMobile ? undefined : "span 4",
+                  },
+                }}
+              >
+                {[
+                  { label: "Name", name: "name", type: "text" },
+                  { label: "User Name", name: "user_name", type: "text" },
+                  { label: "Email", name: "email", type: "email" },
+                  { label: "Password", name: "password", type: "password" },
+                ].map(({ label, name, type }) => (
+                  <TextField
+                    key={name}
+                    fullWidth
+                    variant="filled"
+                    type={type}
+                    label={label}
+                    name={name}
+                    value={values[name]}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={touched[name] && Boolean(errors[name])}
+                    helperText={touched[name] && errors[name]}
+                    sx={{ gridColumn: "span 4" }}
+                  />
+                ))}
+
+                {/* Avatar Upload */}
+                {/* <TextField
+                  fullWidth
+                  type="file"
+                  variant="filled"
+                  label="Upload Avatar"
+                  InputLabelProps={{ shrink: true }}
+                  onChange={(e) =>
+                    setFieldValue("avatar", e.currentTarget.files[0])
+                  }
+                  sx={{ gridColumn: "span 4" }}
+                /> */}
+
+                <Box sx={{ gridColumn: "span 4" }}>
+                  <input
+                    accept="image/jpeg, image/png, image/jpg, image/gif"
+                    style={{ display: 'none' }}
+                    id="avatar-upload" // <-- changed here
+                    name="avatar"
+                    type="file"
+                    onChange={(event) => {
+                      const file = event.currentTarget.files[0];
+                      if (file) {
+                        setFieldValue("avatar", file);
+                        // Optionally, set a preview URL
+                        setFieldValue("avatar_preview", URL.createObjectURL(file));
+                      }
+                    }}
+                  />
+                  <label htmlFor="avatar-upload">
+                    <Button variant="contained" component="span">
+                      Upload Image
+                    </Button>
+                  </label>
+
+                  {/* Show selected file name */}
+                  {values.avatar && values.avatar.name && (
+                    <Box mt={1}>
+                      <span>Selected: {values.avatar.name}</span>
+                    </Box>
+                  )}
+
+                  {/* Show image preview */}
+                  <Box mt={2}>
+                    {values.avatar && values.avatar instanceof File && (
+                      <img
+                        src={values.avatar_preview || URL.createObjectURL(values.avatar)}
+                        alt="Preview"
+                        style={{ maxWidth: 200, maxHeight: 200 }}
+                      />
+                    )}
+                    {!values.avatar?.name && userData?.avatar && (
+                      <img
+                        src={values.avatar}
+                        alt="Current"
+                        style={{ maxWidth: 200, maxHeight: 200 }}
+                      />
+                    )}
+                  </Box>
+                </Box>
+
+                {/* Role Selector */}
+                <Autocomplete
+                  options={roles}
+                  getOptionLabel={(opt) => opt.name}
+                  value={roles.find((opt) => opt.id === values.role_id) || null}
+                  onChange={(_, newValue) => {
+                    setFieldValue("role_id", newValue?.id || "");
+                    setFieldValue("role", newValue?.name || "");
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Role"
+                      variant="filled"
+                      error={touched.role_id && Boolean(errors.role_id)}
+                      helperText={touched.role_id && errors.role_id}
+                    />
+                  )}
+                  sx={{ gridColumn: "span 4" }}
+                />
+
+                <FormGroup>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={values.is_admin}
+                        onChange={(e) =>
+                          setFieldValue("is_admin", e.target.checked)
+                        }
+                        name="is_admin"
+                        color="secondary"
+                      />
+                    }
+                    label="Is Admin"
+                    sx={{ gridColumn: "span 4" }}
+                  />
+                </FormGroup>
+              </Box>
+
+              <Box display="flex" justifyContent="flex-end" mt={3}>
+                <Button type="submit" variant="contained" color="secondary">
+                  Save User Details
+                </Button>
+              </Box>
+            </form>
+          )}
+        </Formik>
+      )}
+    </Box>
+  );
 };
 
 export default UserDetailsForm;
-
-

@@ -4,15 +4,12 @@ import { DataGrid } from "@mui/x-data-grid";
 import { mockDataCategories, type } from "../../data/mockData";
 import { tokens } from "../../theme";
 import {
-  AdminPanelSettingsOutlined,
   Close,
   DvrOutlined,
-  Home,
   SearchOutlined,
-  SecurityOutlined,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
 import CategoryServices from "../../services/categoryServices";
 import { toast } from "react-toastify";
@@ -31,129 +28,128 @@ const Category = () => {
   const [selectedId, setSelectedId] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
   const [selectedCategoryName, setSelectedCategoryName] = useState("");
-  const [categoryListData, setCategoryListData] = useState([])
+  const [categoryListData, setCategoryListData] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    getCategoryListData()
-  }, [])
+  // Permissions (memoized)
+  const canAdd = useMemo(() => hasPermission(permissionList, "add_CategoryDetails"), [permissionList]);
+  const canView = useMemo(() => hasPermission(permissionList, "read_CategoryDetails"), [permissionList]);
+  const canEdit = useMemo(() => hasPermission(permissionList, "edit_CategoryDetails"), [permissionList]);
+  const canDelete = useMemo(() => hasPermission(permissionList, "delete_CategoryDetails"), [permissionList]);
+  const canBrowse = useMemo(() => hasPermission(permissionList, "browse_Category"), [permissionList]);
 
-
-  const getCategoryListData = async () => {
+  // Fetch category list
+  const getCategoryListData = useCallback(async () => {
     try {
       setLoading(true);
       const response = await CategoryServices.getCategoryList();
-      // console.log(" getCategoryListData response", response)
-      setCategoryListData(response?.data)
-
+      setCategoryListData(response?.data || []);
     } catch (error) {
-      console.error("Error fetching menu list:", error);
+      console.error("Error fetching category list:", error);
+      toast.error("Failed to fetch category list.");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const handleDelete = (data) => {
-    setSelectedIds([])
+  useEffect(() => {
+    getCategoryListData();
+  }, [getCategoryListData]);
+
+  // Handlers (memoized)
+  const handleDelete = useCallback((data) => {
+    setSelectedIds([]);
     setSelectedId(data?.id);
     setSelectedCategoryName(data?.cat_name);
     setDialogOpen(true);
-  };
+  }, []);
 
-  const confirmDelete = () => {
+  const confirmDelete = useCallback(() => {
     selectedIds.length > 0 && !selectedCategoryName
-      ? bulkDeleteCategory(selectedIds) : deleteCategory(selectedId);
+      ? bulkDeleteCategory(selectedIds)
+      : deleteCategory(selectedId);
     setDialogOpen(false);
-  };
+  }, [selectedIds, selectedCategoryName, selectedId]);
 
-  const cancelDelete = () => {
+  const cancelDelete = useCallback(() => {
     setDialogOpen(false);
     setSelectedId(null);
-    setSelectedCategoryName("")
-  };
+    setSelectedCategoryName("");
+  }, []);
 
-  const handleView = (id) => {
-    navigate(`/category-details/${id}`, { state: { id, categoryListData: categoryListData } });
-  };
+  const handleView = useCallback((id) => {
+    navigate(`/category-details/${id}`, { state: { id, categoryListData } });
+  }, [navigate, categoryListData]);
 
-  const handleEdit = (id) => {
-    console.log(id)
+  const handleEdit = useCallback((id) => {
     const selectedRow = categoryListData.find((row) => row.id === id);
-    navigate(`/category-details/${id}/edit`, { state: { selectedCategory: selectedRow, categoryListData: categoryListData } });;
-  };
-  const handleToggle = () => {
-    setShowDeleted((prev) => !prev);
-  };
-  const handleAddNewClick = () => {
-    navigate("/category-details/create", { state: { categoryListData: categoryListData } });
-  };
-  const handleBulkDelete = () => {
+    navigate(`/category-details/${id}/edit`, { state: { selectedCategory: selectedRow, categoryListData } });
+  }, [navigate, categoryListData]);
+
+  const handleAddNewClick = useCallback(() => {
+    navigate("/category-details/create", { state: { categoryListData } });
+  }, [navigate, categoryListData]);
+
+  const handleBulkDelete = useCallback(() => {
     if (selectedIds.length > 0) {
       setDialogOpen(true);
     } else {
       toast.warning("Please select at least one category to delete.");
     }
-  };
-  const handleOrderClick = () => {
+  }, [selectedIds]);
+
+  const handleOrderClick = useCallback(() => {
     navigate("/category-details/order");
-  };
-  const handleRowSelection = (ids) => {
+  }, [navigate]);
+
+  const handleRowSelection = useCallback((ids) => {
     setSelectedIds(ids);
-  };
+  }, []);
 
-
-  const bulkDeleteCategory = async (ids) => {
+  // Delete functions
+  const bulkDeleteCategory = useCallback(async (ids) => {
     try {
-      let data = JSON.stringify({
-        "ids": ids
-      });
-      const response = await CategoryServices.bulkdeleteCategorys(data);
-      // console.log(response)
-      setLoading(true)
-      toast.success("Multiple Category Deleted successfully!");
+      setLoading(true);
+      await CategoryServices.bulkdeleteCategorys(JSON.stringify({ ids }));
+      toast.success("Multiple categories deleted successfully!");
       getCategoryListData();
     } catch (error) {
-      console.error("Error fetching menu list:", error);
-      toast.error("Failed to process menu. Please try again.");
+      console.error("Error deleting categories:", error);
+      toast.error("Failed to delete categories. Please try again.");
     } finally {
       setLoading(false);
     }
-  };
-  const deleteCategory = async (id) => {
+  }, [getCategoryListData]);
+
+  const deleteCategory = useCallback(async (id) => {
     try {
-      const response = await CategoryServices.deleteCategorys(id);
-      console.log(response)
-      setLoading(true)
-      toast.success("Category Deleted successfully!");
+      setLoading(true);
+      await CategoryServices.deleteCategorys(id);
+      toast.success("Category deleted successfully!");
       getCategoryListData();
-      setSelectedCategoryName("")
+      setSelectedCategoryName("");
     } catch (error) {
-      console.error("Error fetching menu list:", error);
-      toast.error("Failed to process menu. Please try again.");
+      console.error("Error deleting category:", error);
+      toast.error("Failed to delete category. Please try again.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [getCategoryListData]);
 
-  const canAdd = hasPermission(permissionList, "add_CategoryDetails");
-  const canView = hasPermission(permissionList, "read_CategoryDetails");
-  const canEdit = hasPermission(permissionList, "edit_CategoryDetails");
-  const canDelete = hasPermission(permissionList, "delete_CategoryDetails");
-  const canBrowse = hasPermission(permissionList, "browse_Category");
-
-  const columns = [
+  // Columns (memoized)
+  const columns = useMemo(() => [
     { field: "cat_name", headerName: "Category Name", flex: 1 },
     {
       field: "category_chinese_name",
       headerName: "Category Chinese Name",
       flex: 1,
-      // cellClassName: "name-column--cell",
     },
     {
-      field: "categoryType", headerName: "Category Type",
+      field: "categoryType",
+      headerName: "Category Type",
       valueGetter: (params) => {
         const typeId = params.row.type;
-        const typeObj = type.find((t) => t.id === typeId);
+        const typeObj = type.find((t) => t.id === JSON.parse(typeId));
         return typeObj ? typeObj.type_name : "N/A";
       },
     },
@@ -162,7 +158,7 @@ const Category = () => {
       headerName: "Parent Id",
       valueGetter: (params) => {
         const parentId = params.row.parent_id;
-        const parentObj = categoryListData.find((t) => t.id === parentId);
+        const parentObj = categoryListData.find((t) => t.id === JSON.parse(parentId));
         return parentObj ? parentObj.cat_name : "No results";
       },
       flex: 1,
@@ -171,43 +167,49 @@ const Category = () => {
       field: "actions",
       headerName: "Actions",
       flex: 1,
-      renderCell: ({ row }) => {
-        return (
-          <Box display="flex" gap={1}>
-            <Button
-              variant="contained"
-              color="info"
-              size="small"
-              onClick={() => handleView(row.id)}
-              disabled={!canView}
-            >
-              View
-            </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={() => handleEdit(row.id)}
-              disabled={!canEdit}
-            >
-              Edit
-            </Button>
-            <Button
-              variant="contained"
-              color="secondary"
-              size="small"
-              onClick={() => handleDelete(row)}
-              disabled={!canDelete}
-
-            >
-              Delete
-            </Button>
-
-          </Box>
-        );
-      },
+      renderCell: ({ row }) => (
+        <Box display="flex" gap={1}>
+          <Button
+            variant="contained"
+            color="info"
+            size="small"
+            onClick={() => handleView(row.id)}
+            disabled={!canView}
+          >
+            View
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            onClick={() => handleEdit(row.id)}
+            disabled={!canEdit}
+          >
+            Edit
+          </Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            size="small"
+            onClick={() => handleDelete(row)}
+            disabled={!canDelete}
+          >
+            Delete
+          </Button>
+        </Box>
+      ),
     },
-  ];
+  ], [canView, canEdit, canDelete, categoryListData, handleView, handleEdit, handleDelete]);
+
+  // Filtered rows (memoized)
+  const filteredRows = useMemo(() => {
+    const search = searchText.toLowerCase();
+    return categoryListData.filter(
+      (row) =>
+        row.cat_name?.toLowerCase().includes(search) ||
+        row.category_chinese_name?.toLowerCase().includes(search)
+    );
+  }, [categoryListData, searchText]);
 
   return (
     <Box m="20px">
@@ -217,7 +219,6 @@ const Category = () => {
         addNewClick={handleAddNewClick}
         addBulkDelete={handleBulkDelete}
         orderClick={handleOrderClick}
-        showToggleClick={handleToggle}
         buttons={true}
         addButton={canAdd && canBrowse}
         deleteButton={canDelete && canBrowse}
@@ -228,15 +229,9 @@ const Category = () => {
           height="75vh"
           flex={1}
           sx={{
-            "& .MuiDataGrid-root": {
-              border: "none",
-            },
-            "& .MuiDataGrid-cell": {
-              border: "none",
-            },
-            "& .name-column--cell": {
-              color: colors.greenAccent[300],
-            },
+            "& .MuiDataGrid-root": { border: "none" },
+            "& .MuiDataGrid-cell": { border: "none" },
+            "& .name-column--cell": { color: colors.greenAccent[300] },
             "& .MuiDataGrid-columnHeaders": {
               backgroundColor: colors.blueAccent[700],
               borderBottom: "none",
@@ -264,7 +259,7 @@ const Category = () => {
             mb="10px"
           >
             <InputBase
-              placeholder="Search by Categopry Name, or Category Chinese Name..."
+              placeholder="Search by Category Name or Category Chinese Name..."
               sx={{ ml: 2, flex: 1 }}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
@@ -273,19 +268,13 @@ const Category = () => {
               type="button"
               sx={{ p: 1 }}
               onClick={() => setSearchText("")}
+              aria-label={searchText ? "Clear search" : "Search"}
             >
-              {searchText
-                ? <Close />
-                : <SearchOutlined />
-              }
+              {searchText ? <Close /> : <SearchOutlined />}
             </IconButton>
           </Box>
           <DataGrid
-            rows={categoryListData.filter(
-              (row) =>
-                row.cat_name?.toLowerCase().includes(searchText.toLowerCase()) ||
-                row.category_chinese_name?.toLowerCase().includes(searchText.toLowerCase())
-            )}
+            rows={filteredRows}
             columns={columns}
             loading={loading}
             initialState={{
@@ -295,8 +284,9 @@ const Category = () => {
                 },
               },
             }}
+            pageSizeOptions={[10, 20, 50, 100]}
             checkboxSelection
-            onRowSelectionModelChange={(ids) => handleRowSelection(ids)}
+            onRowSelectionModelChange={handleRowSelection}
             components={{
               LoadingOverlay: CustomLoadingOverlay,
             }}
@@ -324,4 +314,3 @@ const Category = () => {
 };
 
 export default Category;
-
