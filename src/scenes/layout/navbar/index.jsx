@@ -22,6 +22,7 @@ import {
 import { ToggledContext } from "../../../App";
 import AuthServices from "../../../services/authServices";
 import { toast } from "react-toastify";
+import CustomLoadingOverlay from "../../../components/CustomLoadingOverlay";
 
 const Navbar = () => {
   const theme = useTheme();
@@ -30,7 +31,7 @@ const Navbar = () => {
   const isMdDevices = useMediaQuery("(max-width:768px)");
   const isXsDevices = useMediaQuery("(max-width:466px)");
   const colors = tokens(theme.palette.mode);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   // State for dropdown menu
   const [anchorEl, setAnchorEl] = useState(null);
@@ -119,7 +120,14 @@ const Navbar = () => {
           }}
         >
           <MenuItem onClick={handleMenuClose}>User Settings</MenuItem>
-          <MenuItem onClick={handleLogout}>Logout</MenuItem>
+          {/* <MenuItem onClick={handleLogout}>Logout</MenuItem> */}
+          {loading ? (
+            <MenuItem>
+               <CustomLoadingOverlay />
+            </MenuItem>
+          ) : (
+            <MenuItem onClick={handleLogout}>Logout</MenuItem>
+          )}
         </Menu>
       </Box>
     </Box>
