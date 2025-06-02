@@ -168,7 +168,7 @@ const CategoryDetailsForm = () => {
                                     onBlur={handleBlur}
                                     onChange={(e) => {
                                         handleChange(e);
-                                        const selectedType = JSON.stringify(e.target.value);
+                                        const selectedType = e.target.value;
                                         setFieldValue("type", selectedType);
                                         const filteredOptions = categoryListData
                                             .filter(
