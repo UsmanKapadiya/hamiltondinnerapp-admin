@@ -13,6 +13,7 @@ import RoleServices from "../../services/roleServices";
 import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
+import { setPermissionList } from "../../redux/action/permissionAction";
 
 // Yup validation schema
 const validationSchema = yup.object().shape({
@@ -76,17 +77,17 @@ const RoleDetailsForm = () => {
       .map(item => item.id);
 
     const formData = { ...values, permissions: selectedPermissions };
-
     try {
       if (formData.id) {
         await RoleServices.updateRole(formData.id, formData);
+        await fetchGetRoleById(); // <-- Move here
         toast.success("Role updated successfully!");
       } else {
         await RoleServices.createRole(formData);
+        await fetchGetRoleById();
         toast.success("Role created successfully!");
         actions.resetForm();
       }
-      fetchGetRoleById();
     } catch (error) {
       const errors = error?.response?.data?.errors;
       if (errors) {
@@ -102,7 +103,7 @@ const RoleDetailsForm = () => {
   const fetchGetRoleById = async () => {
     try {
       const response = await RoleServices.getRoleById(userData?.role_id);
-      dispatch(setPermissionsList(response?.data?.permission_list || []));
+      dispatch(setPermissionList(response?.data?.permission_list));
     } catch (error) {
       console.error("Error fetching role by ID:", error);
     }
