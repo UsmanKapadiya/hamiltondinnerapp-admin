@@ -11,6 +11,7 @@ import {
   DashboardOutlined,
   DonutLargeOutlined,
   DvrOutlined,
+  DynamicFormOutlined,
   ExpandLessOutlined,
   ExpandMoreOutlined,
   HelpOutlineOutlined,
@@ -276,6 +277,12 @@ const SideBar = () => {
             path="/order-details"
             colors={colors}
             icon={<LocalPizzaOutlined />}
+          />
+            <Item
+            title="Forms"
+            path="/forms"
+            colors={colors}
+            icon={<DynamicFormOutlined />}
           />
           {/* <Item
             title="Contacts Information"
