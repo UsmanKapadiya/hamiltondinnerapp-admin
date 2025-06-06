@@ -36,6 +36,9 @@ import User from "./scenes/user";
 import UserDetailsView from "./scenes/user/userDetails-view";
 import UserDetailsForm from "./scenes/user/userDetails-form";
 import NotFound from "./scenes/pageNotFounf/NotFound";
+import Forms from "./scenes/Forms";
+import FormsAddUpdate from "./scenes/Forms/forms-addUpdate";
+import FormsDetailsView from "./scenes/Forms/formsDetails-view";
 
 
 const ProtectedRoute = ({ children }) => {
@@ -104,6 +107,11 @@ const AppRouter = () => {
           <Route path="/users-details/:id" element={<UserDetailsView />} />
           <Route path="/users-details/create" element={<UserDetailsForm />} />
           <Route path="/users-details/:id/edit" element={<UserDetailsForm />} />
+          {/* Forms */}
+          <Route path="/forms" element={<Forms />} />
+          <Route path="/forms/:id" element={<FormsDetailsView />} />
+          <Route path="/forms/create" element={<FormsAddUpdate />} />
+          <Route path="/forms/:id/edit" element={<FormsAddUpdate />} />
 
           <Route path="/faq" element={<FAQ />} />
           <Route path="*" element={<NotFound />} />
