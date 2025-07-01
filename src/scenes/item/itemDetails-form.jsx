@@ -11,22 +11,23 @@ import { useEffect, useState, useMemo } from "react";
 
 const validationSchema = yup.object().shape({
   item_name: yup.string().required("Item Name is required"),
-  item_chinese_name: yup.string().required("Item Chinese Name is required"),
-  options: yup
-    .array()
-    .of(yup.string().required("Each option must be a string"))
-    .min(1, "At least one option is required")
-    .required("Options are required"),
+  // item_chinese_name: yup.string().required("Item Chinese Name is required"),
+  // options: yup
+  //   .array()
+  //   .of(yup.string().required("Each option must be a string"))
+  //   .min(1, "At least one option is required")
+  //   .required("Options are required"),
   cat_id: yup
     .number()
     .typeError("Parent Id must be a number")
     .required("Parent Id is required"),
   is_allday: yup.boolean().required("Is All Day is required"),
-  preference: yup
-    .array()
-    .of(yup.string().required("Each preference must be a string"))
-    .min(1, "At least one preference is required")
-    .required("Preference is required"),
+  
+  // preference: yup
+  //   .array()
+  //   .of(yup.string().required("Each preference must be a string"))
+  //   .min(1, "At least one preference is required")
+  //   .required("Preference is required"),
   // item_image: yup
   // .mixed()
   // .test("fileType", "Unsupported File Format", (value) => {
