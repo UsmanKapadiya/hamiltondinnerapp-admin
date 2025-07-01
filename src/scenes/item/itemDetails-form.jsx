@@ -3,7 +3,7 @@ import { Header } from "../../components";
 import { Formik } from "formik";
 import * as yup from "yup";
 import { DvrOutlined } from "@mui/icons-material";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import ItemServices from "../../services/itemServices";
 import { toast } from "react-toastify";
 import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
@@ -19,8 +19,8 @@ const validationSchema = yup.object().shape({
   //   .required("Options are required"),
   cat_id: yup
     .number()
-    .typeError("Parent Id must be a number")
-    .required("Parent Id is required"),
+    .typeError("Category must be a number")
+    .required("Category is required"),
   is_allday: yup.boolean().required("Is All Day is required"),
   
   // preference: yup
@@ -39,6 +39,7 @@ const validationSchema = yup.object().shape({
 
 const ItemDetailsForm = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const isNonMobile = useMediaQuery("(min-width:600px)");
   const [loading, setLoading] = useState(true);
   const [itemDetails, setItemDetails] = useState();
@@ -90,7 +91,7 @@ const ItemDetailsForm = () => {
     id: itemDetails?.id || "",
     item_name: itemDetails?.item_name || "",
     item_chinese_name: itemDetails?.item_chinese_name || "",
-    cat_id: itemDetails?.cat_id || 0,
+    cat_id: itemDetails?.cat_id,
     is_allday: itemDetails?.is_allday || false,
     options: (() => {
       try {
@@ -143,11 +144,13 @@ const ItemDetailsForm = () => {
         response = await ItemServices.updatetItems(values.id, formData);
         setItemDetails(response.data);
         toast.success("Items updated successfully!");
+        navigate("/item-details");
       } else {
         response = await ItemServices.createItems(formData);
         setItemDetails(response.data || null);
         toast.success("Items created successfully!");
         resetForm();
+        navigate("/item-details");
       }
     } catch (error) {
       console.error("Error processing menu:", error);
@@ -245,11 +248,10 @@ const ItemDetailsForm = () => {
                   options={categoryData}
                   getOptionLabel={(option) => option.label}
                   value={
-                    categoryData.find((option) => option.value === values.cat_id) ||
-                    null
+                    categoryData.find((option) => option.value === values.cat_id) || null
                   }
                   onChange={(_, newValue) => {
-                    setFieldValue("cat_id", newValue ? newValue.value : 0);
+                    setFieldValue("cat_id", newValue ? newValue.value : '');
                   }}
                   renderInput={(params) => (
                     <TextField
