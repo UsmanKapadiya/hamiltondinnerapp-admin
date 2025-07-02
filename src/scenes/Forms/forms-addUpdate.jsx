@@ -61,7 +61,7 @@ const FormsAddUpdate = () => {
 
     return (
         <Box m="20px">
-            <Header title={formDetails?.id ? "Edit Form Type" : "Add Form Type"} icon={<DynamicFormOutlined />} Buttons={false} />
+            <Header title={formDetails?.id ? "Update Form Type" : "Add Form Type"} icon={<DynamicFormOutlined />} Buttons={false} />
             {loading ? (
                 <Box display="flex" justifyContent="center" alignItems="center" height="calc(100vh - 100px)">
                     <CustomLoadingOverlay />

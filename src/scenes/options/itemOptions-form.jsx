@@ -61,7 +61,7 @@ const ItemoptionsForm = () => {
 
   return (
     <Box m="20px">
-      <Header title={optionsDetails?.id ? "Edit Item Option" : "Add Item Option"} icon={<DvrOutlined />} Buttons={false} />
+      <Header title={optionsDetails?.id ? "Update Item Option" : "Add Item Option"} icon={<DvrOutlined />} Buttons={false} />
       {loading ? (
         <Box display="flex" justifyContent="center" alignItems="center" height="calc(100vh - 100px)">
           <CustomLoadingOverlay />

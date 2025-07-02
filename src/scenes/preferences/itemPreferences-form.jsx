@@ -56,7 +56,15 @@ const ItemPreferencesForm = () => {
 
   return (
     <Box m="20px">
-      <Header title="Add Item Preference" icon={<DvrOutlined />} Buttons={false} />
+      <Header
+        title={
+          loading
+            ? ""
+            : preferencesDetails?.id
+              ? "Update Item Preference"
+              : "Add Item Preference"
+        }
+        icon={<DvrOutlined />} Buttons={false} />
       {loading ? (
         <Box display="flex" justifyContent="center" alignItems="center" height="calc(100vh - 100px)">
           <CustomLoadingOverlay />
