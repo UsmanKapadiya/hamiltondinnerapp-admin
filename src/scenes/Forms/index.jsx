@@ -290,7 +290,7 @@ const Forms = () => {
                         rows={filteredRows}
                         columns={columns}
                         loading={loading}
-                        rowCount={pagination.total}
+                        rowCount={filteredRows.length}
                         paginationModel={{
                             page: pagination.page - 1,
                             pageSize: pagination.pageSize,

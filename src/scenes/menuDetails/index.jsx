@@ -293,7 +293,7 @@ const MenuDetails = () => {
             loading={loading}
             pagination
             paginationMode="server"
-            rowCount={pagination.total}
+            rowCount={filteredRows.length}
             paginationModel={{
               page: pagination.page - 1,
               pageSize: pagination.pageSize,

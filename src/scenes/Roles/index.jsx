@@ -246,7 +246,7 @@ const Roles = () => {
           loading={loading}
           pagination
           paginationMode="server"
-          rowCount={pagination.total}
+          rowCount={filteredRoles.length}
           paginationModel={{
             page: pagination.page - 1,
             pageSize: pagination.pageSize,
