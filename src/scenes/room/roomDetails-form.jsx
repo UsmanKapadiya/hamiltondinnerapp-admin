@@ -20,14 +20,14 @@ import { toast } from "react-toastify";
 
 const validationSchema = yup.object({
   room_name: yup.string().required("Unit Number is required"),
-  resident_name: yup.string().required("Resident Name is required"),
+  // resident_name: yup.string().required("Resident Name is required"),
   occupancy: yup
     .number()
     .typeError("Occupancy must be a number")
     .required("Occupancy is required"),
   language: yup.string().required("Language Preference is required"),
-  food_texture: yup.string().required("Food Texture is required"),
-  special_instrucations: yup.string(),
+  // food_texture: yup.string().required("Food Texture is required"),
+  // special_instrucations: yup.string(),
   is_active: yup.boolean(),
 });
 
