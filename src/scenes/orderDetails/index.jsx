@@ -64,7 +64,7 @@ const OrderDetails = () => {
       const rows = data?.result?.rows || [];
       const columns =
         Array.isArray(data?.columns) &&
-        Array.isArray(data.columns[data.columns.length - 1])
+          Array.isArray(data.columns[data.columns.length - 1])
           ? data.columns[data.columns.length - 1]
           : [];
       const exportData = rows.map(row =>
@@ -249,6 +249,24 @@ const OrderDetails = () => {
                         sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
                       >
                         {item.field}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                  <TableRow>
+                    {/* First cell empty */}
+                    <TableCell
+                      align="center"
+                      sx={{ border: '1px solid rgba(224, 224, 224, 1)', fontWeight: 'bold', backgroundColor: colors.primary[400] }}
+                    >
+                    </TableCell>
+                    {/* Display total data */}
+                    {getColumns(data?.columns?.length - 1).map((item, key) => (
+                      <TableCell
+                        key={key}
+                        align="center"
+                        sx={{ border: '1px solid rgba(224, 224, 224, 1)', fontWeight: 'bold', backgroundColor: colors.primary[400],color:colors.redAccent[800] }}
+                      >
+                        {data?.total[item.field] !== undefined ? data?.total[item.field] : ''}
                       </TableCell>
                     ))}
                   </TableRow>
