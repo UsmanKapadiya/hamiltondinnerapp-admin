@@ -20,7 +20,7 @@ import { toast } from "react-toastify";
 
 const validationSchema = yup.object({
   room_name: yup.string().required("Unit Number is required"),
-  // resident_name: yup.string().required("Resident Name is required"),
+  resident_name: yup.string().required("Resident Name is required"),
   occupancy: yup
     .number()
     .typeError("Occupancy must be a number")
@@ -52,8 +52,8 @@ const RoomDetailsForm = () => {
       id: roomDetails?.id || "",
       room_name: roomDetails?.room_name || "",
       resident_name: roomDetails?.resident_name || "",
-      occupancy: roomDetails?.occupancy || "",
-      language: roomDetails?.language?.toString() || "",
+      occupancy: roomDetails?.occupancy || "1",
+      language: roomDetails?.language?.toString() || "1",
       food_texture: roomDetails?.food_texture || "",
       special_instrucations: roomDetails?.special_instrucations || "",
       is_active: roomDetails?.is_active === 1 || roomDetails?.is_active === true,
@@ -175,6 +175,14 @@ const RoomDetailsForm = () => {
                   error={touched.occupancy && Boolean(errors.occupancy)}
                   helperText={touched.occupancy && errors.occupancy}
                   sx={{ gridColumn: "span 2" }}
+                  inputProps={{ min: 1, max: 10, step: 1 }}
+                  onInput={e => {
+                    if (e.target.value !== "") {
+                      let val = parseInt(e.target.value) || 1;
+                      val = Math.max(1, Math.min(10, val));
+                      e.target.value = val;
+                    }
+                  }}
                 />
                 <TextField
                   fullWidth
