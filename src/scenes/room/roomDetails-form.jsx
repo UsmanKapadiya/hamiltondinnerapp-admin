@@ -7,7 +7,10 @@ import {
   Switch,
   FormGroup,
   FormControlLabel,
+  IconButton,
 } from "@mui/material";
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { Header } from "../../components";
 import { Formik } from "formik";
 import * as yup from "yup";
@@ -25,6 +28,10 @@ const validationSchema = yup.object({
     .number()
     .typeError("Occupancy must be a number")
     .required("Occupancy is required"),
+  password: yup
+    .string()
+    .required("Password is required")
+    .min(6, "Password must be at least 6 characters"),
   language: yup.string().required("Language Preference is required"),
   // food_texture: yup.string().required("Food Texture is required"),
   // special_instrucations: yup.string(),
@@ -37,6 +44,7 @@ const RoomDetailsForm = () => {
   const isNonMobile = useMediaQuery("(min-width:600px)");
   const [roomDetails, setRoomDetails] = useState({});
   const [loading, setLoading] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -54,6 +62,7 @@ const RoomDetailsForm = () => {
       resident_name: roomDetails?.resident_name || "",
       occupancy: roomDetails?.occupancy || "1",
       language: roomDetails?.language?.toString() || "1",
+      password: roomDetails?.password,
       food_texture: roomDetails?.food_texture || "",
       special_instrucations: roomDetails?.special_instrucations || "",
       is_active: roomDetails?.is_active === 1 || roomDetails?.is_active === true,
@@ -200,6 +209,37 @@ const RoomDetailsForm = () => {
                   <MenuItem value="1">English</MenuItem>
                   <MenuItem value="0">Chinese</MenuItem>
                 </TextField>
+                <TextField
+                  fullWidth
+                  variant="filled"
+                  type={showPassword ? "text" : "password"}
+                  label="Password"
+                  onBlur={handleBlur}
+                  onChange={handleChange}
+                  value={values.password}
+                  name="password"
+                  error={touched.password && Boolean(errors.password)}
+                  helperText={touched.password && errors.password}
+                  sx={{ gridColumn: "span 4" }}
+                  InputProps={{
+                    endAdornment: (
+                      <IconButton
+                        onClick={() => setShowPassword((prev) => !prev)}
+                        tabIndex={-1}
+                        edge="end"
+                        size="small"
+                        sx={{ minWidth: 0, padding: 0 }}
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                      >
+                        {showPassword ? (
+                          <VisibilityOffIcon />
+                        ) : (
+                          <VisibilityIcon />
+                        )}
+                      </IconButton>
+                    ),
+                  }}
+                />
                 <TextField
                   fullWidth
                   variant="filled"
