@@ -134,7 +134,13 @@ const RoleDetailsForm = () => {
 
   return (
     <Box m="20px">
-      <Header title="Add Role" icon={<LockOutlined />} Buttons={false} />
+      <Header title={
+        loading
+           ? ""
+            : roleDetails?.id
+            ? "Update Role"
+            : "Add Role"
+      } icon={<LockOutlined />} Buttons={false} />
       {loading ? (
         <Box display="flex" justifyContent="center" alignItems="center" height="80vh">
           <CustomLoadingOverlay />
