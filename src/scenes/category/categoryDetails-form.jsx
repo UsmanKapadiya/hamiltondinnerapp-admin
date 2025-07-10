@@ -12,9 +12,9 @@ import { useEffect, useState } from "react";
 
 const validationSchema = yup.object().shape({
     cat_name: yup.string().required("Category Name is required"),
-    category_chinese_name: yup.string().required("Category Chinese Name is required"),
+    // category_chinese_name: yup.string().required("Category Chinese Name is required"),
     type: yup.string().required("Category Type is required"),
-    parent_id: yup.string().required("Parent Id is required"),
+    // parent_id: yup.string().required("Parent Id is required"),
 });
 
 const CategoryDetailsForm = () => {
