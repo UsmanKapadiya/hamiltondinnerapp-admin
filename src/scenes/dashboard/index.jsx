@@ -46,7 +46,7 @@ function Dashboard() {
     setLoading(true)
   }, []);
   useEffect(()=>{
-    console.log(userData?.role_id)
+    // console.log(userData?.role_id)
     if(userData?.role_id){
       fetchGetRoleById(userData?.role_id);
     }
@@ -55,7 +55,7 @@ function Dashboard() {
   const fetchItemsList = async () => {
     try {
       const response = await ItemServices.getItemList();
-      console.log("response", response)
+      // console.log("response", response)
       dispatch(setItemList(response.data)); // Store in Redux
       setItemListData(response.data);
     } catch (error) {

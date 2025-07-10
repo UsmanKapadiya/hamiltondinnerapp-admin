@@ -18,7 +18,7 @@ instance.interceptors.request.use(
       token = JSON.parse(Cookies.get('userToken')).token; // Ensure you're accessing the correct field
     }
     const isAuthenticated = localStorage.getItem('authToken'); // Use the correct key for the token
-    console.log("TOKEN ====>>", token);
+    // console.log("TOKEN ====>>", token);
 
     if (isAuthenticated && !config.headers['Authorization']) {
       config.headers['Authorization'] = `Bearer ${isAuthenticated}`;

@@ -23,50 +23,51 @@ const Login = () => {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  const newErrors = {};
-  if (!formData.email) newErrors.email = "Email is required";
-  if (!formData.password) newErrors.password = "Password is required";
+    e.preventDefault();
+    const newErrors = {};
+    if (!formData.email) newErrors.email = "Email is required";
+    if (!formData.password) newErrors.password = "Password is required";
 
-  if (Object.keys(newErrors).length > 0) {
-    setErrors(newErrors);
-    return;
-  }
-
-  console.log("Form submitted", formData);
-
-  try {
-    setLoading(true);
-    let response = await AuthServices.login(formData);
-    const { access_token, user } = response;
-
-    console.log("response", access_token, user);
-    localStorage.setItem("authToken", access_token);
-    localStorage.setItem("userData", JSON.stringify(user));
-
-    // Show success toast
-    toast.success("Login Successfully!");
-
-    // Delay navigation to ensure toast is displayed
-    setTimeout(() => {
-      navigate("/");
-    }, 1000);
-  } catch (error) {
-    console.error("Error processing login:", error);
-
-    const errorMessage =
-      error.response?.data?.error || "An unexpected error occurred. Please try again.";
-    toast.error(errorMessage);
-
-    setTimeout(() => {
-      setLoading(false);
-    }, 1500);
-  } finally {
-    if (!error) {
-      setLoading(false);
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
     }
-  }
-};
+
+    // console.log("Form submitted", formData);
+
+    let hasError = false;
+    try {
+      setLoading(true);
+      let response = await AuthServices.login(formData);
+      const { access_token, user } = response;
+
+      // console.log("response", access_token, user);
+      localStorage.setItem("authToken", access_token);
+      localStorage.setItem("userData", JSON.stringify(user));
+
+      toast.success("Login Successfully!");
+
+      // Delay navigation to ensure toast is displayed
+      setTimeout(() => {
+        navigate("/");
+      }, 1000);
+    } catch (error) {
+      hasError = true;
+      console.error("Error processing login:", error);
+
+      const errorMessage =
+        error.response?.data?.error || "An unexpected error occurred. Please try again.";
+      toast.error(errorMessage);
+
+      setTimeout(() => {
+        setLoading(false);
+      }, 1500);
+    } finally {
+      if (!hasError) {
+        setLoading(false);
+      }
+    }
+  };
 
   return (
     <Box
@@ -74,7 +75,7 @@ const Login = () => {
       height="100vh"
       width="100vw"
       sx={{
-        overflow: "hidden", 
+        overflow: "hidden",
       }}
     >
       {/* Left Section: Background Image */}

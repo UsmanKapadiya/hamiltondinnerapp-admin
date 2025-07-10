@@ -44,8 +44,8 @@ const Setting = () => {
       setSetting(response?.data)
       const appMsg = response?.data.find(item => item.key === "site.app_msg");
       const appMsgCn = response?.data.find(item => item.key === "site.app_msg_cn");
-      console.log(appMsg?.value)
-      console.log(appMsgCn?.value)
+      // console.log(appMsg?.value)
+      // console.log(appMsgCn?.value)
       setInitialValues({
         siteGuidelines: appMsg?.value || "test", //Chocolate Chip Cookies can served as snacks.
         siteGuidelinesChinese: appMsgCn?.value || "dummy",//巧克力曲奇可以当零食吃。
@@ -83,15 +83,15 @@ const Setting = () => {
         "order": 1,
         "group": "general"
       }]
-    console.log(payload)
+    // console.log(payload)
     try {
       let response;
       if (appMsg?.id && appMsgCn?.id) {
-        console.log("update call")
+        // console.log("update call")
         response = await SettingServices.updateSettings(payload);
         toast.success("Setting updated successfully!");
       } else {
-        console.log("create call")
+        // console.log("create call")
         response = await SettingServices.createSettings(payload);
         toast.success("Setting created successfully!");
       }

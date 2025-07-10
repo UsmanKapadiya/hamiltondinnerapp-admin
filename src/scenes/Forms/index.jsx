@@ -57,7 +57,7 @@ const Forms = () => {
         setLoading(true);
         try {
             const response = await FormServices.getFormList();
-            console.log("response", response);
+            // console.log("response", response);
             setFormsListData(response.data);
             setPagination((prev) => ({
                 ...prev,

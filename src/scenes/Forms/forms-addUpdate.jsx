@@ -26,7 +26,7 @@ const FormsAddUpdate = () => {
         }
         setLoading(false);
     }, [location.state]);
-    console.log(formDetails)
+    // console.log(formDetails)
     // Memoize initial values to avoid recreation on every render
     const initialValues = useMemo(() => ({
         id: formDetails?.id || "",
@@ -40,7 +40,7 @@ const FormsAddUpdate = () => {
     const handleFormSubmit = useCallback(async (values, actions) => {
         setLoading(true);
         const formData = { ...values };
-        console.log(formData)
+        // console.log(formData)
         try {
             let response;
             if (formData.id) {
