@@ -63,6 +63,37 @@ const Navbar = () => {
       setLoading(false);
     }
   };
+  function DotWaveLoader() {
+    return (
+      <span style={{ display: 'inline-block', height: 16 }}>
+        <span className="dot-wave-loader">
+          <span className="dot" style={{ animationDelay: '0s' }}>.</span>
+          <span className="dot" style={{ animationDelay: '0.2s' }}>.</span>
+          <span className="dot" style={{ animationDelay: '0.4s' }}>.</span>
+        </span>
+        <style>{`
+        .dot-wave-loader {
+          display: inline-flex;
+          align-items: flex-end;
+          height: 16px;
+        }
+        .dot {
+          font-size: 22px;
+          line-height: 1;
+          margin: 0 1px;
+          color: #FFF;
+          animation: dotWave 1s infinite ease-in-out;
+          position: relative;
+        }
+        @keyframes dotWave {
+          0%, 60%, 100% { transform: translateY(0); }
+          30% { transform: translateY(-8px); }
+        }
+      `}</style>
+      </span>
+    );
+  }
+
 
   return (
     <Box display="flex" alignItems="center" justifyContent="space-between" p={2}>
@@ -122,8 +153,19 @@ const Navbar = () => {
           <MenuItem onClick={handleMenuClose}>User Settings</MenuItem>
           {/* <MenuItem onClick={handleLogout}>Logout</MenuItem> */}
           {loading ? (
-            <MenuItem>
-               <CustomLoadingOverlay />
+            <MenuItem sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '100%',
+                  height: 24,
+                }}
+              >
+                <span style={{ marginLeft: 8 }}>Logging out</span>
+                {DotWaveLoader()}
+              </Box>
             </MenuItem>
           ) : (
             <MenuItem onClick={handleLogout}>Logout</MenuItem>
