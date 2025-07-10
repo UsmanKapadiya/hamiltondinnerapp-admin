@@ -8,7 +8,7 @@ import {
   FormControlLabel,
   Switch,
 } from "@mui/material";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { DvrOutlined } from "@mui/icons-material";
 import { Formik } from "formik";
 import * as yup from "yup";
@@ -38,6 +38,7 @@ const getValidationSchema = (isUpdate = false) =>
 
 const UserDetailsForm = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const isNonMobile = useMediaQuery("(min-width:600px)");
 
   const [loading, setLoading] = useState(true);
@@ -77,33 +78,54 @@ const UserDetailsForm = () => {
   };
 
   const handleFormSubmit = async (values) => {
-  setLoading(true);
-  try {
-    const formData = new FormData();
-    formData.append("name", values.name);
-    formData.append("user_name", values.user_name);
-    formData.append("email", values.email);
-    if (values.password) formData.append("password", values.password);
-    formData.append("role", values.role);
-    formData.append("role_id", values.role_id);
-    formData.append("is_admin", values.is_admin);
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("name", values.name);
+      formData.append("user_name", values.user_name);
+      formData.append("email", values.email);
+      if (values.password) formData.append("password", values.password);
+      formData.append("role", values.role);
+      formData.append("role_id", values.role_id);
+      formData.append("is_admin", values.is_admin);
 
-    if (
-      values.avatar &&
-      values.avatar instanceof File &&
-      ["image/jpeg", "image/png", "image/jpg", "image/gif"].includes(values.avatar.type)
-    ) {
-      formData.append("avatar", values.avatar);
-    } else  {
-      // formData.append("avatar", values.avatar);
-    }
-    if (values.id) formData.append("id", values.id);
-    const response = values.id
-      ? await UserServices.updatetUser(values.id, formData)
-      : await UserServices.createUser(formData);
+      if (
+        values.avatar &&
+        values.avatar instanceof File &&
+        ["image/jpeg", "image/png", "image/jpg", "image/gif"].includes(values.avatar.type)
+      ) {
+        formData.append("avatar", values.avatar);
+      } else  {
+        // formData.append("avatar", values.avatar);
+      }
+      if (values.id) formData.append("id", values.id);
+      const response = values.id
+        ? await UserServices.updatetUser(values.id, formData)
+        : await UserServices.createUser(formData);
 
-    if (!response || response.success === false) {
-      const apiErrors = response?.errors;
+      if (!response || response.success === false) {
+        const apiErrors = response?.errors;
+        if (apiErrors) {
+          Object.entries(apiErrors).forEach(([field, messages]) => {
+            messages.forEach((msg) => toast.error(msg));
+          });
+        } else {
+          toast.error("Failed to process user. Please try again.");
+        }
+        return; // Stop here if error
+      }
+
+      toast.success(`User ${values.id ? "updated" : "created"} successfully!`);
+
+      if (values.id) {
+        setUserData(response?.data);
+      }
+
+      // Redirect to users screen after success
+      navigate("/users");
+    } catch (error) {
+      console.error("Submission error:", error);
+      const apiErrors = error?.response?.data?.errors;
       if (apiErrors) {
         Object.entries(apiErrors).forEach(([field, messages]) => {
           messages.forEach((msg) => toast.error(msg));
@@ -111,28 +133,10 @@ const UserDetailsForm = () => {
       } else {
         toast.error("Failed to process user. Please try again.");
       }
-      return; // Stop here if error
+    } finally {
+      setLoading(false);
     }
-
-    toast.success(`User ${values.id ? "updated" : "created"} successfully!`);
-
-    if (values.id) {
-      setUserData(response?.data);
-    }
-  } catch (error) {
-    console.error("Submission error:", error);
-    const apiErrors = error?.response?.data?.errors;
-    if (apiErrors) {
-      Object.entries(apiErrors).forEach(([field, messages]) => {
-        messages.forEach((msg) => toast.error(msg));
-      });
-    } else {
-      toast.error("Failed to process user. Please try again.");
-    }
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
 
   return (
