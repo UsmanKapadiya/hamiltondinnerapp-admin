@@ -27,7 +27,7 @@ const getValidationSchema = (isUpdate = false) =>
     email: yup.string().email("Invalid email format").required("Email is required"),
     password: yup
       .string()
-      .min(6, "Password must be at least 6 characters")
+      .min(4, "Password must be at least 4 characters")
       .when([], {
         is: () => !isUpdate,
         then: (schema) => schema.required("Password is required"),
