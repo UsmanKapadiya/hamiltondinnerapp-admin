@@ -57,48 +57,53 @@ const OrderDetails = () => {
   const handleExportClick = (event) => setExportAnchor(event.currentTarget);
   const handleExportClose = () => setExportAnchor(null);
 
-  const handleExportOption = async (option) => {
-    handleExportClose();
-    try {
-      setLoading(true);
-      const rows = data?.result?.rows || [];
-      const columns =
-        Array.isArray(data?.columns) &&
-          Array.isArray(data.columns[data.columns.length - 1])
-          ? data.columns[data.columns.length - 1]
-          : [];
-      const exportData = rows.map(row =>
-        columns.reduce((acc, col) => {
-          acc[col.field] = row[col.field];
-          return acc;
-        }, {})
-      );
-      const worksheet = XLSX.utils.json_to_sheet(exportData);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "OrderReport");
-      const fileExt = option === "Excel" ? "xlsx" : "xls";
-      const fileType = option === "Excel"
-        ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        : "application/vnd.ms-excel";
-      const wbout = XLSX.write(workbook, { bookType: fileExt, type: "array" });
-      const blob = new Blob([wbout], { type: fileType });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute(
-        "download",
-        `OrderReport_${date.format("YYYY-MM-DD")}.${fileExt}`
-      );
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Export failed:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+const handleExportOption = async (option) => {
+  handleExportClose();
+  try {
+    setLoading(true);
+    const rows = data?.result?.rows || [];
+    // Get columns for export
+    const columns =
+      Array.isArray(data?.columns) &&
+      Array.isArray(data.columns[data.columns.length - 1])
+        ? data.columns[data.columns.length - 1]
+        : [];
+    // Add Room No column at the beginning
+    const exportColumns = [{ field: "room_id", title: "Room No" }, ...columns];
+    const exportData = rows.map(row =>
+      exportColumns.reduce((acc, col) => {
+        acc[col.title || col.field] = row[col.field];
+        return acc;
+      }, {})
+    );
+    // Set header row as titles
+    const header = exportColumns.map(col => col.title || col.field);
+    const worksheet = XLSX.utils.json_to_sheet(exportData, { header });
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "OrderReport");
+    const fileExt = option === "Excel" ? "xlsx" : "xls";
+    const fileType = option === "Excel"
+      ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      : "application/vnd.ms-excel";
+    const wbout = XLSX.write(workbook, { bookType: fileExt, type: "array" });
+    const blob = new Blob([wbout], { type: fileType });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute(
+      "download",
+      `OrderReport_${date.format("YYYY-MM-DD")}.${fileExt}`
+    );
+    document.body.appendChild(link);
+    link.click();
+    link.parentNode.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error("Export failed:", error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const canView = hasPermission(permissionList, "read_OrderDetails");
 
