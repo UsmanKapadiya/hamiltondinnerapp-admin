@@ -3,7 +3,7 @@ import { Header } from "../../components";
 import { Formik } from "formik";
 import * as yup from "yup";
 import { DvrOutlined } from "@mui/icons-material";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { type } from "../../data/mockData";
 import CategoryServices from "../../services/categoryServices";
 import { toast } from "react-toastify";
@@ -19,6 +19,7 @@ const validationSchema = yup.object().shape({
 
 const CategoryDetailsForm = () => {
     const location = useLocation();
+    const navigate = useNavigate()
     const [categoryDetails, setCategoryDetails] = useState(null);
     const categoryListData = location.state?.categoryListData || [];
     const isNonMobile = useMediaQuery("(min-width:600px)");
@@ -72,6 +73,9 @@ const CategoryDetailsForm = () => {
             }
             setCategoryDetails(response?.data);
             actions.resetForm({ values: { ...response?.data } });
+            if(response?.success === true) {
+                navigate("/category-details");
+            }
         } catch (error) {
             toast.error("Failed to process category. Please try again.");
         } finally {
@@ -174,7 +178,7 @@ const CategoryDetailsForm = () => {
                                             .filter(
                                                 (category) =>
                                                     category.type === selectedType &&
-                                                    category.id !== values.id
+                                                    category.id !== values.id  && category?.parent_id === 0
                                             )
                                             .map((category) => ({
                                                 label: category.cat_name,
