@@ -3,7 +3,7 @@ import { Header } from "../../components";
 import { Formik } from "formik";
 import * as yup from "yup";
 import { DynamicFormOutlined } from "@mui/icons-material";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState, useMemo, useCallback } from "react";
 import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
 import { toast } from "react-toastify";
@@ -14,7 +14,8 @@ const validationSchema = yup.object().shape({
 });
 
 const FormsAddUpdate = () => {
-    const location = useLocation();
+    const location = useLocation()
+    const navigate = useNavigate();
     const isNonMobile = useMediaQuery("(min-width:600px)");
     const [formDetails, setFormDetails] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -51,6 +52,9 @@ const FormsAddUpdate = () => {
                 response = await FormServices.createFormsDetails(formData);
                 toast.success("Form created successfully!");
                 actions.resetForm({ values: initialValues });
+            }
+            if(response?.success === true) {
+                navigate("/forms");
             }
         } catch (error) {
             toast.error("Failed to process forms. Please try again.");
