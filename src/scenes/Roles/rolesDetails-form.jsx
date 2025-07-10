@@ -5,7 +5,7 @@ import {
 import { LockOutlined } from "@mui/icons-material";
 import { Formik } from "formik";
 import { useDispatch } from "react-redux";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import * as yup from "yup";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -17,8 +17,8 @@ import { setPermissionList } from "../../redux/action/permissionAction";
 
 // Yup validation schema
 const validationSchema = yup.object().shape({
-  name: yup.string().required("Option Name is required"),
-  display_name: yup.string().required("Option Chinese Name is required"),
+  name: yup.string().required("Name is required"),
+  display_name: yup.string().required("Display Name is required"),
 });
 
 const RoleDetailsForm = () => {
@@ -26,6 +26,7 @@ const RoleDetailsForm = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const location = useLocation();
+  const navigate = useNavigate();
   const isNonMobile = useMediaQuery("(min-width:600px)");
   const userData = JSON.parse(localStorage.getItem('userData'));
 
@@ -80,20 +81,22 @@ const RoleDetailsForm = () => {
     try {
       if (formData.id) {
         await RoleServices.updateRole(formData.id, formData);
-        await fetchGetRoleById(); // <-- Move here
+        await fetchGetRoleById();
         toast.success("Role updated successfully!");
+        navigate("/roles");
       } else {
         await RoleServices.createRole(formData);
         await fetchGetRoleById();
         toast.success("Role created successfully!");
         actions.resetForm();
+        navigate("/roles");
       }
     } catch (error) {
       const errors = error?.response?.data?.errors;
       if (errors) {
         Object.values(errors).flat().forEach((message) => toast.error(message));
       } else {
-        toast.error("Failed to process menu. Please try again.");
+        toast.error("Failed to process role. Please try again.");
       }
     } finally {
       setLoading(false);
