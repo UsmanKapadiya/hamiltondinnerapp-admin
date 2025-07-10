@@ -167,12 +167,12 @@ const OrderDetails = () => {
                   <RestartAltOutlined />
                 </IconButton>
               </Tooltip>
-              <Tooltip title="Show Checked Codes">
+              {/* <Tooltip title="Show Checked Codes">
                 <IconButton onClick={data?.result?.rows?.length > 0 ? handleMenuClick : undefined}>
                   <WidgetsOutlined />
                 </IconButton>
-              </Tooltip>
-              <Menu
+              </Tooltip> 
+               <Menu
                 anchorEl={menuAnchor}
                 open={Boolean(menuAnchor)}
                 onClose={handleMenuClose}
@@ -184,7 +184,7 @@ const OrderDetails = () => {
                 {getColumns(data?.columns?.length - 1).map((item, key) => (
                   <MenuItem key={key}>{item.field}</MenuItem>
                 ))}
-              </Menu>
+              </Menu> */}
               <Tooltip title="Export Data">
                 <IconButton onClick={handleExportClick}>
                   <FileDownload />
