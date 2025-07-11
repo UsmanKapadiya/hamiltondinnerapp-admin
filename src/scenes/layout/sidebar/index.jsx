@@ -45,7 +45,7 @@ const SideBar = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [reportsDropdownOpen, setReportsDropdownOpen] = useState(false);
   const userData = JSON.parse(localStorage.getItem('userData')); // Use the correct key for the token
-
+  console.log(userData)
   const handleDropdownToggle = () => {
     setDropdownOpen(!dropdownOpen);
   };
@@ -122,8 +122,12 @@ const SideBar = () => {
         >
           <Avatar
             alt="avatar"
-            src={avatar}
+            src={userData?.avatar || avatar}
             sx={{ width: "100px", height: "100px" }}
+            onError={e => {
+              e.target.onerror = null;
+              e.target.src = avatar;
+            }}
           />
           <Box sx={{ textAlign: "center" }}>
             <Typography variant="h3" fontWeight="bold" color={colors.gray[100]}>
@@ -191,7 +195,7 @@ const SideBar = () => {
           />
           <List>
             <ListItemButton onClick={handleDropdownToggle}>
-              <ListItemIcon style={{paddingLeft:10}}>
+              <ListItemIcon style={{ paddingLeft: 10 }}>
                 <TonalityOutlined style={{ color: colors.gray[100], }} />
               </ListItemIcon>
               <ListItemText
@@ -278,7 +282,7 @@ const SideBar = () => {
             colors={colors}
             icon={<LocalPizzaOutlined />}
           />
-            <Item
+          <Item
             title="Forms"
             path="/forms"
             colors={colors}
