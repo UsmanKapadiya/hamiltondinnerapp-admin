@@ -45,7 +45,7 @@ const SideBar = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [reportsDropdownOpen, setReportsDropdownOpen] = useState(false);
   const userData = JSON.parse(localStorage.getItem('userData')); // Use the correct key for the token
-  console.log(userData)
+
   const handleDropdownToggle = () => {
     setDropdownOpen(!dropdownOpen);
   };
