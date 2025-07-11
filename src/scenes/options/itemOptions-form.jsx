@@ -3,7 +3,7 @@ import { Header } from "../../components";
 import { Formik } from "formik";
 import * as yup from "yup";
 import { DvrOutlined } from "@mui/icons-material";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState, useMemo, useCallback } from "react";
 import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
 import ItemServices from "../../services/itemServices";
@@ -11,12 +11,13 @@ import { toast } from "react-toastify";
 
 const validationSchema = yup.object().shape({
   option_name: yup.string().required("Option Name is required"),
-  option_name_cn: yup.string().required("Option Chinese Name is required"),
+  // option_name_cn: yup.string().required("Option Chinese Name is required"),
   is_paid_item: yup.boolean().required("Is Paid Item is required"),
 });
 
 const ItemoptionsForm = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const isNonMobile = useMediaQuery("(min-width:600px)");
   const [optionsDetails, setOptionsDetails] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -37,8 +38,7 @@ const ItemoptionsForm = () => {
     is_paid_item: !!optionsDetails?.is_paid_item,
   }), [optionsDetails]);
 
-  // Memoize form submit handler
-  const handleFormSubmit = useCallback(async (values, actions) => {
+   const handleFormSubmit = useCallback(async (values, actions) => {
     setLoading(true);
     const formData = { ...values };
     try {
@@ -52,12 +52,15 @@ const ItemoptionsForm = () => {
         toast.success("Item Options created successfully!");
         actions.resetForm({ values: initialValues });
       }
+      if (response?.success) {
+        navigate("/item-options");
+      }
     } catch (error) {
-      toast.error("Failed to process menu. Please try again.");
+      toast.error("Failed to process options. Please try again.");
     } finally {
       setLoading(false);
     }
-  }, [initialValues]);
+  }, [initialValues, navigate]);
 
   return (
     <Box m="20px">

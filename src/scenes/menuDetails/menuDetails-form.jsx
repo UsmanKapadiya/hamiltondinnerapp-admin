@@ -3,7 +3,7 @@ import { Header } from "../../components";
 import { Formik } from "formik";
 import * as yup from "yup";
 import { CreateOutlined } from "@mui/icons-material";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useTheme } from "@emotion/react";
 import { tokens } from "../../theme";
@@ -25,6 +25,7 @@ const MenuDetailsForm = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const location = useLocation();
+  const navigate = useNavigate();
   const optionsDetails = location.state;
   const isNonMobile = useMediaQuery("(min-width:600px)");
   const [loading, setLoading] = useState(false);
@@ -188,6 +189,9 @@ const MenuDetailsForm = () => {
         response = await MenuServices.createMenu(formData);
         toast.success("Menu created successfully!");
       }
+      if(response?.success === true) {
+        navigate("/menu-details");
+      }
     } catch (error) {
       const errors = error?.response?.data?.errors;
       if (errors) {
@@ -269,19 +273,22 @@ const MenuDetailsForm = () => {
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
                   label="Date"
-                  value={values.date ? dayjs(values.date) : null} // Convert to dayjs if needed
-                  onChange={(newValue) => setFieldValue("date", newValue ? newValue.format("YYYY-MM-DD") : "")}
+                  value={values.date ? dayjs(values.date) : null}
+                  onChange={(newValue) => {
+                    setFieldValue("date", newValue ? newValue.format("YYYY-MM-DD") : "");
+                  }}
                   minDate={dayjs()}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      fullWidth
-                      variant="filled"
-                      error={touched.date && Boolean(errors.date)}
-                      helperText={touched.date && errors.date}
-                      sx={{ gridColumn: "span 1" }}
-                    />
-                  )}
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      variant: "filled",
+                      name: "date",
+                      onBlur: handleBlur,
+                      error: touched.date && Boolean(errors.date),
+                      helperText: touched.date && errors.date,
+                      sx: { gridColumn: "span 1" },
+                    }
+                  }}
                 />
               </LocalizationProvider>
               <FormGroup sx={{ gridColumn: "span 1" }}>
