@@ -31,7 +31,7 @@ const validationSchema = yup.object({
   password: yup
     .string()
     .required("Password is required")
-    .min(4, "Password must be at least 4 characters"),
+    .min(3, "Password must be at least 3 characters"),
   language: yup.string().required("Language Preference is required"),
   // food_texture: yup.string().required("Food Texture is required"),
   // special_instrucations: yup.string(),
