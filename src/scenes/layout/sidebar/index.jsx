@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { Avatar, Box, IconButton, Typography, useTheme, Collapse, List, ListItemButton, ListItemText, ListItemIcon } from "@mui/material";
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { tokens } from "../../../theme";
 import { Menu, MenuItem, Sidebar } from "react-pro-sidebar";
 import {
@@ -31,11 +31,13 @@ import {
   WavesOutlined,
 
 } from "@mui/icons-material";
-import avatar from "../../../assets/images/avatar.png";
+// import avatar from "../../../assets/images/avatar.png";
 // import logo from "../../../assets/images/logo.png";
 import logos from "../../../assets/images/hamilton-logo.png";
 import Item from "./Item";
 import { ToggledContext } from "../../../App";
+
+const defaultAvtar = "http://hamiltondinnerapp.staging.intelligrp.com/images/user.webp"
 
 const SideBar = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -44,7 +46,12 @@ const SideBar = () => {
   const colors = tokens(theme.palette.mode);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [reportsDropdownOpen, setReportsDropdownOpen] = useState(false);
-  const userData = JSON.parse(localStorage.getItem('userData')); // Use the correct key for the token
+  const userData = JSON.parse(localStorage.getItem('userData'));
+  const [avatarSrc, setAvatarSrc] = useState(userData?.avatar && userData?.avatar !== "" ? userData.avatar : defaultAvtar);
+
+  useEffect(() => {
+    setAvatarSrc(userData?.avatar && userData?.avatar !== "" ? userData.avatar : defaultAvtar);
+  }, [userData?.avatar]);
 
   const handleDropdownToggle = () => {
     setDropdownOpen(!dropdownOpen);
@@ -122,11 +129,12 @@ const SideBar = () => {
         >
           <Avatar
             alt="avatar"
-            src={userData?.avatar || avatar}
+            src={avatarSrc}
             sx={{ width: "100px", height: "100px" }}
             onError={e => {
-              e.target.onerror = null;
-              e.target.src = avatar;
+              if (avatarSrc !== defaultAvtar) {
+                setAvatarSrc(defaultAvtar);
+              }
             }}
           />
           <Box sx={{ textAlign: "center" }}>

@@ -17,6 +17,8 @@ import { useSelector } from "react-redux";
 import { hasPermission } from "../../components/permissions";
 import NoPermissionMessage from "../../components/NoPermissionMessage";
 
+const defaultAvtar = "http://hamiltondinnerapp.staging.intelligrp.com/images/user.webp"
+
 // Debounce hook for search input
 function useDebounce(value, delay) {
   const [debounced, setDebounced] = useState(value);
@@ -177,7 +179,11 @@ const User = () => {
       renderCell: (params) =>
         params.value ? (
           <img
-            src={params.value}
+              src={params.value || defaultAvtar}
+            onError={e => {
+              e.target.onerror = null;
+              e.target.src = defaultAvtar;
+            }}
             alt="avatar"
             style={{ width: 40, height: 40, borderRadius: "50%", objectFit: "cover" }}
           />
