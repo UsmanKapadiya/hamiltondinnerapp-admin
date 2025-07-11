@@ -44,6 +44,7 @@ const UserDetailsForm = () => {
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState(null);
   const [roles, setRoles] = useState([]);
+  const loginUserData = JSON.parse(localStorage.getItem('userData'));
 
   const user = location?.state?.selectedRow;
 
@@ -72,6 +73,8 @@ const UserDetailsForm = () => {
     email: userData?.email || "",
     password: "",
     avatar: userData?.avatar ? userData?.avatar : null,
+    avatar_preview: null,
+    avatar_removed: false,
     role: userData?.role || "",
     role_id: userData?.role_id || "",
     is_admin: userData?.is_admin || false,
@@ -95,13 +98,19 @@ const UserDetailsForm = () => {
         ["image/jpeg", "image/png", "image/jpg", "image/gif"].includes(values.avatar.type)
       ) {
         formData.append("avatar", values.avatar);
-      } else  {
-        // formData.append("avatar", values.avatar);
+      }
+      if (values.avatar_removed) {
+        formData.append("avatar", "");
       }
       if (values.id) formData.append("id", values.id);
       const response = values.id
         ? await UserServices.updatetUser(values.id, formData)
         : await UserServices.createUser(formData);
+      if (response?.success === true) {
+        if (loginUserData?.id === response?.data?.id) {
+          localStorage.setItem("userData", JSON.stringify(response?.data));
+        }
+      }
 
       if (!response || response.success === false) {
         const apiErrors = response?.errors;
@@ -200,31 +209,17 @@ const UserDetailsForm = () => {
                   />
                 ))}
 
-                {/* Avatar Upload */}
-                {/* <TextField
-                  fullWidth
-                  type="file"
-                  variant="filled"
-                  label="Upload Avatar"
-                  InputLabelProps={{ shrink: true }}
-                  onChange={(e) =>
-                    setFieldValue("avatar", e.currentTarget.files[0])
-                  }
-                  sx={{ gridColumn: "span 4" }}
-                /> */}
-
                 <Box sx={{ gridColumn: "span 4" }}>
                   <input
                     accept="image/jpeg, image/png, image/jpg, image/gif"
                     style={{ display: 'none' }}
-                    id="avatar-upload" // <-- changed here
+                    id="avatar-upload"
                     name="avatar"
                     type="file"
                     onChange={(event) => {
                       const file = event.currentTarget.files[0];
                       if (file) {
                         setFieldValue("avatar", file);
-                        // Optionally, set a preview URL
                         setFieldValue("avatar_preview", URL.createObjectURL(file));
                       }
                     }}
@@ -235,29 +230,32 @@ const UserDetailsForm = () => {
                     </Button>
                   </label>
 
-                  {/* Show selected file name */}
-                  {values.avatar && values.avatar.name && (
-                    <Box mt={1}>
-                      <span>Selected: {values.avatar.name}</span>
-                    </Box>
-                  )}
-
-                  {/* Show image preview */}
                   <Box mt={2}>
-                    {values.avatar && values.avatar instanceof File && (
-                      <img
-                        src={values.avatar_preview || URL.createObjectURL(values.avatar)}
-                        alt="Preview"
-                        style={{ maxWidth: 200, maxHeight: 200 }}
-                      />
-                    )}
-                    {!values.avatar?.name && userData?.avatar && (
-                      <img
-                        src={values.avatar}
-                        alt="Current"
-                        style={{ maxWidth: 200, maxHeight: 200 }}
-                      />
-                    )}
+                    {(values.avatar && values.avatar instanceof File) || values.avatar ? (
+                      <>
+                        <img
+                          src={
+                            values.avatar_preview ||
+                            (values.avatar instanceof File
+                              ? URL.createObjectURL(values.avatar)
+                              : values.avatar)
+                          }
+                          alt="Preview"
+                          style={{ maxWidth: 200, maxHeight: 200, display: "block", marginBottom: 8 }}
+                        />
+                        <Button
+                          variant="outlined"
+                          color="error"
+                          onClick={() => {
+                            setFieldValue("avatar", null);
+                            setFieldValue("avatar_preview", null);
+                            setFieldValue("avatar_removed", true);
+                          }}
+                        >
+                          Remove Image
+                        </Button>
+                      </>
+                    ) : null}
                   </Box>
                 </Box>
 
