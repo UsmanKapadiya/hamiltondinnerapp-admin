@@ -22,7 +22,7 @@ const validationSchema = yup.object().shape({
     .typeError("Category must be a number")
     .required("Category is required"),
   is_allday: yup.boolean().required("Is All Day is required"),
-  
+
   // preference: yup
   //   .array()
   //   .of(yup.string().required("Each preference must be a string"))
@@ -112,6 +112,8 @@ const ItemDetailsForm = () => {
       }
     })(),
     item_image: itemDetails?.item_image ? itemDetails?.item_image : null,
+    item_image_preview: null,
+    item_image_removed: false,
   });
 
   const handleFormSubmit = async (values, { resetForm, setFieldValue }) => {
@@ -130,8 +132,9 @@ const ItemDetailsForm = () => {
       ["image/jpeg", "image/png", "image/jpg", "image/gif"].includes(values.item_image.type)
     ) {
       formData.append("item_image", values.item_image);
-    } else {
-      console.warn("Not a valid image file. Skipping append.");
+    }
+    if (values.item_image_removed) {
+      formData.append("item_image", "");
     }
 
     if (values.id) {
@@ -293,7 +296,6 @@ const ItemDetailsForm = () => {
                       const file = event.currentTarget.files[0];
                       if (file) {
                         setFieldValue("item_image", file);
-                        // Optionally, set a preview URL
                         setFieldValue("item_image_preview", URL.createObjectURL(file));
                       }
                     }}
@@ -304,34 +306,34 @@ const ItemDetailsForm = () => {
                     </Button>
                   </label>
 
-                  {/* Show selected file name */}
-                  {values.item_image && values.item_image.name && (
-                    <Box mt={1}>
-                      <span>Selected: {values.item_image.name}</span>
-                    </Box>
-                  )}
-
-                  {/* Show image preview */}
                   <Box mt={2}>
-                    {values.item_image && values.item_image instanceof File && (
-                      <img
-                        src={values.item_image_preview || URL.createObjectURL(values.item_image)}
-                        alt="Preview"
-                        style={{ maxWidth: 200, maxHeight: 200 }}
-                      />
-                    )}
-                    {!values.item_image?.name && itemDetails?.item_image && (
-                      <img
-                        src={itemDetails.item_image}
-                        alt="Current"
-                        style={{ maxWidth: 200, maxHeight: 200 }}
-                      />
+                    {((values.item_image && values.item_image instanceof File) || (values.item_image && typeof values.item_image === 'string')) && !values.item_image_removed && (
+                      <>
+                        <img
+                          src={
+                            values.item_image_preview ||
+                            (values.item_image instanceof File
+                              ? URL.createObjectURL(values.item_image)
+                              : values.item_image)
+                          }
+                          alt="Preview"
+                          style={{ maxWidth: 200, maxHeight: 200, display: "block", marginBottom: 8 }}
+                        />
+                        <Button
+                          variant="outlined"
+                          color="error"
+                          onClick={() => {
+                            setFieldValue("item_image", null);
+                            setFieldValue("item_image_preview", null);
+                            setFieldValue("item_image_removed", true);
+                          }}
+                        >
+                          Remove Image
+                        </Button>
+                      </>
                     )}
                   </Box>
                 </Box>
-
-
-
 
                 {/* Options Multi-Select */}
                 <Autocomplete
