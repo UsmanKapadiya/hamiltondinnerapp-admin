@@ -2,11 +2,14 @@ import { Box, Typography, useTheme, Button, Tabs, Tab, useMediaQuery, TextField,
 import { Header } from "../../components";
 import { tokens } from "../../theme";
 import { SettingsOutlined } from "@mui/icons-material";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Formik } from "formik";
 import * as yup from "yup";
 import SettingServices from "../../services/settingServices";
 import { toast } from "react-toastify";
+import { hasPermission } from "../../components/permissions";
+import { useSelector } from "react-redux";
+import NoPermissionMessage from "../../components/NoPermissionMessage";
 
 const CustomTabPanel = ({ children, value, index }) => {
   return (
@@ -27,6 +30,8 @@ const Setting = () => {
   const [value, setValue] = useState(0);
   const [setting, setSetting] = useState([])
   const [loading, setLoading] = useState(false);
+  const permissionList = useSelector((state) => state?.permissionState?.permissionsList);
+
   useEffect(() => {
     fetchSettings();
   }, []);
@@ -36,6 +41,13 @@ const Setting = () => {
     siteGuidelines: "",
     siteGuidelinesChinese: "",
   });
+
+  // Memoize permissions for performance
+  const canAdd = useMemo(() => hasPermission(permissionList, "add_Settings"), [permissionList]);
+  const canView = useMemo(() => hasPermission(permissionList, "read_Settings"), [permissionList]);
+  const canEdit = useMemo(() => hasPermission(permissionList, "edit_Settings"), [permissionList]);
+  const canDelete = useMemo(() => hasPermission(permissionList, "delete_Settings"), [permissionList]);
+  const canBrowseRoom = useMemo(() => hasPermission(permissionList, "browse_Settings"), [permissionList]);
 
   const fetchSettings = useCallback(async () => {
     setLoading(true);
@@ -123,95 +135,98 @@ const Setting = () => {
         title="Settings"
         icon={<SettingsOutlined />}
         Buttons={false}
+        addButton={canAdd && canBrowseRoom}
+        deleteButton={canDelete && canBrowseRoom}
       />
-      <Box
-        mt="40px"
-        height="75vh"
-        flex={1}
-        sx={{
-          "& .MuiDataGrid-root": {
-            border: "none",
-          },
-          "& .MuiDataGrid-cell": {
-            border: "none",
-          },
-          "& .name-column--cell": {
-            color: colors.greenAccent[300],
-          },
-          "& .MuiDataGrid-columnHeaders": {
-            backgroundColor: colors.blueAccent[700],
-            borderBottom: "none",
-          },
-          "& .MuiDataGrid-virtualScroller": {
-            backgroundColor: colors.primary[400],
-          },
-          "& .MuiDataGrid-footerContainer": {
-            borderTop: "none",
-            backgroundColor: colors.blueAccent[700],
-          },
-          "& .MuiCheckbox-root": {
-            color: `${colors.greenAccent[200]} !important`,
-          },
-          "& .MuiDataGrid-iconSeparator": {
-            color: colors.primary[100],
-          },
-        }}
-      >
+      {canBrowseRoom ? (
         <Box
-          display="flex"
-          gap="20px"
-          mt="15px"
+          mt="40px"
+          height="75vh"
+          flex={1}
+          sx={{
+            "& .MuiDataGrid-root": {
+              border: "none",
+            },
+            "& .MuiDataGrid-cell": {
+              border: "none",
+            },
+            "& .name-column--cell": {
+              color: colors.greenAccent[300],
+            },
+            "& .MuiDataGrid-columnHeaders": {
+              backgroundColor: colors.blueAccent[700],
+              borderBottom: "none",
+            },
+            "& .MuiDataGrid-virtualScroller": {
+              backgroundColor: colors.primary[400],
+            },
+            "& .MuiDataGrid-footerContainer": {
+              borderTop: "none",
+              backgroundColor: colors.blueAccent[700],
+            },
+            "& .MuiCheckbox-root": {
+              color: `${colors.greenAccent[200]} !important`,
+            },
+            "& .MuiDataGrid-iconSeparator": {
+              color: colors.primary[100],
+            },
+          }}
         >
           <Box
             display="flex"
-            flexDirection="column"
-            alignItems="flext-start"
-            justifyContent="flex-start"
-            bgcolor={colors.primary[400]}
-            p="20px"
-            borderRadius="8px"
-            flex="1"
+            gap="20px"
+            mt="15px"
           >
-            <Typography color={colors.gray[100]} variant="h5" fontWeight="600">
-              How To Use:
-            </Typography>
-            <Typography color={colors.gray[100]} fontWeight="500" mt="10px">
-              You can get the value of each setting anywhere on your site by calling{" "}
-              <Box
-                component="span"
-                sx={{
-                  color: `${colors.redAccent[900]}`,
-                  backgroundColor: "white",
-                  padding: "2px 4px",
-                  borderRadius: "4px",
-                }}
-              >
-                setting('group.key')
-              </Box>
-            </Typography>
+            <Box
+              display="flex"
+              flexDirection="column"
+              alignItems="flext-start"
+              justifyContent="flex-start"
+              bgcolor={colors.primary[400]}
+              p="20px"
+              borderRadius="8px"
+              flex="1"
+            >
+              <Typography color={colors.gray[100]} variant="h5" fontWeight="600">
+                How To Use:
+              </Typography>
+              <Typography color={colors.gray[100]} fontWeight="500" mt="10px">
+                You can get the value of each setting anywhere on your site by calling{" "}
+                <Box
+                  component="span"
+                  sx={{
+                    color: `${colors.redAccent[900]}`,
+                    backgroundColor: "white",
+                    padding: "2px 4px",
+                    borderRadius: "4px",
+                  }}
+                >
+                  setting('group.key')
+                </Box>
+              </Typography>
+            </Box>
           </Box>
-        </Box>
-        {/* Tabs Section */}
-        <Box mt="20px" sx={{ borderBottom: 1, borderColor: "divider" }}>
-          <Tabs
-            value={value}
-            onChange={handleChange}
-            aria-label="settings tabs"
-            TabIndicatorProps={{
-              sx: { backgroundColor: colors.greenAccent[500] }, // Indicator color
-            }}
-          >
-            <Tab
-              label="Site"
-              sx={{
-                backgroundColor: value === 0 ? colors.primary[400] : "transparent", // Active tab background
-                color: value === 0 ? colors.gray[100] : colors.gray[300], // Active tab text color
-                borderRadius: "8px",
-                transition: "0.3s",
+          {/* Tabs Section */}
+          <Box mt="20px" sx={{ borderBottom: 1, borderColor: "divider" }}>
+            <Tabs
+              value={value}
+              onChange={handleChange}
+              aria-label="settings tabs"
+              TabIndicatorProps={{
+                sx: { backgroundColor: colors.greenAccent[500] }, // Indicator color
               }}
-            />
-            {/* Admin Tabs Commented */}
-            {/* <Tab
+            >
+              <Tab
+                label="Site"
+                sx={{
+                  backgroundColor: value === 0 ? colors.primary[400] : "transparent", // Active tab background
+                  color: value === 0 ? colors.gray[100] : colors.gray[300], // Active tab text color
+                  borderRadius: "8px",
+                  transition: "0.3s",
+                }}
+              />
+              {/* Admin Tabs Commented */}
+              {/* <Tab
               label="Admin"
               sx={{
                 backgroundColor: value === 1 ? colors.primary[400] : "transparent", // Active tab background
@@ -221,82 +236,83 @@ const Setting = () => {
               }}
             /> */}
 
-          </Tabs>
-        </Box>
-        <CustomTabPanel value={value} index={0}>
-          <Box>
-            <Formik
-              onSubmit={handleFormSubmit}
-              initialValues={initialValues}
-              validationSchema={validationSchema}
-              enableReinitialize
-            >
-              {({
-                values,
-                errors,
-                touched,
-                handleBlur,
-                handleChange,
-                handleSubmit,
-                setFieldValue,
-              }) => (
-                <form onSubmit={handleSubmit}>
+            </Tabs>
+          </Box>
+          <CustomTabPanel value={value} index={0}>
+            <Box>
+              <Formik
+                onSubmit={handleFormSubmit}
+                initialValues={initialValues}
+                validationSchema={validationSchema}
+                enableReinitialize
+              >
+                {({
+                  values,
+                  errors,
+                  touched,
+                  handleBlur,
+                  handleChange,
+                  handleSubmit,
+                  setFieldValue,
+                }) => (
+                  <form onSubmit={handleSubmit}>
 
-                  <Box
-                    display="grid"
-                    gap="20px"
-                    mt="15px"
-                    gridTemplateColumns="repeat(8, 1fr)"
-                  >
-
-                  </Box>
-
-                  {/* Site Guidelines   */}
-                  <Box
-                    display="grid"
-                    gap="20px"
-                    mt="20px"
-                    gridTemplateColumns="repeat(12, 1fr)"
-                  >
                     <Box
-                      display="flex"
-                      sx={{ gridColumn: "span 12" }}
-                      flexDirection="column"
-                      alignItems="flex-start" // Align content to the left
-                      justifyContent="flex-start"
-                      flex={1}
+                      display="grid"
+                      gap="20px"
+                      mt="15px"
+                      gridTemplateColumns="repeat(8, 1fr)"
                     >
-                      <Typography color={colors.gray[100]} mb="20px" fontWeight="500">
-                        Guidelines
-                        <Box
-                          component="span"
-                          ml="5px"
-                          sx={{
-                            color: `red`,
-                            padding: "2px 4px",
-                            borderRadius: "4px",
-                          }}
-                        >
-                          setting('site.app_msg')
-                        </Box>
-                      </Typography>
-                      <TextField
-                        fullWidth
-                        variant="filled"
-                        type="text"
-                        multiline // Enables textarea functionality
-                        rows={4} // Sets the number of visible rows
-                        onBlur={handleBlur}
-                        onChange={handleChange}
-                        value={values.siteGuidelines}
-                        name="siteGuidelines"
-                        error={touched.siteGuidelines && Boolean(errors.siteGuidelines)}
-                        helperText={touched.siteGuidelines && errors.siteGuidelines}
-                        sx={{ gridColumn: "span 2" }}
-                      />
+
                     </Box>
-                    {/* Right Side Dropdown */}
-                    {/* <Box
+
+                    {/* Site Guidelines   */}
+                    <Box
+                      display="grid"
+                      gap="20px"
+                      mt="20px"
+                      gridTemplateColumns="repeat(12, 1fr)"
+                    >
+                      <Box
+                        display="flex"
+                        sx={{ gridColumn: "span 12" }}
+                        flexDirection="column"
+                        alignItems="flex-start" // Align content to the left
+                        justifyContent="flex-start"
+                        flex={1}
+                      >
+                        <Typography color={colors.gray[100]} mb="20px" fontWeight="500">
+                          Guidelines
+                          <Box
+                            component="span"
+                            ml="5px"
+                            sx={{
+                              color: `red`,
+                              padding: "2px 4px",
+                              borderRadius: "4px",
+                            }}
+                          >
+                            setting('site.app_msg')
+                          </Box>
+                        </Typography>
+                        <TextField
+                          fullWidth
+                          variant="filled"
+                          type="text"
+                          multiline // Enables textarea functionality
+                          rows={4} // Sets the number of visible rows
+                          onBlur={handleBlur}
+                          onChange={handleChange}
+                          value={values.siteGuidelines}
+                          name="siteGuidelines"
+                          error={touched.siteGuidelines && Boolean(errors.siteGuidelines)}
+                          helperText={touched.siteGuidelines && errors.siteGuidelines}
+                          disabled={!canAdd && !canEdit}
+                          sx={{ gridColumn: "span 2" }}
+                        />
+                      </Box>
+                      {/* Right Side Dropdown */}
+                      {/* <Box
                       display="flex"
                       flexDirection="column"
                       alignItems="flex-end" // Align content to the left
@@ -336,53 +352,54 @@ const Setting = () => {
                         sx={{ gridColumn: "span 4" }}
                       />
                     </Box> */}
-                  </Box>
-                  {/* Site Guidelines Chinese  */}
-                  <Box
-                    display="grid"
-                    gap="20px"
-                    mt="20px"
-                    gridTemplateColumns="repeat(12, 1fr)" //8
-                  >
-                    <Box
-                      display="flex"
-                      sx={{ gridColumn: "span 12" }} // "span 6"
-                      flexDirection="column"
-                      alignItems="flex-start" // Align content to the left
-                      justifyContent="flex-start"
-                      flex={1}
-                    >
-                      <Typography color={colors.gray[100]} mb="20px" fontWeight="500">
-                        Guidelines Chinese
-                        <Box
-                          component="span"
-                          ml="5px"
-                          sx={{
-                            color: `red`,
-                            padding: "2px 4px",
-                            borderRadius: "4px",
-                          }}
-                        >
-                          setting('site.app_msg_cn')
-                        </Box>
-                      </Typography>
-                      <TextField
-                        fullWidth
-                        variant="filled"
-                        type="text"
-                        multiline // Enables textarea functionality
-                        rows={4} // Sets the number of visible rows
-                        onBlur={handleBlur}
-                        onChange={handleChange}
-                        value={values.siteGuidelinesChinese}
-                        name="siteGuidelinesChinese"
-                        error={touched.siteGuidelinesChinese && Boolean(errors.siteGuidelinesChinese)}
-                        helperText={touched.siteGuidelinesChinese && errors.siteGuidelinesChinese}
-                        sx={{ gridColumn: "span 2" }}
-                      />
                     </Box>
-                    {/* Right Side Dropdown */}
-                    {/* <Box
+                    {/* Site Guidelines Chinese  */}
+                    <Box
+                      display="grid"
+                      gap="20px"
+                      mt="20px"
+                      gridTemplateColumns="repeat(12, 1fr)" //8
+                    >
+                      <Box
+                        display="flex"
+                        sx={{ gridColumn: "span 12" }} // "span 6"
+                        flexDirection="column"
+                        alignItems="flex-start" // Align content to the left
+                        justifyContent="flex-start"
+                        flex={1}
+                      >
+                        <Typography color={colors.gray[100]} mb="20px" fontWeight="500">
+                          Guidelines Chinese
+                          <Box
+                            component="span"
+                            ml="5px"
+                            sx={{
+                              color: `red`,
+                              padding: "2px 4px",
+                              borderRadius: "4px",
+                            }}
+                          >
+                            setting('site.app_msg_cn')
+                          </Box>
+                        </Typography>
+                        <TextField
+                          fullWidth
+                          variant="filled"
+                          type="text"
+                          multiline // Enables textarea functionality
+                          rows={4} // Sets the number of visible rows
+                          onBlur={handleBlur}
+                          onChange={handleChange}
+                          value={values.siteGuidelinesChinese}
+                          name="siteGuidelinesChinese"
+                          disabled={!canAdd && !canEdit}
+                          error={touched.siteGuidelinesChinese && Boolean(errors.siteGuidelinesChinese)}
+                          helperText={touched.siteGuidelinesChinese && errors.siteGuidelinesChinese}
+                          sx={{ gridColumn: "span 2" }}
+                        />
+                      </Box>
+                      {/* Right Side Dropdown */}
+                      {/* <Box
                       display="flex"
                       flexDirection="column"
                       alignItems="flex-end" // Align content to the left
@@ -423,23 +440,31 @@ const Setting = () => {
                         sx={{ gridColumn: "span 4" }}
                       />
                     </Box> */}
-                  </Box>
-                  <Box
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="end"
-                    mt="20px"
-                  >
-                    <Button type="submit" color="secondary" variant="contained">
-                      Save Site Settings
-                    </Button>
-                  </Box>
-                </form>
-              )}
-            </Formik>
-          </Box>
-        </CustomTabPanel>
-      </Box>
+                    </Box>
+                    {(canAdd || canEdit) && (
+                      <Box
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="end"
+                        mt="20px"
+                      >
+                        <Button type="submit" color="secondary" variant="contained">
+                          Save Site Settings
+                        </Button>
+                      </Box>
+                    )}
+                  </form>
+                )}
+              </Formik>
+            </Box>
+          </CustomTabPanel>
+        </Box>
+      ) : (
+        <NoPermissionMessage
+          title="You do not have permission to Setting."
+          message="Please contact your administrator if you believe this is a mistake."
+        />
+      )}
     </Box>
   );
 };
