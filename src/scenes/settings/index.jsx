@@ -44,7 +44,6 @@ const Setting = () => {
 
   // Memoize permissions for performance
   const canAdd = useMemo(() => hasPermission(permissionList, "add_Settings"), [permissionList]);
-  const canView = useMemo(() => hasPermission(permissionList, "read_Settings"), [permissionList]);
   const canEdit = useMemo(() => hasPermission(permissionList, "edit_Settings"), [permissionList]);
   const canDelete = useMemo(() => hasPermission(permissionList, "delete_Settings"), [permissionList]);
   const canBrowseRoom = useMemo(() => hasPermission(permissionList, "browse_Settings"), [permissionList]);
