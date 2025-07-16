@@ -22,12 +22,14 @@ import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
 import RoleServices from "../../services/roleServices";
 import { hasPermission } from "../../components/permissions";
 import { useSelector } from "react-redux";
+import NoPermissionMessage from "../../components/NoPermissionMessage";
 
 const Roles = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
   const permissionList = useSelector((state) => state?.permissionState?.permissionsList);
+  const userData = JSON.parse(localStorage.getItem('userData'));
 
   const [searchText, setSearchText] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -47,8 +49,6 @@ const Roles = () => {
   const canEdit = hasPermission(permissionList, "edit_Roles");
   const canDelete = hasPermission(permissionList, "delete_Roles");
   const canBrowse = hasPermission(permissionList, "browse_Roles");
-  const canModify = canAdd && canBrowse;
-  const canRemove = canDelete && canBrowse;
 
   useEffect(() => {
     fetchAllRolelist();
@@ -168,7 +168,7 @@ const Roles = () => {
             color="info"
             size="small"
             onClick={() => handleView(row.id)}
-            disabled={!canView}
+            disabled={!canView && userData?.role !== "superadmin"}
           >
             View
           </Button>
@@ -177,7 +177,7 @@ const Roles = () => {
             color="primary"
             size="small"
             onClick={() => handleEdit(row.id)}
-            disabled={!canEdit}
+            disabled={!canEdit && userData?.role !== "superadmin"}
           >
             Edit
           </Button>
@@ -186,7 +186,7 @@ const Roles = () => {
             color="secondary"
             size="small"
             onClick={() => handleDelete(row)}
-            disabled={!canDelete}
+            disabled={!canDelete && userData?.role !== "superadmin"}
           >
             Delete
           </Button>
@@ -204,71 +204,79 @@ const Roles = () => {
         addNewClick={handleAddNewClick}
         addBulkDelete={handleBulkDelete}
         buttons={true}
-        addButton={canModify}
-        deleteButton={canRemove}
+        addButton={(canAdd && canBrowse) || userData?.role === "superadmin"}
+        deleteButton={(canDelete && canBrowse) || userData?.role === "superadmin"}
       />
-      <Box mt="40px" height="75vh" flex={1} sx={{
-        "& .MuiDataGrid-root": { border: "none" },
-        "& .MuiDataGrid-cell": { border: "none" },
-        "& .name-column--cell": { color: colors.greenAccent[300] },
-        "& .MuiDataGrid-columnHeaders": {
-          backgroundColor: colors.blueAccent[700],
-          borderBottom: "none",
-        },
-        "& .MuiDataGrid-virtualScroller": {
-          backgroundColor: colors.primary[400],
-        },
-        "& .MuiDataGrid-footerContainer": {
-          borderTop: "none",
-          backgroundColor: colors.blueAccent[700],
-        },
-        "& .MuiCheckbox-root": {
-          color: `${colors.greenAccent[200]} !important`,
-        },
-        "& .MuiDataGrid-iconSeparator": {
-          color: colors.primary[100],
-        },
-      }}>
-        <Box display="flex" alignItems="center" bgcolor={colors.primary[400]} borderRadius="3px" mb="10px">
-          <InputBase
-            placeholder="Search by Role Name, or Display Name..."
-            sx={{ ml: 2, flex: 1 }}
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
+      {canBrowse || userData?.role === "superadmin" ? (
+        <Box mt="40px" height="75vh" flex={1} sx={{
+          "& .MuiDataGrid-root": { border: "none" },
+          "& .MuiDataGrid-cell": { border: "none" },
+          "& .name-column--cell": { color: colors.greenAccent[300] },
+          "& .MuiDataGrid-columnHeaders": {
+            backgroundColor: colors.blueAccent[700],
+            borderBottom: "none",
+          },
+          "& .MuiDataGrid-virtualScroller": {
+            backgroundColor: colors.primary[400],
+          },
+          "& .MuiDataGrid-footerContainer": {
+            borderTop: "none",
+            backgroundColor: colors.blueAccent[700],
+          },
+          "& .MuiCheckbox-root": {
+            color: `${colors.greenAccent[200]} !important`,
+          },
+          "& .MuiDataGrid-iconSeparator": {
+            color: colors.primary[100],
+          },
+        }}>
+          <Box display="flex" alignItems="center" bgcolor={colors.primary[400]} borderRadius="3px" mb="10px">
+            <InputBase
+              placeholder="Search by Role Name, or Display Name..."
+              sx={{ ml: 2, flex: 1 }}
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+            />
+            <IconButton type="button" sx={{ p: 1 }} onClick={() => setSearchText("")}>
+              {searchText ? <Close /> : <SearchOutlined />}
+            </IconButton>
+          </Box>
+          <DataGrid
+            rows={filteredRoles}
+            columns={columns}
+            loading={loading}
+            pagination
+            paginationMode="server"
+            rowCount={filteredRoles.length}
+            paginationModel={{
+              page: pagination.page - 1,
+              pageSize: pagination.pageSize,
+            }}
+            onPaginationModelChange={handlePaginationChange}
+            pageSizeOptions={[10, 20, 50, 100]}
+            checkboxSelection
+            onRowSelectionModelChange={(ids) => handleRowSelection(ids)}
+            components={{ LoadingOverlay: CustomLoadingOverlay }}
           />
-          <IconButton type="button" sx={{ p: 1 }} onClick={() => setSearchText("")}>
-            {searchText ? <Close /> : <SearchOutlined />}
-          </IconButton>
+          <ConfirmationDialog
+            open={dialogOpen}
+            title="Confirm Delete"
+            message={
+              selectedIds.length > 0 && !selectedRoleName
+                ? `Are you sure you want to delete ${selectedIds.length} Roles?`
+                : `Are you sure you want to delete the Role "${selectedRoleName}"?`
+            }
+            onConfirm={confirmDelete}
+            onCancel={cancelDelete}
+          />
         </Box>
-        <DataGrid
-          rows={filteredRoles}
-          columns={columns}
-          loading={loading}
-          pagination
-          paginationMode="server"
-          rowCount={filteredRoles.length}
-          paginationModel={{
-            page: pagination.page - 1,
-            pageSize: pagination.pageSize,
-          }}
-          onPaginationModelChange={handlePaginationChange}
-          pageSizeOptions={[10, 20, 50, 100]}
-          checkboxSelection
-          onRowSelectionModelChange={(ids) => handleRowSelection(ids)}
-          components={{ LoadingOverlay: CustomLoadingOverlay }}
+      ) : (
+        <NoPermissionMessage
+          title="You do not have permission to view Role Details."
+          message="Please contact your administrator if you believe this is a mistake."
         />
-        <ConfirmationDialog
-          open={dialogOpen}
-          title="Confirm Delete"
-          message={
-            selectedIds.length > 0 && !selectedRoleName
-              ? `Are you sure you want to delete ${selectedIds.length} Roles?`
-              : `Are you sure you want to delete the Role "${selectedRoleName}"?`
-          }
-          onConfirm={confirmDelete}
-          onCancel={cancelDelete}
-        />
-      </Box>
+      )
+      }
     </Box>
   );
 };
