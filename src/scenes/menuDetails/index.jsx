@@ -14,10 +14,13 @@ import MenuServices from "../../services/menuServices";
 import { toast } from "react-toastify";
 import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
 import { hasPermission } from "../../components/permissions";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import NoPermissionMessage from "../../components/NoPermissionMessage";
+import ItemServices from "../../services/itemServices";
+import { setItemList } from "../../redux/action/itemAction";
 
 const MenuDetails = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const permissionList = useSelector((state) => state?.permissionState?.permissionsList);
   const theme = useTheme();
@@ -46,6 +49,7 @@ const MenuDetails = () => {
   // Fetch menu list on mount, pagination, or search change
   useEffect(() => {
     fetchMenuList();
+    fetchItemsList()
   }, [pagination.page, pagination.pageSize, debouncedSearch]);
 
   const fetchMenuList = useCallback(async () => {
@@ -67,6 +71,18 @@ const MenuDetails = () => {
       setLoading(false);
     }
   }, [pagination.page, pagination.pageSize, debouncedSearch]);
+
+  const fetchItemsList = async () => {
+    try {
+      const response = await ItemServices.getItemList();
+      // console.log("response", response)
+      dispatch(setItemList(response.data)); // Store in Redux
+    } catch (error) {
+      console.error("Error fetching menu list:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const bulkDeleteMenu = useCallback(async (ids) => {
     try {
@@ -232,8 +248,8 @@ const MenuDetails = () => {
         icon={<CreateOutlined />}
         addNewClick={handleAddNewClick}
         addBulkDelete={handleBulkDelete}
-        orderClick={() => {}}
-        showToggleClick={() => {}}
+        orderClick={() => { }}
+        showToggleClick={() => { }}
         buttons={true}
         addButton={canAdd && canBrowse}
         deleteButton={canDelete && canBrowse}
@@ -293,7 +309,7 @@ const MenuDetails = () => {
             loading={loading}
             pagination
             paginationMode="server"
-            rowCount={filteredRows.length}
+            rowCount={pagination.total}
             paginationModel={{
               page: pagination.page - 1,
               pageSize: pagination.pageSize,
