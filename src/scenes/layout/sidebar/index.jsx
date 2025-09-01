@@ -171,13 +171,13 @@ const SideBar = () => {
             icon={<DashboardOutlined />}
           />
         </Menu>
-        <Typography
+        {/* <Typography
           variant="h6"
           color={colors.gray[300]}
           sx={{ m: "15px 0 5px 20px" }}
         >
           {!collapsed ? "Data" : " "}
-        </Typography>{" "}
+        </Typography>{" "} */}
         <Menu
           menuItemStyles={{
             button: {
