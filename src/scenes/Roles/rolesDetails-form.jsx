@@ -1,8 +1,8 @@
 import {
   Box, Button, Checkbox, FormControlLabel, FormGroup,
-  TextField, Typography, useMediaQuery, useTheme
+  TextField, Typography, useMediaQuery, useTheme, Accordion, AccordionSummary, AccordionDetails
 } from "@mui/material";
-import { LockOutlined } from "@mui/icons-material";
+import { ExpandLessOutlined, ExpandMoreOutlined, LockOutlined } from "@mui/icons-material";
 import { Formik } from "formik";
 import { useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -136,8 +136,8 @@ const RoleDetailsForm = () => {
     <Box m="20px">
       <Header title={
         loading
-           ? ""
-            : roleDetails?.id
+          ? ""
+          : roleDetails?.id
             ? "Update Role"
             : "Add Role"
       } icon={<LockOutlined />} Buttons={false} />
@@ -211,7 +211,7 @@ const RoleDetailsForm = () => {
                 </Typography>
               </Box>
 
-              <FormGroup sx={{ mt: 2 }}>
+              {/* <FormGroup sx={{ mt: 2 }}>
                 {permissionsList.map((item) => (
                   <FormControlLabel
                     key={item.id}
@@ -225,7 +225,69 @@ const RoleDetailsForm = () => {
                     label={item.display_name}
                   />
                 ))}
-              </FormGroup>
+              </FormGroup> */}
+
+              {(() => {
+                function groupPermissionsByModule(permissions) {
+                  const groups = {};
+                  permissions.forEach((perm) => {
+                    const match = perm.name.match(/_(.+)$/);
+                    let module = match ? match[1] : "Other";
+                    if (["Form", "Forms"].includes(module)) {
+                      module = "Form";
+                    } else if (module === "FormDetails") {
+                      module = "FormDetails";
+                    } else if (["Room", "Category", "Item", "Menus", "Settings", "Roles", "Users", "OrderDetails"].includes(module)) {
+                      module += "Details";
+                    }
+                    if (module === "Options") module = "ItemOptions";
+                    if (module === "Preference") module = "ItemPreference";
+                    if (!groups[module]) groups[module] = [];
+                    groups[module].push(perm);
+                  });
+                  return groups;
+                }
+                const grouped = groupPermissionsByModule(permissionsList);
+                // Track expanded panels
+                const [expanded, setExpanded] = useState({});
+                const handleAccordionChange = (panel) => (event, isExpanded) => {
+                  setExpanded((prev) => ({ ...prev, [panel]: isExpanded }));
+                };
+                return Object.entries(grouped).map(([module, perms]) => (
+                  <Accordion
+                    key={module}
+                    sx={{ mb: 2, backgroundColor: theme.palette.mode === 'dark' ? colors.primary[400] : '#f5f5f5', borderRadius: 2 }}
+                    expanded={expanded[module] !== undefined ? expanded[module] : true}
+                    onChange={handleAccordionChange(module)}
+                  >
+                    <AccordionSummary
+                      expandIcon={expanded[module] ? <ExpandLessOutlined /> : <ExpandMoreOutlined />}
+                      sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: theme.palette.mode === 'dark' ? colors.primary[200] : '#e0e0e0', color:colors.primary[500], borderRadius: 2, mt:2 }}
+                    >
+                      <Typography variant="subtitle1" fontWeight="bold">
+                        {module.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                      </Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <FormGroup>
+                        {perms.map((item) => (
+                          <FormControlLabel
+                            key={item.id}
+                            control={
+                              <Checkbox
+                                checked={item.checked}
+                                onChange={() => togglePermission(item.id)}
+                                color="secondary"
+                              />
+                            }
+                            label={item.display_name}
+                          />
+                        ))}
+                      </FormGroup>
+                    </AccordionDetails>
+                  </Accordion>
+                ));
+              })()}
 
               <Box display="flex" justifyContent="flex-end" mt={4}>
                 <Button type="submit" color="secondary" variant="contained">
