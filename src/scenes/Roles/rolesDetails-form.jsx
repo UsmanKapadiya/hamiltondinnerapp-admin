@@ -83,13 +83,13 @@ const RoleDetailsForm = () => {
         await RoleServices.updateRole(formData.id, formData);
         await fetchGetRoleById();
         toast.success("Role updated successfully!");
-        navigate("/roles");
+        navigate("/roles-details");
       } else {
         await RoleServices.createRole(formData);
         await fetchGetRoleById();
         toast.success("Role created successfully!");
         actions.resetForm();
-        navigate("/roles");
+        navigate("/roles-details");
       }
     } catch (error) {
       const errors = error?.response?.data?.errors;

@@ -92,7 +92,7 @@ const AppRouter = () => {
           {/*Menu Details */}
           <Route path="/settings" element={<Setting />} />
 
-          <Route path="/roles" element={<Roles />} />
+          <Route path="/roles-details" element={<Roles />} />
           <Route path="/roles-details/:id" element={<RolesDetailsView />} />
           <Route path="/roles-details/create" element={<RoleDetailsForm />} />
           <Route path="/roles-details/:id/edit" element={<RoleDetailsForm />} />

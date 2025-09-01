@@ -258,7 +258,7 @@ const SideBar = () => {
           />
           <Item
             title="Roles"
-            path="/roles"
+            path="/roles-details"
             colors={colors}
             icon={<LockOutlined />}
           />
