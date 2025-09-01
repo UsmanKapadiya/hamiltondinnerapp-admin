@@ -104,7 +104,7 @@ const ItemDetailsView = () => {
         >
           <Box p="10px">
             <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
-              Item Name
+              Menu Item Name
             </Typography>
             <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
               {itemDetails?.item_name || "N/A"}
@@ -113,7 +113,7 @@ const ItemDetailsView = () => {
           <Divider sx={{ bgcolor: colors.gray[300] }} />
           <Box p="10px">
             <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
-              Item Chinese Name
+              Menu Item Chinese Name
             </Typography>
             <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
               {itemDetails?.item_chinese_name || "N/A"}
@@ -122,7 +122,7 @@ const ItemDetailsView = () => {
           <Divider sx={{ bgcolor: colors.gray[300] }} />
           <Box p="10px">
             <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
-              Category
+              Course
             </Typography>
             <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
               {(() => {
@@ -144,7 +144,7 @@ const ItemDetailsView = () => {
           <Divider sx={{ bgcolor: colors.gray[300] }} />
           <Box p="10px">
             <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
-              Item Image
+              Menu Item Image
             </Typography>
             {itemDetails?.item_image ? (
               <img

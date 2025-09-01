@@ -10,7 +10,7 @@ import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
 import { useEffect, useState, useMemo } from "react";
 
 const validationSchema = yup.object().shape({
-  item_name: yup.string().required("Item Name is required"),
+  item_name: yup.string().required("Menu Item Name is required"),
   // item_chinese_name: yup.string().required("Item Chinese Name is required"),
   // options: yup
   //   .array()
@@ -19,8 +19,8 @@ const validationSchema = yup.object().shape({
   //   .required("Options are required"),
   cat_id: yup
     .number()
-    .typeError("Category must be a number")
-    .required("Category is required"),
+    .typeError("Course must be a number")
+    .required("Course is required"),
   // is_allday: yup.boolean().required("Is All Day is required"),
 
   // preference: yup
@@ -146,18 +146,18 @@ const ItemDetailsForm = () => {
       if (values.id) {
         response = await ItemServices.updatetItems(values.id, formData);
         setItemDetails(response.data);
-        toast.success("Items updated successfully!");
-        navigate("/item-details");
+        toast.success("Menu Items updated successfully!");
+        navigate("/menu-item-details");
       } else {
         response = await ItemServices.createItems(formData);
         setItemDetails(response.data || null);
-        toast.success("Items created successfully!");
+        toast.success("Menu Items created successfully!");
         resetForm();
-        navigate("/item-details");
+        navigate("/menu-item-details");
       }
     } catch (error) {
-      console.error("Error processing menu:", error);
-      toast.error("Failed to process menu. Please try again.");
+      console.error("Error processing menu items:", error);
+      toast.error("Failed to process menu items. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -170,8 +170,8 @@ const ItemDetailsForm = () => {
           loading
             ? ""
             : itemDetails?.id
-              ? "Update Item Detail"
-              : "Add Item Detail"
+              ? "Update Menu Item Detail"
+              : "Add Menu Item Detail"
         }
         icon={<DvrOutlined />}
         Buttons={false}
@@ -219,7 +219,7 @@ const ItemDetailsForm = () => {
                   fullWidth
                   variant="filled"
                   type="text"
-                  label="Item Name"
+                  label="Menu Item Name"
                   onBlur={handleBlur}
                   onChange={handleChange}
                   value={values.item_name}
@@ -234,7 +234,7 @@ const ItemDetailsForm = () => {
                   fullWidth
                   variant="filled"
                   type="text"
-                  label="Item Chinese Name"
+                  label="Menu Item Chinese Name"
                   onBlur={handleBlur}
                   onChange={handleChange}
                   value={values.item_chinese_name}
@@ -259,7 +259,7 @@ const ItemDetailsForm = () => {
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      label="Category"
+                      label="Course"
                       variant="filled"
                       error={touched.cat_id && Boolean(errors.cat_id)}
                       helperText={touched.cat_id && errors.cat_id}
@@ -391,7 +391,7 @@ const ItemDetailsForm = () => {
                 mt="20px"
               >
                 <Button type="submit" color="secondary" variant="contained">
-                  Save Item Details
+                  Save Menu Item Details
                 </Button>
               </Box>
             </form>

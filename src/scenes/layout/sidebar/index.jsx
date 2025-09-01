@@ -207,7 +207,7 @@ const SideBar = () => {
                 <TonalityOutlined style={{ color: colors.gray[100], }} />
               </ListItemIcon>
               <ListItemText
-                primary="Manage Items"
+                primary="Manage Menu Items"
                 primaryTypographyProps={{
                   color: colors.gray[100],
                   fontWeight: "bold",
@@ -218,8 +218,8 @@ const SideBar = () => {
             <Collapse in={dropdownOpen} timeout="auto" unmountOnExit>
               <List component="div" disablePadding>
                 <Item
-                  title="Item Details"
-                  path="/item-details"
+                  title="Menu Item Details"
+                  path="/menu-item-details"
                   colors={colors}
                   icon={<PlaylistAddOutlined />}
                 />

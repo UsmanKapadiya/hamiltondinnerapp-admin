@@ -95,15 +95,15 @@ const Item = () => {
 
   // Memoized columns
   const columns = useMemo(() => [
-    { field: "item_name", headerName: "Item Name", flex: 1 },
+    { field: "item_name", headerName: "Menu Item Name", flex: 1 },
     {
       field: "item_chinese_name",
-      headerName: "Item Chinese Name",
+      headerName: "Menu Item Chinese Name",
       flex: 1,
     },
     {
       field: "category",
-      headerName: "Category",
+      headerName: "Course",
       valueGetter: (params) => {
         const typeId = params?.row?.cat_id;
         const typeObj = categoryListData.find((t) => t.id === typeId);
@@ -174,7 +174,7 @@ const Item = () => {
   };
 
   const handleView = (id) => {
-    navigate(`/item-details/${id}`, {
+    navigate(`/menu-item-details/${id}`, {
       state: {
         id,
         categoryListData,
@@ -186,7 +186,7 @@ const Item = () => {
 
   const handleEdit = (id) => {
     const selectedRow = itemListData.find((row) => row.id === id);
-    navigate(`/item-details/${id}/edit`, {
+    navigate(`/menu-item-details/${id}/edit`, {
       state: {
         selectedRow,
         categoryListData,
@@ -197,7 +197,7 @@ const Item = () => {
   };
 
   const handleAddNewClick = () => {
-    navigate("/item-details/create", {
+    navigate("/menu-item-details/create", {
       state: {
         categoryListData,
         optionsList: optionsListData,
@@ -210,12 +210,12 @@ const Item = () => {
     if (selectedIds.length > 0) {
       setDialogOpen(true);
     } else {
-      toast.warning("Please select at least one Item to delete.");
+      toast.warning("Please select at least one Menu Item to delete.");
     }
   };
 
   const handleOrderClick = () => {
-    navigate("/item-details/order");
+    navigate("/menu-item-details/order");
   };
 
   const handleRowSelection = (ids) => {
@@ -255,7 +255,7 @@ const Item = () => {
     setLoading(true);
     try {
       await ItemServices.deleteItems(id);
-      toast.success("Item Deleted successfully!");
+      toast.success("Menu Item Deleted successfully!");
       // Refresh list
       const response = await ItemServices.getItemList();
       setItemListData(response.data);
@@ -265,8 +265,8 @@ const Item = () => {
       }));
       setSelectedItemName("");
     } catch (error) {
-      console.error("Error deleting item:", error);
-      toast.error("Failed to delete item. Please try again.");
+      console.error("Error deleting Menu item:", error);
+      toast.error("Failed to delete Menu item. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -275,7 +275,7 @@ const Item = () => {
   return (
     <Box m="20px">
       <Header
-        title="Item Details"
+        title="Menu Item Details"
         icon={<DvrOutlined />}
         addNewClick={handleAddNewClick}
         addBulkDelete={handleBulkDelete}
@@ -320,7 +320,7 @@ const Item = () => {
             mb="10px"
           >
             <InputBase
-              placeholder="Search by Item Name, or Item Chinese Name..."
+              placeholder="Search by Menu Item Name, or Menu Item Chinese Name..."
               sx={{ ml: 2, flex: 1 }}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
@@ -354,8 +354,8 @@ const Item = () => {
             title="Confirm Delete"
             message={
               selectedIds.length > 0 && !selectedItemName
-                ? `Are you sure you want to delete ${selectedIds.length} Option items?`
-                : `Are you sure you want to delete the Option "${selectedItemName}"?`
+                ? `Are you sure you want to delete ${selectedIds.length} Menu Items?`
+                : `Are you sure you want to delete the Menu Item "${selectedItemName}"?`
             }
             onConfirm={confirmDelete}
             onCancel={cancelDelete}
@@ -363,7 +363,7 @@ const Item = () => {
         </Box>
       ) : (
         <NoPermissionMessage
-          title="You do not have permission to view Item Details."
+          title="You do not have permission to view Menu Item Details."
           message="Please contact your administrator if you believe this is a mistake."
         />
       )}
