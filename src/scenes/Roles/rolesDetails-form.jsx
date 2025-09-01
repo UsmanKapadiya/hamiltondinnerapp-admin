@@ -265,7 +265,11 @@ const RoleDetailsForm = () => {
                       sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: theme.palette.mode === 'dark' ? colors.primary[200] : '#e0e0e0', color:colors.primary[500], borderRadius: 2, mt:2 }}
                     >
                       <Typography variant="subtitle1" fontWeight="bold">
-                        {module.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                        {module === 'RoomDetails'
+                          ? 'Resident Details'
+                          : module === 'CategoryDetails'
+                            ? 'Course Details'
+                            : module.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
                       </Typography>
                     </AccordionSummary>
                     <AccordionDetails>
@@ -291,7 +295,7 @@ const RoleDetailsForm = () => {
 
               <Box display="flex" justifyContent="flex-end" mt={4}>
                 <Button type="submit" color="secondary" variant="contained">
-                  Save
+                  Save Role
                 </Button>
               </Box>
             </form>
