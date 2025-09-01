@@ -196,7 +196,7 @@ const SideBar = () => {
             icon={<Home />}
           />
           <Item
-            title="Category Details"
+            title="Course Details"
             path="/category-details"
             colors={colors}
             icon={<DvrOutlined />}

@@ -38,7 +38,7 @@ const CategoryDetailsView = () => {
             setCategoryDetails(response?.data || null);
         } catch (error) {
             setCategoryDetails(null);
-            console.error("Error fetching category details:", error);
+            console.error("Error fetching Course details:", error);
         } finally {
             setLoading(false);
         }
@@ -57,7 +57,7 @@ const CategoryDetailsView = () => {
     return (
         <Box m="20px">
             <Header
-                title="Category Details View"
+                title="Course Details View"
                 icon={<ListAltOutlined />}
                 Buttons={false}
                 ActionButton={true}
@@ -80,7 +80,7 @@ const CategoryDetailsView = () => {
                 >
                     <Box p="10px">
                         <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
-                            Category Name
+                            Course Name
                         </Typography>
                         <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
                             {categoryDetails?.cat_name || "N/A"}
@@ -89,7 +89,7 @@ const CategoryDetailsView = () => {
                     <Divider sx={{ bgcolor: colors.gray[300] }} />
                     <Box p="10px">
                         <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
-                            Category Chinese Name
+                            Course Chinese Name
                         </Typography>
                         <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
                             {categoryDetails?.category_chinese_name || "N/A"}
@@ -107,7 +107,7 @@ const CategoryDetailsView = () => {
                     <Divider sx={{ bgcolor: colors.gray[300] }} />
                     <Box p="10px">
                         <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
-                            Parent Category
+                            Parent Course
                         </Typography>
                         <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
                             {getParentName(categoryDetails?.parent_id)}

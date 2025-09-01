@@ -11,9 +11,9 @@ import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
 import { useEffect, useState } from "react";
 
 const validationSchema = yup.object().shape({
-    cat_name: yup.string().required("Category Name is required"),
+    cat_name: yup.string().required("Course Name is required"),
     // category_chinese_name: yup.string().required("Category Chinese Name is required"),
-    type: yup.string().required("Category Type is required"),
+    type: yup.string().required("Course Type is required"),
     // parent_id: yup.string().required("Parent Id is required"),
 });
 
@@ -66,10 +66,10 @@ const CategoryDetailsForm = () => {
             let response;
             if (values.id) {
                 response = await CategoryServices.updateCategoryDetails(values.id, values);
-                toast.success("Category updated successfully!");
+                toast.success("Course updated successfully!");
             } else {
                 response = await CategoryServices.createCategoryDetails(values);
-                toast.success("Category created successfully!");
+                toast.success("Course created successfully!");
             }
             setCategoryDetails(response?.data);
             actions.resetForm({ values: { ...response?.data } });
@@ -77,7 +77,7 @@ const CategoryDetailsForm = () => {
                 navigate("/category-details");
             }
         } catch (error) {
-            toast.error("Failed to process category. Please try again.");
+            toast.error("Failed to process Course. Please try again.");
         } finally {
             setLoading(false);
         }
@@ -90,8 +90,8 @@ const CategoryDetailsForm = () => {
                     loading
                         ? ""
                         : categoryDetails?.id
-                        ? "Update Category Detail"
-                        : "Add Category Detail"
+                        ? "Update Course Detail"
+                        : "Add Course Detail"
                 }
                 icon={<DvrOutlined />}
                 Buttons={false}
@@ -136,7 +136,7 @@ const CategoryDetailsForm = () => {
                                     fullWidth
                                     variant="filled"
                                     type="text"
-                                    label="Category Name"
+                                    label="Course Name"
                                     onBlur={handleBlur}
                                     onChange={handleChange}
                                     value={values.cat_name}
@@ -149,7 +149,7 @@ const CategoryDetailsForm = () => {
                                     fullWidth
                                     variant="filled"
                                     type="text"
-                                    label="Category Chinese Name"
+                                    label="Course Chinese Name"
                                     onBlur={handleBlur}
                                     onChange={handleChange}
                                     value={values.category_chinese_name}
@@ -168,7 +168,7 @@ const CategoryDetailsForm = () => {
                                     fullWidth
                                     select
                                     variant="filled"
-                                    label="Select category type"
+                                    label="Select Course type"
                                     onBlur={handleBlur}
                                     onChange={(e) => {
                                         handleChange(e);
@@ -230,7 +230,7 @@ const CategoryDetailsForm = () => {
                                 mt="20px"
                             >
                                 <Button type="submit" color="secondary" variant="contained">
-                                    Save Category Details
+                                    Save Course Details
                                 </Button>
                             </Box>
                         </form>

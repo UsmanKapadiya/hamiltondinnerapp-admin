@@ -45,8 +45,8 @@ const Category = () => {
       const response = await CategoryServices.getCategoryList();
       setCategoryListData(response?.data || []);
     } catch (error) {
-      console.error("Error fetching category list:", error);
-      toast.error("Failed to fetch category list.");
+      console.error("Error fetching Course list:", error);
+      toast.error("Failed to fetch Course list.");
     } finally {
       setLoading(false);
     }
@@ -94,7 +94,7 @@ const Category = () => {
     if (selectedIds.length > 0) {
       setDialogOpen(true);
     } else {
-      toast.warning("Please select at least one category to delete.");
+      toast.warning("Please select at least one Course to delete.");
     }
   }, [selectedIds]);
 
@@ -125,12 +125,12 @@ const Category = () => {
     try {
       setLoading(true);
       await CategoryServices.deleteCategorys(id);
-      toast.success("Category deleted successfully!");
+      toast.success("Course deleted successfully!");
       getCategoryListData();
       setSelectedCategoryName("");
     } catch (error) {
-      console.error("Error deleting category:", error);
-      toast.error("Failed to delete category. Please try again.");
+      console.error("Error deleting Course:", error);
+      toast.error("Failed to delete Course. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -138,15 +138,15 @@ const Category = () => {
 
   // Columns (memoized)
   const columns = useMemo(() => [
-    { field: "cat_name", headerName: "Category Name", flex: 1 },
+    { field: "cat_name", headerName: "Course Name", flex: 1 },
     {
       field: "category_chinese_name",
-      headerName: "Category Chinese Name",
+      headerName: "Course Chinese Name",
       flex: 1,
     },
     {
       field: "categoryType",
-      headerName: "Category Type",
+      headerName: "Course Type",
       valueGetter: (params) => {
         const typeId = params.row.type;
         const typeObj = type.find((t) => t.id === JSON.parse(typeId));
@@ -214,7 +214,7 @@ const Category = () => {
   return (
     <Box m="20px">
       <Header
-        title="Category Details"
+        title="Course Details"
         icon={<DvrOutlined />}
         addNewClick={handleAddNewClick}
         addBulkDelete={handleBulkDelete}
@@ -259,7 +259,7 @@ const Category = () => {
             mb="10px"
           >
             <InputBase
-              placeholder="Search by Category Name or Category Chinese Name..."
+              placeholder="Search by Course Name or Course Chinese Name..."
               sx={{ ml: 2, flex: 1 }}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
@@ -296,8 +296,8 @@ const Category = () => {
             title="Confirm Delete"
             message={
               selectedIds.length > 0 && !selectedCategoryName
-                ? `Are you sure you want to delete ${selectedIds.length} Category items?`
-                : `Are you sure you want to delete the Category "${selectedCategoryName}"?`
+                ? `Are you sure you want to delete ${selectedIds.length} Course items?`
+                : `Are you sure you want to delete the Course "${selectedCategoryName}"?`
             }
             onConfirm={confirmDelete}
             onCancel={cancelDelete}
@@ -305,7 +305,7 @@ const Category = () => {
         </Box>
       ) : (
         <NoPermissionMessage
-          title="You do not have permission to view Category Details."
+          title="You do not have permission to view Course Details."
           message="Please contact your administrator if you believe this is a mistake."
         />
       )}
