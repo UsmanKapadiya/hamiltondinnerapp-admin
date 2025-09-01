@@ -65,7 +65,7 @@ const RoomDetailsForm = () => {
       password: roomDetails?.password,
       food_texture: roomDetails?.food_texture || "",
       special_instrucations: roomDetails?.special_instrucations || "",
-      is_active: roomDetails?.is_active === 1 || roomDetails?.is_active === true,
+      is_active: roomDetails?.is_active === 1 || roomDetails?.is_active === true || roomDetails?.id === undefined,
     }),
     [roomDetails]
   );
@@ -104,8 +104,8 @@ const RoomDetailsForm = () => {
           loading
             ? ""
             : roomDetails?.id
-            ? "Update Room Detail"
-            : "Add Room Detail"
+              ? "Update Room Detail"
+              : "Add Room Detail"
         }
         icon={<Home />}
         Buttons={false}
