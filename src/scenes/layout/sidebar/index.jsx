@@ -230,8 +230,8 @@ const SideBar = () => {
                   icon={<ContactsOutlined />}
                 />
                 <Item
-                  title="Item Preferences"
-                  path="/item-preferences"
+                  title="Menu Item Preferences"
+                  path="/menu-item-preferences"
                   colors={colors}
                   icon={<ReceiptOutlined />}
                 />

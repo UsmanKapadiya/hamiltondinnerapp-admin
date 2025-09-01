@@ -99,23 +99,23 @@ const ItemPreferences = () => {
   }, []);
 
   const handleView = useCallback((id) => {
-    navigate(`/item-preferences/${id}`, { state: { id } });
+    navigate(`/menu-item-preferences/${id}`, { state: { id } });
   }, [navigate]);
 
   const handleEdit = useCallback((id) => {
     const selectedRow = preferencesListData.find((row) => row.id === id);
-    navigate(`/item-preferences/${id}/edit`, { state: selectedRow });
+    navigate(`/menu-item-preferences/${id}/edit`, { state: selectedRow });
   }, [navigate, preferencesListData]);
 
   const handleAddNewClick = useCallback(() => {
-    navigate("/item-preferences/create");
+    navigate("/menu-item-preferences/create");
   }, [navigate]);
 
   const handleBulkDelete = useCallback(() => {
     if (selectedIds.length > 0) {
       setDialogOpen(true);
     } else {
-      toast.warning("Please select at least one Option to delete.");
+      toast.warning("Please select at least one Preferences to delete.");
     }
   }, [selectedIds]);
 
@@ -137,7 +137,7 @@ const ItemPreferences = () => {
       fetchALLPreferenceList();
     } catch (error) {
       console.error("Error deleting preferences:", error);
-      toast.error("Failed to process menu. Please try again.");
+      toast.error("Failed to process preference. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -222,7 +222,7 @@ const ItemPreferences = () => {
   return (
     <Box m="20px">
       <Header
-        title="Item Preferences"
+        title="Menu Item Preferences"
         icon={<ClearAllOutlined />}
         addNewClick={handleAddNewClick}
         addBulkDelete={handleBulkDelete}

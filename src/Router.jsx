@@ -77,10 +77,10 @@ const AppRouter = () => {
           <Route path="/menu-item-options/:id/edit" element={<ItemoptionsForm />} />
           <Route path="/menu-item-options/:id" element={<ItemOptionsView />} />
           {/*Item Preferences */}
-          <Route path="/item-preferences" element={<ItemPreferences />} />
-          <Route path="/item-preferences/create" element={<ItemPreferencesForm />} />
-          <Route path="/item-preferences/:id/edit" element={<ItemPreferencesForm />} />
-          <Route path="/item-preferences/:id" element={<ItemPreferencesView />} />
+          <Route path="/menu-item-preferences" element={<ItemPreferences />} />
+          <Route path="/menu-item-preferences/create" element={<ItemPreferencesForm />} />
+          <Route path="/menu-item-preferences/:id/edit" element={<ItemPreferencesForm />} />
+          <Route path="/menu-item-preferences/:id" element={<ItemPreferencesView />} />
           {/*Menu Details */}
           <Route path="/menu-details" element={<MenuDetails />} />
           <Route path="/menu-details/create" element={<MenuDetailsForm />} />

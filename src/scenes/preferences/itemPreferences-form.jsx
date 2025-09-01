@@ -65,8 +65,8 @@ const ItemPreferencesForm = () => {
           loading
             ? ""
             : preferencesDetails?.id
-              ? "Update Item Preference"
-              : "Add Item Preference"
+              ? "Update Menu Item Preference"
+              : "Add Menu Item Preference"
         }
         icon={<DvrOutlined />} Buttons={false} />
       {loading ? (
@@ -130,7 +130,7 @@ const ItemPreferencesForm = () => {
               </Box>
               <Box display="flex" alignItems="center" justifyContent="end" mt="20px">
                 <Button type="submit" color="secondary" variant="contained">
-                  Save
+                  Save Menu Item Preference
                 </Button>
               </Box>
             </form>

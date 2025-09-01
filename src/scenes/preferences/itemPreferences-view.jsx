@@ -43,7 +43,7 @@ const ItemPreferencesView = () => {
     return (
         <Box m="20px">
             <Header
-                title="Item Details View"
+                title="Menu Item Details View"
                 icon={<ListAltOutlined />}
                 Buttons={false}
                 ActionButton={true}
