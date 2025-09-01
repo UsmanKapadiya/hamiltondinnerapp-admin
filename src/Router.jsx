@@ -59,12 +59,12 @@ const AppRouter = () => {
           }
         >
           <Route path="/" element={<Dashboard />} />
-          {/*Room  */}
-          <Route path="/room-details" element={<Room />} />
-          <Route path="/room-details/create" element={<RoomDetailsForm />} />
-          <Route path="/room-details/:id/edit" element={<RoomDetailsForm />} />
-          <Route path="/room-details/:id" element={<RoomDetailsView />} />
-          <Route path="/room-details/order" element={<RoomDetailsOrder />} />
+          {/*Resident  */}
+          <Route path="/resident-details" element={<Room />} />
+          <Route path="/resident-details/create" element={<RoomDetailsForm />} />
+          <Route path="/resident-details/:id/edit" element={<RoomDetailsForm />} />
+          <Route path="/resident-details/:id" element={<RoomDetailsView />} />
+          <Route path="/resident-details/order" element={<RoomDetailsOrder />} />
           {/*Category  */}
           <Route path="/category-details" element={<Category />} />
           <Route path="/category-details/create" element={<CategoryDetailsForm />} />

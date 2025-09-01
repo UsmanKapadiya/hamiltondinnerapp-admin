@@ -30,7 +30,7 @@ const RoomDetailsView = () => {
       setRoomDetails(response?.data || {});
     } catch (error) {
       setRoomDetails({});
-      console.error("Error fetching room details:", error);
+      console.error("Error fetching resident details:", error);
     } finally {
       setLoading(false);
     }
@@ -50,7 +50,7 @@ const RoomDetailsView = () => {
   return (
     <Box m="20px">
       <Header
-        title="Room Details View"
+        title="Resident Details View"
         icon={<ListAltOutlined />}
         Buttons={false}
         ActionButton={true}

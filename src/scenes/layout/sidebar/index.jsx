@@ -190,8 +190,8 @@ const SideBar = () => {
           }}
         >
           <Item
-            title="Room Details"
-            path="/room-details"
+            title="Resident Details"
+            path="/resident-details"
             colors={colors}
             icon={<Home />}
           />

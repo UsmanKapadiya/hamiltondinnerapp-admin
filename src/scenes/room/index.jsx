@@ -54,8 +54,8 @@ const Room = () => {
         total: response.count,
       }));
     } catch (error) {
-      console.error("Error fetching room list:", error);
-      toast.error("Failed to fetch room list. Please try again.");
+      console.error("Error fetching resident list:", error);
+      toast.error("Failed to fetch resident list. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -185,22 +185,22 @@ const Room = () => {
   }, []);
 
   const handleView = useCallback((id) => {
-    navigate(`/room-details/${id}`, { state: { id } });
+    navigate(`/resident-details/${id}`, { state: { id } });
   }, [navigate]);
 
   const handleEdit = useCallback((id) => {
     const selectedRow = roomListData.find((row) => row.id === id);
-    navigate(`/room-details/${id}/edit`, { state: selectedRow });
+    navigate(`/resident-details/${id}/edit`, { state: selectedRow });
   }, [navigate, roomListData]);
 
   const handleAddNewClick = useCallback(() => {
-    navigate("/room-details/create");
+    navigate("/resident-details/create");
   }, [navigate]);
   const handleBulkDelete = useCallback(() => {
     if (selectedIds.length > 0) {
       setDialogOpen(true);
     } else {
-      toast.warning("Please select at least one Room to delete.");
+      toast.warning("Please select at least one Resident to delete.");
     }
   }, [selectedIds]);
   const handlePaginationChange = useCallback((newPaginationModel) => {
@@ -231,12 +231,12 @@ const Room = () => {
     try {
       await RoomServices.deleteRooms(id);
       setLoading(true);
-      toast.success("Room Deleted successfully!");
+      toast.success("Resident Deleted successfully!");
       fetchALLRoomList();
       setSelectedRoomName("");
     } catch (error) {
-      console.error("Error deleting room:", error);
-      toast.error("Failed to process room. Please try again.");
+      console.error("Error deleting resident:", error);
+      toast.error("Failed to process resident. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -245,7 +245,7 @@ const Room = () => {
   return (
     <Box m="20px">
       <Header
-        title="Room Details"
+        title="Resident Details"
         icon={<Home />}
         addNewClick={handleAddNewClick}
         addBulkDelete={handleBulkDelete}
@@ -326,8 +326,8 @@ const Room = () => {
             title="Confirm Delete"
             message={
               selectedIds.length > 0 && !selectedRoomName
-                ? `Are you sure you want to delete ${selectedIds.length} Room${selectedIds.length > 1 ? "s" : ""}?`
-                : `Are you sure you want to delete the Room "${selectedRoomName}"?`
+                ? `Are you sure you want to delete ${selectedIds.length} Resident${selectedIds.length > 1 ? "s" : ""}?`
+                : `Are you sure you want to delete the Resident "${selectedRoomName}"?`
             }
             onConfirm={confirmDelete}
             onCancel={cancelDelete}
@@ -335,7 +335,7 @@ const Room = () => {
         </Box>
       ) : (
         <NoPermissionMessage
-          title="You do not have permission to view Room Details."
+          title="You do not have permission to view Resident Details."
           message="Please contact your administrator if you believe this is a mistake."
         />
       )}

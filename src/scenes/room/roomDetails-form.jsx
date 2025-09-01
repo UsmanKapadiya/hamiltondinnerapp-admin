@@ -80,16 +80,16 @@ const RoomDetailsForm = () => {
       try {
         if (payload.id) {
           await RoomServices.updateRoomDetails(payload.id, payload);
-          toast.success("Room updated successfully!");
+          toast.success("Resident updated successfully!");
         } else {
           await RoomServices.createRoomDetails(payload);
-          toast.success("Room created successfully!");
+          toast.success("Resident created successfully!");
           actions.resetForm({ values: initialValues });
         }
         // After save, navigate to the room list to show latest data
-        navigate("/room-details");
+        navigate("/resident-details");
       } catch (error) {
-        toast.error("Failed to process room. Please try again.");
+        toast.error("Failed to process resident. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -104,8 +104,8 @@ const RoomDetailsForm = () => {
           loading
             ? ""
             : roomDetails?.id
-              ? "Update Room Detail"
-              : "Add Room Detail"
+              ? "Update Resident Detail"
+              : "Add Resident Detail"
         }
         icon={<Home />}
         Buttons={false}
@@ -303,7 +303,7 @@ const RoomDetailsForm = () => {
                 mt="20px"
               >
                 <Button type="submit" color="secondary" variant="contained">
-                  Save Room Details
+                  Save Resident Details
                 </Button>
               </Box>
             </form>
