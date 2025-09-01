@@ -12,11 +12,17 @@ import { useEffect, useState, useMemo } from "react";
 const validationSchema = yup.object().shape({
   item_name: yup.string().required("Menu Item Name is required"),
   // item_chinese_name: yup.string().required("Item Chinese Name is required"),
-  // options: yup
-  //   .array()
-  //   .of(yup.string().required("Each option must be a string"))
-  //   .min(1, "At least one option is required")
-  //   .required("Options are required"),
+  options: yup
+      .array()
+      .of(yup.string().required("Each option must be a string"))
+      .test(
+        "min-if-present",
+        "At least 2 options are required",
+        (value) => {
+          if (!value || value.length === 0) return true; // not required
+          return value.length >= 2;
+        }
+      ),
   cat_id: yup
     .number()
     .typeError("Course must be a number")
