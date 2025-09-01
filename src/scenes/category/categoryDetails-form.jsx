@@ -1,4 +1,4 @@
-import { Box, Button, TextField, useMediaQuery, MenuItem, Autocomplete } from "@mui/material";
+import { Box, Button, TextField, useMediaQuery, Autocomplete, FormHelperText, FormControlLabel, Radio, RadioGroup, FormControl, Typography } from "@mui/material";
 import { Header } from "../../components";
 import { Formik } from "formik";
 import * as yup from "yup";
@@ -73,7 +73,7 @@ const CategoryDetailsForm = () => {
             }
             setCategoryDetails(response?.data);
             actions.resetForm({ values: { ...response?.data } });
-            if(response?.success === true) {
+            if (response?.success === true) {
                 navigate("/category-details");
             }
         } catch (error) {
@@ -90,8 +90,8 @@ const CategoryDetailsForm = () => {
                     loading
                         ? ""
                         : categoryDetails?.id
-                        ? "Update Course Detail"
-                        : "Add Course Detail"
+                            ? "Update Course Detail"
+                            : "Add Course Detail"
                 }
                 icon={<DvrOutlined />}
                 Buttons={false}
@@ -164,42 +164,54 @@ const CategoryDetailsForm = () => {
                                     }
                                     sx={{ gridColumn: "span 4" }}
                                 />
-                                <TextField
-                                    fullWidth
-                                    select
-                                    variant="filled"
-                                    label="Select Course type"
-                                    onBlur={handleBlur}
-                                    onChange={(e) => {
-                                        handleChange(e);
-                                        const selectedType = e.target.value;
-                                        setFieldValue("type", selectedType);
-                                        const filteredOptions = categoryListData
-                                            .filter(
-                                                (category) =>
-                                                    category.type === selectedType &&
-                                                    category.id !== values.id  && category?.parent_id === 0
-                                            )
-                                            .map((category) => ({
-                                                label: category.cat_name,
-                                                value: category.id,
-                                                type: category.type,
-                                            }));
-                                        setFilteredParentOptions(filteredOptions);
-                                        setFieldValue("parent_id", ""); // Reset parent_id when type changes
-                                    }}
-                                    value={values.type}
-                                    name="type"
-                                    error={touched.type && Boolean(errors.type)}
-                                    helperText={touched.type && errors.type}
+                                <FormControl
+                                    component="fieldset"
                                     sx={{ gridColumn: "span 4" }}
+                                    error={touched.type && Boolean(errors.type)}
                                 >
-                                    {type.map((option) => (
-                                        <MenuItem key={option.id} value={option.id}>
-                                            {option.type_name}
-                                        </MenuItem>
-                                    ))}
-                                </TextField>
+                                    <Typography variant="subtitle1" fontWeight="400" mb="10px">
+                                        Select Meal Type
+                                    </Typography>
+                                    <RadioGroup
+                                        name="type"
+                                        value={String(values.type)}
+                                        onChange={(e) => {
+                                            const selectedType = e.target.value;
+                                            handleChange(e);
+                                            setFieldValue("type", selectedType);
+
+                                            const filteredOptions = categoryListData
+                                                .filter(
+                                                    (category) =>
+                                                        String(category.type) === selectedType &&
+                                                        category.id !== values.id &&
+                                                        category?.parent_id === 0
+                                                )
+                                                .map((category) => ({
+                                                    label: category.cat_name,
+                                                    value: category.id,
+                                                    type: category.type,
+                                                }));
+
+                                            setFilteredParentOptions(filteredOptions);
+                                            setFieldValue("parent_id", ""); // Reset parent_id when type changes
+                                        }}
+
+                                        row
+                                    >
+                                        {type.map((option) => (
+                                            <FormControlLabel
+                                                key={option.id}
+                                                value={String(option.id)}
+                                                control={<Radio color="secondary" />}
+                                                label={option.type_name}
+                                            />
+                                        ))}
+                                    </RadioGroup>
+                                    {touched.type && errors.type && (
+                                        <FormHelperText>{errors.type}</FormHelperText>
+                                    )}
+                                </FormControl>
                                 <Autocomplete
                                     options={filteredParentOptions}
                                     getOptionLabel={(option) => option.label || ""}
