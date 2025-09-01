@@ -21,7 +21,7 @@ const validationSchema = yup.object().shape({
     .number()
     .typeError("Category must be a number")
     .required("Category is required"),
-  is_allday: yup.boolean().required("Is All Day is required"),
+  // is_allday: yup.boolean().required("Is All Day is required"),
 
   // preference: yup
   //   .array()
@@ -92,7 +92,7 @@ const ItemDetailsForm = () => {
     item_name: itemDetails?.item_name || "",
     item_chinese_name: itemDetails?.item_chinese_name || "",
     cat_id: itemDetails?.cat_id,
-    is_allday: itemDetails?.is_allday || false,
+    // is_allday: itemDetails?.is_allday || false,
     options: (() => {
       try {
         return itemDetails?.options
@@ -123,7 +123,7 @@ const ItemDetailsForm = () => {
     formData.append("item_name", values.item_name);
     formData.append("item_chinese_name", values.item_chinese_name);
     formData.append("cat_id", values.cat_id);
-    formData.append("is_allday", values.is_allday ? 1 : 0);
+    // formData.append("is_allday", values.is_allday ? 1 : 0);
     formData.append("options", JSON.stringify(values.options));
     formData.append("preference", JSON.stringify(values.preference));
     if (
@@ -268,8 +268,8 @@ const ItemDetailsForm = () => {
                   sx={{ gridColumn: "span 4" }}
                 />
 
-                {/* Is All Day Switch */}
-                <FormGroup>
+                {/* Is All Day Switch hidden */}
+                  {/* <FormGroup>
                   <FormControlLabel
                     control={
                       <Switch
@@ -283,7 +283,7 @@ const ItemDetailsForm = () => {
                     }
                     label="Is All Day"
                   />
-                </FormGroup>
+                </FormGroup> */}
 
                 <Box sx={{ gridColumn: "span 4" }}>
                   <input

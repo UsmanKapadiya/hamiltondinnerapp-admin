@@ -133,14 +133,14 @@ const ItemDetailsView = () => {
             </Typography>
           </Box>
           <Divider sx={{ bgcolor: colors.gray[300] }} />
-          <Box p="10px">
+          {/* <Box p="10px">
             <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
               Is Allday
             </Typography>
             <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
               {itemDetails?.is_allday ? "Yes" : "No"}
             </Typography>
-          </Box>
+          </Box> */}
           <Divider sx={{ bgcolor: colors.gray[300] }} />
           <Box p="10px">
             <Typography color={colors.gray[100]} variant="h3" fontWeight="600">

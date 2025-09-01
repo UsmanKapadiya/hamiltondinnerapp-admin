@@ -111,7 +111,7 @@ const Item = () => {
       },
       flex: 1,
     },
-    { field: "is_allday", headerName: "Is Allday" },
+    // { field: "is_allday", headerName: "Is Allday" },
     {
       field: "actions",
       headerName: "Actions",
