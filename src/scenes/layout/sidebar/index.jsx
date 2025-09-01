@@ -190,16 +190,10 @@ const SideBar = () => {
           }}
         >
           <Item
-            title="Resident Details"
-            path="/resident-details"
+            title="Menu Details"
+            path="/menu-details"
             colors={colors}
-            icon={<Home />}
-          />
-          <Item
-            title="Course Details"
-            path="/category-details"
-            colors={colors}
-            icon={<DvrOutlined />}
+            icon={<CreateOutlined />}
           />
           <List>
             <ListItemButton onClick={handleDropdownToggle}>
@@ -239,11 +233,49 @@ const SideBar = () => {
             </Collapse>
           </List>
           <Item
-            title="Menu Details"
-            path="/menu-details"
+            title="Course Details"
+            path="/category-details"
             colors={colors}
-            icon={<CreateOutlined />}
+            icon={<DvrOutlined />}
           />
+          <Item
+            title="Resident Details"
+            path="/resident-details"
+            colors={colors}
+            icon={<Home />}
+          />
+          <Item
+            title="Order Details"
+            path="/order-details"
+            colors={colors}
+            icon={<LocalPizzaOutlined />}
+          />
+          <Item
+            title="Users"
+            path="/users"
+            colors={colors}
+            icon={<PersonOutlined />}
+          />
+          <Item
+            title="Roles"
+            path="/roles"
+            colors={colors}
+            icon={<LockOutlined />}
+          />
+
+          <Item
+            title="Forms"
+            path="/forms"
+            colors={colors}
+            icon={<DynamicFormOutlined />}
+          />
+          <Item
+            title="Settings"
+            path="/settings"
+            colors={colors}
+            icon={<SettingsOutlined />}
+          />
+
           {/* <List>
             <ListItemButton onClick={handleReportsDropdownToggle}>
               <ListItemText
@@ -266,36 +298,7 @@ const SideBar = () => {
               </List>
             </Collapse>
           </List> */}
-          <Item
-            title="Settings"
-            path="/settings"
-            colors={colors}
-            icon={<SettingsOutlined />}
-          />
-          <Item
-            title="Roles"
-            path="/roles"
-            colors={colors}
-            icon={<LockOutlined />}
-          />
-          <Item
-            title="Users"
-            path="/users"
-            colors={colors}
-            icon={<PersonOutlined />}
-          />
-          <Item
-            title="Order Details"
-            path="/order-details"
-            colors={colors}
-            icon={<LocalPizzaOutlined />}
-          />
-          <Item
-            title="Forms"
-            path="/forms"
-            colors={colors}
-            icon={<DynamicFormOutlined />}
-          />
+
           {/* <Item
             title="Contacts Information"
             path="/contacts"
