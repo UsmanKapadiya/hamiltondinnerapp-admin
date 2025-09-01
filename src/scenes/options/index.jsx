@@ -96,14 +96,14 @@ const ItemOptions = () => {
     setSelectedOptionName("");
   }, []);
   const handleView = useCallback((id) => {
-    navigate(`/item-options/${id}`, { state: { id } });
+    navigate(`/menu-item-options/${id}`, { state: { id } });
   }, [navigate]);
   const handleEdit = useCallback((id) => {
     const selectedRow = optionsListData.find((row) => row.id === id);
-    navigate(`/item-options/${id}/edit`, { state: selectedRow });
+    navigate(`/menu-item-options/${id}/edit`, { state: selectedRow });
   }, [navigate, optionsListData]);
   const handleAddNewClick = useCallback(() => {
-    navigate("/item-options/create");
+    navigate("/menu-item-options/create");
   }, [navigate]);
   const handleBulkDelete = useCallback(() => {
     if (selectedIds.length > 0) {
@@ -130,7 +130,7 @@ const ItemOptions = () => {
       fetchALLOptionsList();
     } catch (error) {
       console.error("Error deleting options:", error);
-      toast.error("Failed to process menu. Please try again.");
+      toast.error("Failed to process Option. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -214,7 +214,7 @@ const ItemOptions = () => {
   return (
     <Box m="20px">
       <Header
-        title="Item Options"
+        title="Menu Item Options"
         icon={<FormatListBulletedOutlined />}
         addNewClick={handleAddNewClick}
         addBulkDelete={handleBulkDelete}

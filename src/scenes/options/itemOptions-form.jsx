@@ -53,7 +53,7 @@ const ItemoptionsForm = () => {
         actions.resetForm({ values: initialValues });
       }
       if (response?.success) {
-        navigate("/item-options");
+        navigate("/menu-item-options");
       }
     } catch (error) {
       toast.error("Failed to process options. Please try again.");
@@ -64,7 +64,7 @@ const ItemoptionsForm = () => {
 
   return (
     <Box m="20px">
-      <Header title={optionsDetails?.id ? "Update Item Option" : "Add Item Option"} icon={<DvrOutlined />} Buttons={false} />
+      <Header title={optionsDetails?.id ? "Update Menu Item Option" : "Add Menu Item Option"} icon={<DvrOutlined />} Buttons={false} />
       {loading ? (
         <Box display="flex" justifyContent="center" alignItems="center" height="calc(100vh - 100px)">
           <CustomLoadingOverlay />
@@ -140,7 +140,7 @@ const ItemoptionsForm = () => {
               </Box>
               <Box display="flex" alignItems="center" justifyContent="end" mt="20px">
                 <Button type="submit" color="secondary" variant="contained">
-                  Save
+                  Save Menu Item Option
                 </Button>
               </Box>
             </form>

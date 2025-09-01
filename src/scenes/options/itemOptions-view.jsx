@@ -29,7 +29,7 @@ const ItemOptionsView = () => {
             const response = await ItemServices.getOptionDetails(id);
             setOptionsDetails(response?.data);
         } catch (error) {
-            console.error("Error fetching menu list:", error);
+            console.error("Error fetching option list:", error);
         } finally {
             setLoading(false);
         }
@@ -42,7 +42,7 @@ const ItemOptionsView = () => {
     return (
         <Box m="20px">
             <Header
-                title="Item Details View"
+                title="Menu Item Details View"
                 icon={<ListAltOutlined />}
                 Buttons={false}
                 ActionButton={true}
@@ -65,7 +65,7 @@ const ItemOptionsView = () => {
                 >
                     <Box p="10px">
                         <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
-                            Item Name
+                            Option Name
                         </Typography>
                         <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
                             {optionsDetails?.option_name || "-"}
@@ -74,7 +74,7 @@ const ItemOptionsView = () => {
                     <Divider sx={{ bgcolor: colors.gray[300] }} />
                     <Box p="10px">
                         <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
-                            Item Chinese Name
+                            Option Chinese Name
                         </Typography>
                         <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
                             {optionsDetails?.option_name_cn || "-"}

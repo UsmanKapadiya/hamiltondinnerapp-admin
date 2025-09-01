@@ -224,8 +224,8 @@ const SideBar = () => {
                   icon={<PlaylistAddOutlined />}
                 />
                 <Item
-                  title="Item Options"
-                  path="/item-options"
+                  title="Menu Item Options"
+                  path="/menu-item-options"
                   colors={colors}
                   icon={<ContactsOutlined />}
                 />
