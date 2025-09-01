@@ -252,7 +252,7 @@ const SideBar = () => {
           />
           <Item
             title="Users"
-            path="/users"
+            path="/users-details"
             colors={colors}
             icon={<PersonOutlined />}
           />

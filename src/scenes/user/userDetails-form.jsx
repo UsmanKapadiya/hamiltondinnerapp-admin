@@ -131,7 +131,7 @@ const UserDetailsForm = () => {
       }
 
       // Redirect to users screen after success
-      navigate("/users");
+      navigate("/users-details");
     } catch (error) {
       console.error("Submission error:", error);
       const apiErrors = error?.response?.data?.errors;

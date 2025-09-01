@@ -97,7 +97,7 @@ const AppRouter = () => {
           <Route path="/roles-details/create" element={<RoleDetailsForm />} />
           <Route path="/roles-details/:id/edit" element={<RoleDetailsForm />} />
           {/* User */}
-          <Route path="/users" element={<User />} />
+          <Route path="/users-details" element={<User />} />
           <Route path="/users-details/:id" element={<UserDetailsView />} />
           <Route path="/users-details/create" element={<UserDetailsForm />} />
           <Route path="/users-details/:id/edit" element={<UserDetailsForm />} />
