@@ -7,16 +7,13 @@ import {
 } from "./scenes";
 import Room from "./scenes/room";
 import RoomDetailsForm from "./scenes/room/roomDetails-form";
-import RoomDetailsOrder from "./scenes/room/roomDetailsOrder";
 import RoomDetailsView from "./scenes/room/roomDetails-view";
 import Category from "./scenes/category";
 import CategoryDetailsView from "./scenes/category/categoryDetails-view";
 import CategoryDetailsForm from "./scenes/category/categoryDetails-form";
-import CategoryDetailsOrder from "./scenes/category/categoryDetailsOrder";
 import Item from "./scenes/item";
 import ItemDetailsView from "./scenes/item/itemDetails-view";
 import ItemDetailsForm from "./scenes/item/itemDetails-form";
-import ItemDetailsOrder from "./scenes/item/itemDetailsOrder";
 import Login from "./scenes/login";
 import ItemOptions from "./scenes/options";
 import ItemoptionsForm from "./scenes/options/itemOptions-form";
@@ -64,19 +61,16 @@ const AppRouter = () => {
           <Route path="/resident-details/create" element={<RoomDetailsForm />} />
           <Route path="/resident-details/:id/edit" element={<RoomDetailsForm />} />
           <Route path="/resident-details/:id" element={<RoomDetailsView />} />
-          <Route path="/resident-details/order" element={<RoomDetailsOrder />} />
           {/*Category  */}
           <Route path="/category-details" element={<Category />} />
           <Route path="/category-details/create" element={<CategoryDetailsForm />} />
           <Route path="/category-details/:id/edit" element={<CategoryDetailsForm />} />
           <Route path="/category-details/:id" element={<CategoryDetailsView />} />
-          <Route path="/category-details/order" element={<CategoryDetailsOrder />} />
           {/*Item  */}
           <Route path="/item-details" element={<Item />} />
           <Route path="/item-details/:id" element={<ItemDetailsView />} />
           <Route path="/item-details/:id/edit" element={<ItemDetailsForm />} />
           <Route path="/item-details/create" element={<ItemDetailsForm />} />
-          <Route path="/item-details/order" element={<ItemDetailsOrder />} />
           {/*Item Options */}
           <Route path="/item-options" element={<ItemOptions />} />
           <Route path="/item-options/create" element={<ItemoptionsForm />} />
