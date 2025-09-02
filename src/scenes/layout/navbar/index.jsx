@@ -12,6 +12,7 @@ import { tokens, ColorModeContext } from "../../../theme";
 import { useContext } from "react";
 import {
   DarkModeOutlined,
+  ExitToAppOutlined,
   LightModeOutlined,
   MenuOutlined,
   NotificationsOutlined,
@@ -126,17 +127,19 @@ const Navbar = () => {
             <DarkModeOutlined />
           )}
         </IconButton>
-        <IconButton>
+        {/* <IconButton>
           <NotificationsOutlined />
         </IconButton>
         <IconButton>
           <SettingsOutlined />
-        </IconButton>
+        </IconButton> */}
+        <IconButton onClick={handleLogout}>
+          <ExitToAppOutlined />
+        </IconButton> 
         {/* Dropdown Menu Trigger */}
-        <IconButton onClick={handleMenuOpen}>
+        {/* <IconButton onClick={handleMenuOpen}>
           <PersonOutlined />
         </IconButton>
-        {/* Dropdown Menu */}
         <Menu
           anchorEl={anchorEl}
           open={open}
@@ -151,7 +154,6 @@ const Navbar = () => {
           }}
         >
           <MenuItem onClick={handleMenuClose}>User Settings</MenuItem>
-          {/* <MenuItem onClick={handleLogout}>Logout</MenuItem> */}
           {loading ? (
             <MenuItem sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Box
@@ -170,7 +172,7 @@ const Navbar = () => {
           ) : (
             <MenuItem onClick={handleLogout}>Logout</MenuItem>
           )}
-        </Menu>
+        </Menu> */}
       </Box>
     </Box>
   );
