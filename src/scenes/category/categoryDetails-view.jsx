@@ -87,16 +87,16 @@ const CategoryDetailsView = () => {
                         </Typography>
                     </Box>
                     <Divider sx={{ bgcolor: colors.gray[300] }} />
-                    {/* {categoryDetails?.category_chinese_name && ( */}
-                    <Box p="10px">
-                        <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
-                            Course Chinese Name
-                        </Typography>
-                        <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                            {categoryDetails?.category_chinese_name || ""}
-                        </Typography>
-                    </Box>
-                    {/* )} */}
+                    {categoryDetails?.category_chinese_name && (
+                        <Box p="10px">
+                            <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
+                                Course Chinese Name
+                            </Typography>
+                            <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
+                                {categoryDetails?.category_chinese_name || ""}
+                            </Typography>
+                        </Box>
+                    )}
                     <Divider sx={{ bgcolor: colors.gray[300] }} />
                     <Box p="10px">
                         <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
@@ -107,15 +107,19 @@ const CategoryDetailsView = () => {
                         </Typography>
                     </Box>
                     <Divider sx={{ bgcolor: colors.gray[300] }} />
-                    <Box p="10px">
-                        <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
-                            Parent Course
-                        </Typography>
-                        <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                            {getParentName(categoryDetails?.parent_id)}
-                        </Typography>
-                    </Box>
-                    <Divider sx={{ bgcolor: colors.gray[300] }} />
+                    {getParentName(categoryDetails?.parent_id) && (
+                        <>
+                            <Box p="10px">
+                                <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
+                                    Parent Course
+                                </Typography>
+                                <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
+                                    {getParentName(categoryDetails?.parent_id)}
+                                </Typography>
+                            </Box>
+                            <Divider sx={{ bgcolor: colors.gray[300] }} />
+                        </>
+                    )}
                 </Box>
             )}
         </Box>
