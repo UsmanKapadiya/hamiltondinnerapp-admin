@@ -212,28 +212,31 @@ const CategoryDetailsForm = () => {
                                         <FormHelperText>{errors.type}</FormHelperText>
                                     )}
                                 </FormControl>
-                                <Autocomplete
-                                    options={filteredParentOptions}
-                                    getOptionLabel={(option) => option.label || ""}
-                                    value={
-                                        filteredParentOptions.find(
-                                            (option) => option.value === values.parent_id
-                                        ) || null
-                                    }
-                                    onChange={(_, newValue) => {
-                                        setFieldValue("parent_id", newValue ? newValue.value : "");
-                                    }}
-                                    renderInput={(params) => (
-                                        <TextField
-                                            {...params}
-                                            label="Parent Course"
-                                            variant="filled"
-                                            error={touched.parent_id && Boolean(errors.parent_id)}
-                                            helperText={touched.parent_id && errors.parent_id}
-                                        />
-                                    )}
-                                    sx={{ gridColumn: "span 4" }}
-                                />
+                                {filteredParentOptions?.length > 0 && values.type && (
+                                    <FormControl component="fieldset" sx={{ gridColumn: "span 4" }}>
+                                        <Typography variant="subtitle1" fontWeight="400" mb="10px">
+                                            Select Parent Course
+                                        </Typography>
+                                        <RadioGroup
+                                            name="parent_id"
+                                            value={String(values.parent_id)}
+                                            onChange={(e) => setFieldValue("parent_id", e.target.value)}
+                                            row
+                                        >
+                                            {filteredParentOptions.map((option) => (
+                                                <FormControlLabel
+                                                    key={option.value}
+                                                    value={String(option.value)}
+                                                    control={<Radio color="secondary" />}
+                                                    label={option.label}
+                                                />
+                                            ))}
+                                        </RadioGroup>
+                                        {touched.parent_id && errors.parent_id && (
+                                            <FormHelperText error>{errors.parent_id}</FormHelperText>
+                                        )}
+                                    </FormControl>
+                                )}
                             </Box>
                             <Box
                                 display="flex"
