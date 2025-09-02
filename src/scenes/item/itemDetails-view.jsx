@@ -47,7 +47,7 @@ const ItemDetailsView = () => {
 
   // Memoized display values for options and preferences
   const optionNames = useMemo(() => {
-    if (!itemDetails?.options) return "N/A";
+    if (!itemDetails?.options) return "";
     try {
       const optionIds = JSON.parse(itemDetails.options);
       const names = optionIds
@@ -56,14 +56,14 @@ const ItemDetailsView = () => {
           return option ? option.option_name : null;
         })
         .filter(Boolean);
-      return names.length > 0 ? names.join(", ") : "N/A";
+      return names.length > 0 ? names.join(", ") : "";
     } catch {
-      return "N/A";
+      return "";
     }
   }, [itemDetails, optionsListData]);
 
   const preferenceNames = useMemo(() => {
-    if (!itemDetails?.preference) return "N/A";
+    if (!itemDetails?.preference) return "";
     try {
       const prefIds = JSON.parse(itemDetails.preference);
       const names = prefIds
@@ -72,16 +72,16 @@ const ItemDetailsView = () => {
           return pref ? pref.pname : null;
         })
         .filter(Boolean);
-      return names.length > 0 ? names.join(", ") : "N/A";
+      return names.length > 0 ? names.join(", ") : "";
     } catch {
-      return "N/A";
+      return "";
     }
   }, [itemDetails, preferencesListData]);
 
   return (
     <Box m="20px">
       <Header
-        title="Item Details View"
+        title="View Menu Item Detail"
         icon={<ListAltOutlined />}
         Buttons={false}
         ActionButton={true}
@@ -107,19 +107,23 @@ const ItemDetailsView = () => {
               Menu Item Name
             </Typography>
             <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-              {itemDetails?.item_name || "N/A"}
+              {itemDetails?.item_name || ""}
             </Typography>
           </Box>
           <Divider sx={{ bgcolor: colors.gray[300] }} />
-          <Box p="10px">
-            <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
-              Menu Item Chinese Name
-            </Typography>
-            <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-              {itemDetails?.item_chinese_name || "N/A"}
-            </Typography>
-          </Box>
-          <Divider sx={{ bgcolor: colors.gray[300] }} />
+          {itemDetails?.item_chinese_name && (
+            <>
+              <Box p="10px">
+                <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
+                  Menu Item Chinese Name
+                </Typography>
+                <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
+                  {itemDetails?.item_chinese_name || ""}
+                </Typography>
+              </Box>
+              <Divider sx={{ bgcolor: colors.gray[300] }} />
+            </>
+          )}
           <Box p="10px">
             <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
               Course
@@ -128,7 +132,7 @@ const ItemDetailsView = () => {
               {(() => {
                 const typeId = itemDetails?.cat_id;
                 const typeObj = categoryListData.find((t) => t.id === typeId);
-                return typeObj ? typeObj.cat_name : "N/A";
+                return typeObj ? typeObj.cat_name : "";
               })()}
             </Typography>
           </Box>
@@ -154,28 +158,34 @@ const ItemDetailsView = () => {
               />
             ) : (
               <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                N/A
+
               </Typography>
             )}
           </Box>
           <Divider sx={{ bgcolor: colors.gray[300] }} />
-          <Box p="10px">
-            <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
-              Options
-            </Typography>
-            <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-              {optionNames}
-            </Typography>
-          </Box>
-          <Divider sx={{ bgcolor: colors.gray[300] }} />
-          <Box p="10px">
-            <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
-              Preference
-            </Typography>
-            <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-              {preferenceNames}
-            </Typography>
-          </Box>
+          {optionNames && (
+            <>
+              <Box p="10px">
+                <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
+                  Options
+                </Typography>
+                <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
+                  {optionNames}
+                </Typography>
+              </Box>
+              <Divider sx={{ bgcolor: colors.gray[300] }} />
+            </>
+          )}
+          {preferenceNames && (
+            <Box p="10px">
+              <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
+                Preference
+              </Typography>
+              <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
+                {preferenceNames}
+              </Typography>
+            </Box>
+          )}
         </Box>
       )}
     </Box>

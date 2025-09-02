@@ -105,7 +105,7 @@ const ItemPreferencesForm = () => {
                   fullWidth
                   variant="filled"
                   type="text"
-                  label="Preference name"
+                  label="Preference Name"
                   onBlur={handleBlur}
                   onChange={handleChange}
                   value={values.pname}

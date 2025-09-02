@@ -175,10 +175,10 @@ const ItemPreferences = () => {
   }, [preferencesListData, debouncedSearch]);
 
   const columns = useMemo(() => [
-    { field: "pname", headerName: "Preferences Name", flex: 1 },
+    { field: "pname", headerName: "Preference Name", flex: 1 },
     {
       field: "pname_cn",
-      headerName: "Preferences Chinese Name",
+      headerName: "Preference Chinese Name",
       flex: 1,
     },
     {
@@ -268,7 +268,7 @@ const ItemPreferences = () => {
             mb="10px"
           >
             <InputBase
-              placeholder="Search by Preferences Name, or Preferences Chinese Name..."
+              placeholder="Search by Preference Name, or Preference Chinese Name..."
               sx={{ ml: 2, flex: 1 }}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}

@@ -43,7 +43,7 @@ const ItemPreferencesView = () => {
     return (
         <Box m="20px">
             <Header
-                title="Menu Item Details View"
+                title="View Menu Item Preference"
                 icon={<ListAltOutlined />}
                 Buttons={false}
                 ActionButton={true}
@@ -66,21 +66,23 @@ const ItemPreferencesView = () => {
                 >
                     <Box p="10px">
                         <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
-                            Preference name
+                            Preference Name
                         </Typography>
                         <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                            {preferencesDetails?.pname || "-"}
+                            {preferencesDetails?.pname || ""}
                         </Typography>
                     </Box>
                     <Divider sx={{ bgcolor: colors.gray[300] }} />
-                    <Box p="10px">
-                        <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
-                            Item Chinese Name
-                        </Typography>
-                        <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                            {preferencesDetails?.pname_cn || "-"}
-                        </Typography>
-                    </Box>
+                    {preferencesDetails?.pname_cn && (
+                        <Box p="10px">
+                            <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
+                                Preference Chinese Name
+                            </Typography>
+                            <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
+                                {preferencesDetails?.pname_cn || ""}
+                            </Typography>
+                        </Box>
+                    )}
                 </Box>
             )}
         </Box>
