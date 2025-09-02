@@ -64,7 +64,7 @@ const UserDetailsView = () => {
   return (
     <Box m="20px">
       <Header
-        title="User Details View"
+        title="View User Detail"
         icon={<PersonOutlined />}
         Buttons={false}
         ActionButton={true}

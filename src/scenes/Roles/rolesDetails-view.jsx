@@ -30,7 +30,7 @@ const RolesDetailsView = () => {
     return (
         <Box m="20px">
             <Header
-                title="Roles Detail"
+                title="View Role"
                 icon={<ListAltOutlined />}
                 Buttons={false}
                 ActionButton={true}
