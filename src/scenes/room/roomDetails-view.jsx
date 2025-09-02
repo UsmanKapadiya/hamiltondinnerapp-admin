@@ -135,16 +135,11 @@ const RoomDetailsView = () => {
           )}
           <Box p="10px">
             <Typography color={colors.gray[100]} variant="h3" fontWeight="600" mb="10px">
-              Active
+              Status
             </Typography>
-            <Button
-              variant="contained"
-              color={roomDetails?.is_active === 1 || roomDetails?.is_active === true ? "info" : "inherit"}
-              size="small"
-              sx={{ mt: "10px" }}
-            >
+            <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
               {roomDetails?.is_active === 1 || roomDetails?.is_active === true ? "Active" : "Inactive"}
-            </Button>
+            </Typography>
           </Box>
         </Box>
       )}

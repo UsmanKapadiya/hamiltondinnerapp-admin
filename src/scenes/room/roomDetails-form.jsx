@@ -8,6 +8,7 @@ import {
   FormGroup,
   FormControlLabel,
   IconButton,
+  Typography,
 } from "@mui/material";
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
@@ -280,6 +281,9 @@ const RoomDetailsForm = () => {
                   sx={{ gridColumn: "span 4" }}
                 >
                   <FormGroup>
+                    <Typography variant="subtitle1" fontWeight="400" mb="10px">
+                      Status
+                    </Typography>
                     <FormControlLabel
                       control={
                         <Switch
@@ -291,7 +295,7 @@ const RoomDetailsForm = () => {
                           name="is_active"
                         />
                       }
-                      label="Is Active"
+                      label={values.is_active ? "Active" : "Inactive"}
                     />
                   </FormGroup>
                 </Box>

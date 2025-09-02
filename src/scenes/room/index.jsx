@@ -101,27 +101,12 @@ const Room = () => {
     },
     {
       field: "is_active",
-      headerName: "Active",
+      headerName: "Status",
       flex: 1,
       renderCell: ({ row: { is_active } }) => (
-        <Box
-          width="120px"
-          p={1}
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          gap={1}
-          bgcolor={
-            is_active === 1
-              ? colors.greenAccent[600]
-              : colors.greenAccent[700]
-          }
-          borderRadius={1}
-        >
           <Typography textTransform="capitalize">
             {is_active === 1 ? "Active" : "Inactive"}
           </Typography>
-        </Box>
       ),
     },
     {
