@@ -257,7 +257,7 @@ const MenuDetailsForm = () => {
                 },
               }}
             >
-              <TextField
+              {/* <TextField
                 fullWidth
                 variant="filled"
                 type="text"
@@ -269,13 +269,14 @@ const MenuDetailsForm = () => {
                 error={touched.menu_name && Boolean(errors.menu_name)}
                 helperText={touched.menu_name && errors.menu_name}
                 sx={{ gridColumn: "span 1" }}
-              />
+              /> */}
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
                   label="Date"
                   value={values.date ? dayjs(values.date) : null}
                   onChange={(newValue) => {
                     setFieldValue("date", newValue ? newValue.format("YYYY-MM-DD") : "");
+                    setFieldValue("menu_name", newValue ? newValue.format("YYYY-MM-DD") : "");
                   }}
                   minDate={dayjs()}
                   slotProps={{
@@ -286,7 +287,7 @@ const MenuDetailsForm = () => {
                       onBlur: handleBlur,
                       error: touched.date && Boolean(errors.date),
                       helperText: touched.date && errors.date,
-                      sx: { gridColumn: "span 1" },
+                      sx: { gridColumn: "span 4" },
                     }
                   }}
                 />
@@ -311,7 +312,7 @@ const MenuDetailsForm = () => {
                   <TextField
                     fullWidth
                     variant="outlined"
-                    label="Search item..."
+                    label="Search Menu Item..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     sx={{ mb: "20px" }}
@@ -413,7 +414,7 @@ const MenuDetailsForm = () => {
                   <TextField
                     fullWidth
                     variant="outlined"
-                    label="Search item..."
+                    label="Search Menu Item..."
                     value={lunchSearchTerm}
                     onChange={(e) => setLunchSearchTerm(e.target.value)}
                     sx={{ mb: "20px" }}
@@ -517,7 +518,7 @@ const MenuDetailsForm = () => {
                   <TextField
                     fullWidth
                     variant="outlined"
-                    label="Search item..."
+                    label="Search Menu Item..."
                     value={dinnerSearchTerm}
                     onChange={(e) => setDinnerSearchTerm(e.target.value)}
                     sx={{ mb: "20px" }}

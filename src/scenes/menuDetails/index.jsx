@@ -173,7 +173,7 @@ const MenuDetails = () => {
   const canBrowse = useMemo(() => hasPermission(permissionList, "browse_Menus"), [permissionList]);
 
   const columns = useMemo(() => [
-    { field: "menu_name", headerName: "Menu Name", flex: 1 },
+    // { field: "menu_name", headerName: "Menu Name", flex: 1 },
     {
       field: "date",
       headerName: "Date",
@@ -290,7 +290,7 @@ const MenuDetails = () => {
             mb="10px"
           >
             <InputBase
-              placeholder="Search Menu..."
+              placeholder="Search by Menu Date..."
               sx={{ ml: 2, flex: 1 }}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
