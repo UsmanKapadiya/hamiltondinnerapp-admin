@@ -226,7 +226,7 @@ const CategoryDetailsForm = () => {
                                     renderInput={(params) => (
                                         <TextField
                                             {...params}
-                                            label="Parent Id"
+                                            label="Parent Course"
                                             variant="filled"
                                             error={touched.parent_id && Boolean(errors.parent_id)}
                                             helperText={touched.parent_id && errors.parent_id}

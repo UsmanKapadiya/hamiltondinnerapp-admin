@@ -51,13 +51,13 @@ const CategoryDetailsView = () => {
 
     const getParentName = (parentId) => {
         const parentObj = categoryListData.find((t) => t.id == parentId);
-        return parentObj ? parentObj.cat_name : "No results";
+        return parentObj ? parentObj.cat_name : "";
     };
 
     return (
         <Box m="20px">
             <Header
-                title="Course Details View"
+                title="View Course Detail"
                 icon={<ListAltOutlined />}
                 Buttons={false}
                 ActionButton={true}
@@ -87,18 +87,20 @@ const CategoryDetailsView = () => {
                         </Typography>
                     </Box>
                     <Divider sx={{ bgcolor: colors.gray[300] }} />
+                    {/* {categoryDetails?.category_chinese_name && ( */}
                     <Box p="10px">
                         <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
                             Course Chinese Name
                         </Typography>
                         <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                            {categoryDetails?.category_chinese_name || "N/A"}
+                            {categoryDetails?.category_chinese_name || ""}
                         </Typography>
                     </Box>
+                    {/* )} */}
                     <Divider sx={{ bgcolor: colors.gray[300] }} />
                     <Box p="10px">
                         <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
-                            Type
+                            Meal Type
                         </Typography>
                         <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
                             {getTypeName(categoryDetails?.type)}
