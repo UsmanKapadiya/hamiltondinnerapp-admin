@@ -50,7 +50,7 @@ const RoomDetailsView = () => {
   return (
     <Box m="20px">
       <Header
-        title="Resident Details View"
+        title="View Resident Detail"
         icon={<ListAltOutlined />}
         Buttons={false}
         ActionButton={true}
@@ -107,24 +107,32 @@ const RoomDetailsView = () => {
             </Typography>
           </Box>
           <Divider sx={{ bgcolor: colors.gray[300] }} />
-          <Box p="10px">
-            <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
-              Food Texture
-            </Typography>
-            <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-              {roomDetails?.food_texture || "-"}
-            </Typography>
-          </Box>
-          <Divider sx={{ bgcolor: colors.gray[300] }} />
-          <Box p="10px">
-            <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
-              Special Instructions
-            </Typography>
-            <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-              {roomDetails?.special_instrucations || "-"}
-            </Typography>
-          </Box>
-          <Divider sx={{ bgcolor: colors.gray[300] }} />
+          {roomDetails?.food_texture && (
+            <>
+              <Box p="10px">
+                <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
+                  Food Texture
+                </Typography>
+                <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
+                  {roomDetails?.food_texture || "-"}
+                </Typography>
+              </Box>
+              <Divider sx={{ bgcolor: colors.gray[300] }} />
+            </>
+          )}
+          {roomDetails?.special_instrucations && (
+            <>
+              <Box p="10px">
+                <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
+                  Special Instructions
+                </Typography>
+                <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
+                  {roomDetails?.special_instrucations || "-"}
+                </Typography>
+              </Box>
+              <Divider sx={{ bgcolor: colors.gray[300] }} />
+            </>
+          )}
           <Box p="10px">
             <Typography color={colors.gray[100]} variant="h3" fontWeight="600" mb="10px">
               Active
