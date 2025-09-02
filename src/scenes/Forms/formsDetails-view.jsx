@@ -43,7 +43,7 @@ const FormsDetailsView = () => {
     return (
         <Box m="20px">
             <Header
-                title="Form Details View"
+                title="View Form Type"
                 icon={<DynamicFormOutlined />}
                 Buttons={false}
                 ActionButton={true}
