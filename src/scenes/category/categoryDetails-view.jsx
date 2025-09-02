@@ -88,16 +88,18 @@ const CategoryDetailsView = () => {
                     </Box>
                     <Divider sx={{ bgcolor: colors.gray[300] }} />
                     {categoryDetails?.category_chinese_name && (
-                        <Box p="10px">
-                            <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
-                                Course Chinese Name
-                            </Typography>
-                            <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                                {categoryDetails?.category_chinese_name || ""}
-                            </Typography>
-                        </Box>
+                        <>
+                            <Box p="10px">
+                                <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
+                                    Course Chinese Name
+                                </Typography>
+                                <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
+                                    {categoryDetails?.category_chinese_name || ""}
+                                </Typography>
+                            </Box>
+                            <Divider sx={{ bgcolor: colors.gray[300] }} />
+                        </>
                     )}
-                    <Divider sx={{ bgcolor: colors.gray[300] }} />
                     <Box p="10px">
                         <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
                             Meal Type
