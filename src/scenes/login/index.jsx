@@ -39,18 +39,20 @@ const Login = () => {
     try {
       setLoading(true);
       let response = await AuthServices.login(formData);
-      const { access_token, user } = response;
+      if (response.error) {
+        toast.error(response.error);
+      } else {
+        const { access_token, user } = response;
+        // console.log("response", access_token, user);
+        localStorage.setItem("authToken", access_token);
+        localStorage.setItem("userData", JSON.stringify(user));
 
-      // console.log("response", access_token, user);
-      localStorage.setItem("authToken", access_token);
-      localStorage.setItem("userData", JSON.stringify(user));
-
-      toast.success("Login Successfully!");
-
-      // Delay navigation to ensure toast is displayed
-      setTimeout(() => {
-        navigate("/");
-      }, 1000);
+        toast.success("Login Successfully!");
+        // Delay navigation to ensure toast is displayed
+        setTimeout(() => {
+          navigate("/");
+        }, 1000);
+      }
     } catch (error) {
       hasError = true;
       console.error("Error processing login:", error);
