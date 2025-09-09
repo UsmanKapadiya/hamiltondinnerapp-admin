@@ -237,7 +237,7 @@ const RoleDetailsForm = () => {
                       module = "Form";
                     } else if (module === "FormDetails") {
                       module = "FormDetails";
-                    } else if (["Room", "Category", "Item", "Menus", "Settings", "Roles", "Users", "OrderDetails"].includes(module)) {
+                    } else if (["Room", "Category", "Item", "Menus", "Settings", "Roles", "Users", "Order"].includes(module)) {
                       module += "Details";
                     }
                     if (module === "Options") module = "ItemOptions";
@@ -262,14 +262,24 @@ const RoleDetailsForm = () => {
                   >
                     <AccordionSummary
                       expandIcon={expanded[module] ? <ExpandLessOutlined /> : <ExpandMoreOutlined />}
-                      sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: theme.palette.mode === 'dark' ? colors.primary[200] : '#e0e0e0', color:colors.primary[500], borderRadius: 2, mt:2 }}
+                      sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: theme.palette.mode === 'dark' ? colors.primary[200] : '#e0e0e0', color: colors.primary[500], borderRadius: 2, mt: 2 }}
                     >
                       <Typography variant="subtitle1" fontWeight="bold">
-                        {module === 'RoomDetails'
-                          ? 'Resident Details'
-                          : module === 'CategoryDetails'
-                            ? 'Course Details'
-                            : module.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                        {(() => {
+                          const moduleMap = {
+                            RoomDetails: 'Resident Details',
+                            ItemDetails: 'Menu Item Details',
+                            ItemOptions: 'Menu Item Options',
+                            ItemPreference: 'Menu Item Preferences',
+                            MenusDetails: 'Menu Details',
+                            SettingsDetails: 'Settings',
+                            RolesDetails: 'Roles',
+                            UsersDetails: 'Users',
+                            Form: 'Form Types',
+                            CategoryDetails: 'Course Details',
+                          };
+                          return moduleMap[module] || module.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+                        })()}
                       </Typography>
                     </AccordionSummary>
                     <AccordionDetails>

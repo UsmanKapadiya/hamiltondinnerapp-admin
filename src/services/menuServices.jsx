@@ -8,7 +8,6 @@ const MenuServices = {
     return requests.post(`/menus`, formData);
   },
   updateMenus: async (id, formData) => {
-    console.log(id)
     return requests.put(`/menus/${id}`, formData);
   },
   deleteMenus: async (id) => {
