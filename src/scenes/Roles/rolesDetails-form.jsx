@@ -248,59 +248,82 @@ const RoleDetailsForm = () => {
                   return groups;
                 }
                 const grouped = groupPermissionsByModule(permissionsList);
+                // Custom display order
+                const displayOrder = [
+                  'MenusDetails',
+                  'ItemDetails',
+                  'ItemOptions',
+                  'ItemPreference',
+                  'CategoryDetails',
+                  'RoomDetails',
+                  'OrderDetails',
+                  'UsersDetails',
+                  'RolesDetails',
+                  'Form',
+                  'SettingsDetails',
+                ];
                 // Track expanded panels
                 const [expanded, setExpanded] = useState({});
                 const handleAccordionChange = (panel) => (event, isExpanded) => {
                   setExpanded((prev) => ({ ...prev, [panel]: isExpanded }));
                 };
-                return Object.entries(grouped).map(([module, perms]) => (
-                  <Accordion
-                    key={module}
-                    sx={{ mb: 2, backgroundColor: theme.palette.mode === 'dark' ? colors.primary[400] : '#f5f5f5', borderRadius: 2 }}
-                    expanded={expanded[module] !== undefined ? expanded[module] : true}
-                    onChange={handleAccordionChange(module)}
-                  >
-                    <AccordionSummary
-                      expandIcon={expanded[module] ? <ExpandLessOutlined /> : <ExpandMoreOutlined />}
-                      sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: theme.palette.mode === 'dark' ? colors.primary[200] : '#e0e0e0', color: colors.primary[500], borderRadius: 2, mt: 2 }}
+                // Sort modules by displayOrder, then append any others
+                const sortedModules = [
+                  ...displayOrder.filter((key) => grouped[key]),
+                  ...Object.keys(grouped).filter((key) => !displayOrder.includes(key)),
+                ];
+                return sortedModules.map((module) => {
+                  const perms = grouped[module];
+                  return (
+                    <Accordion
+                      key={module}
+                      sx={{ mb: 2, backgroundColor: theme.palette.mode === 'dark' ? colors.primary[400] : '#f5f5f5', borderRadius: 2 }}
+                      expanded={expanded[module] !== undefined ? expanded[module] : true}
+                      onChange={handleAccordionChange(module)}
                     >
-                      <Typography variant="subtitle1" fontWeight="bold">
-                        {(() => {
-                          const moduleMap = {
-                            RoomDetails: 'Resident Details',
-                            ItemDetails: 'Menu Item Details',
-                            ItemOptions: 'Menu Item Options',
-                            ItemPreference: 'Menu Item Preferences',
-                            MenusDetails: 'Menu Details',
-                            SettingsDetails: 'Settings',
-                            RolesDetails: 'Roles',
-                            UsersDetails: 'Users',
-                            Form: 'Form Types',
-                            CategoryDetails: 'Course Details',
-                          };
-                          return moduleMap[module] || module.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
-                        })()}
-                      </Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <FormGroup>
-                        {perms.map((item) => (
-                          <FormControlLabel
-                            key={item.id}
-                            control={
-                              <Checkbox
-                                checked={item.checked}
-                                onChange={() => togglePermission(item.id)}
-                                color="secondary"
-                              />
-                            }
-                            label={item.display_name}
-                          />
-                        ))}
-                      </FormGroup>
-                    </AccordionDetails>
-                  </Accordion>
-                ));
+                      <AccordionSummary
+                        expandIcon={expanded[module] ? <ExpandLessOutlined /> : <ExpandMoreOutlined />}
+                        sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: theme.palette.mode === 'dark' ? colors.primary[200] : '#e0e0e0', color: colors.primary[500], borderRadius: 2, mt: 2 }}
+                      >
+                        <Typography variant="subtitle1" fontWeight="bold">
+                          {(() => {
+                            const moduleMap = {
+                              RoomDetails: 'Resident Details',
+                              ItemDetails: 'Menu Item Details',
+                              ItemOptions: 'Menu Item Options',
+                              ItemPreference: 'Menu Item Preferences',
+                              MenusDetails: 'Menu Details',
+                              SettingsDetails: 'Settings',
+                              RolesDetails: 'Roles',
+                              UsersDetails: 'Users',
+                              Form: 'Form Types',
+                              CategoryDetails: 'Course Details',
+                              OrderDetails: 'Order Details',
+                            };
+                            return moduleMap[module] || module.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+                          })()}
+                        </Typography>
+                      </AccordionSummary>
+                      <AccordionDetails>
+                        <FormGroup>
+                          {perms.map((item) => (
+                            <FormControlLabel
+                              key={item.id}
+                              control={
+                                <Checkbox
+                                  checked={item.checked}
+                                  onChange={() => togglePermission(item.id)}
+                                  color="secondary"
+                                />
+                              }
+                              label={item.display_name}
+                            />
+                          ))}
+                        </FormGroup>
+                      </AccordionDetails>
+                    </Accordion>
+                  );
+                });
               })()}
 
               <Box display="flex" justifyContent="flex-end" mt={4}>
