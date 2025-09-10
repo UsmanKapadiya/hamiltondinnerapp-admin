@@ -115,7 +115,9 @@ const MenuDetails = () => {
 
   const handleDelete = useCallback((data) => {
     setSelectedId(data?.id);
-    setSelectedMenuName(data?.menu_name);
+    const dateObj = new Date(data.date);
+    const formattedDate = `${dateObj.getDate().toString().padStart(2, "0")}-${(dateObj.getMonth() + 1).toString().padStart(2, "0")}-${dateObj.getFullYear()}`;
+    setSelectedMenuName(formattedDate);
     setDialogOpen(true);
   }, []);
 
@@ -328,7 +330,7 @@ const MenuDetails = () => {
             message={
               selectedIds.length > 0 && !selectedMenuName
                 ? `Are you sure you want to delete ${selectedIds.length} items?`
-                : `Are you sure you want to delete the menu "${selectedMenuName}"?`
+                : `Are you sure you want to delete the menu "${selectedMenuName}" ?`
             }
             onConfirm={confirmDelete}
             onCancel={cancelDelete}

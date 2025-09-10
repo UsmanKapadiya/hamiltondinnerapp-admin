@@ -17,7 +17,6 @@ import { toast } from "react-toastify";
 import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
 
 const validationSchema = yup.object().shape({
-  menu_name: yup.string().required("Menu Name is required"),
   date: yup.string().required("Date is required"),
 });
 
@@ -157,7 +156,6 @@ const MenuDetailsForm = () => {
 
   const initialValues = useMemo(() => ({
     id: optionsDetails?.id,
-    menu_name: optionsDetails?.menu_name || "",
     date: optionsDetails?.date || "",
     breakfast: optionsDetails?.items?.breakfast?.length > 0,
     lunch: optionsDetails?.items?.lunch?.length > 0,
@@ -257,26 +255,12 @@ const MenuDetailsForm = () => {
                 },
               }}
             >
-              {/* <TextField
-                fullWidth
-                variant="filled"
-                type="text"
-                label="Menu Name"
-                onBlur={handleBlur}
-                onChange={handleChange}
-                value={values.menu_name}
-                name="menu_name"
-                error={touched.menu_name && Boolean(errors.menu_name)}
-                helperText={touched.menu_name && errors.menu_name}
-                sx={{ gridColumn: "span 1" }}
-              /> */}
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
                   label="Date"
                   value={values.date ? dayjs(values.date) : null}
                   onChange={(newValue) => {
                     setFieldValue("date", newValue ? newValue.format("YYYY-MM-DD") : "");
-                    setFieldValue("menu_name", newValue ? newValue.format("YYYY-MM-DD") : "");
                   }}
                   minDate={dayjs()}
                   slotProps={{

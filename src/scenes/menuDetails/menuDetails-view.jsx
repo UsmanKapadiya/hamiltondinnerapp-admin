@@ -66,14 +66,6 @@ const MenuDetailsView = () => {
                     bgcolor={colors.primary[400]}
                     overflow="auto"
                 >
-                    {/* <Box p="10px">
-                        <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
-                            Menu Name
-                        </Typography>
-                        <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                            {menuDetails?.menu_name}
-                        </Typography>
-                    </Box> */}
                     <Divider sx={{ bgcolor: colors.gray[300] }} />
                     <Box p="10px">
                         <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
@@ -150,9 +142,9 @@ const MenuDetailsView = () => {
                                 </Box>
                             </Box>
                         )}
-                  
+
                         {/* Dinner Section */}
-                           {menuDetails?.items?.dinner?.length > 0 && (
+                        {menuDetails?.items?.dinner?.length > 0 && (
                             <Box ml="10px" mt="15px">
                                 <Typography color={colors.gray[100]} variant="h4" fontWeight="600">
                                     Dinner:
@@ -178,7 +170,7 @@ const MenuDetailsView = () => {
                                     })}
                                 </Box>
                             </Box>
-                        )}                        
+                        )}
                         {/* Advanced Lunch Section */}
                         {(menuDetails?.selectedLunchItems?.lunchSoup?.length > 0 ||
                             menuDetails?.selectedLunchItems?.lunchEntree?.length > 0 ||
