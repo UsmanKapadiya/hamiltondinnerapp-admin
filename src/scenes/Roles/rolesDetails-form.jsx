@@ -18,7 +18,6 @@ import { setPermissionList } from "../../redux/action/permissionAction";
 // Yup validation schema
 const validationSchema = yup.object().shape({
   name: yup.string().required("Name is required"),
-  display_name: yup.string().required("Display Name is required"),
 });
 
 const RoleDetailsForm = () => {
@@ -35,7 +34,6 @@ const RoleDetailsForm = () => {
   const [roleDetails, setRoleDetails] = useState({
     id: "",
     name: "",
-    display_name: "",
     permissions: [],
   });
 
@@ -59,7 +57,6 @@ const RoleDetailsForm = () => {
         setRoleDetails({
           id: role.id || "",
           name: role.name || "",
-          display_name: role.display_name || "",
           permissions: selectedPerms,
         });
       } catch (error) {
@@ -175,18 +172,6 @@ const RoleDetailsForm = () => {
                   helperText={touched.name && errors.name}
                   sx={{ gridColumn: "span 4" }}
                 />
-                <TextField
-                  fullWidth
-                  variant="filled"
-                  label="Display Name"
-                  name="display_name"
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  value={values.display_name}
-                  error={touched.display_name && Boolean(errors.display_name)}
-                  helperText={touched.display_name && errors.display_name}
-                  sx={{ gridColumn: "span 4" }}
-                />
                 <Typography variant="h5" fontWeight="600" color={colors.gray[100]} sx={{ gridColumn: "span 4" }}>
                   Permissions
                 </Typography>
@@ -210,23 +195,6 @@ const RoleDetailsForm = () => {
                   Deselect All
                 </Typography>
               </Box>
-
-              {/* <FormGroup sx={{ mt: 2 }}>
-                {permissionsList.map((item) => (
-                  <FormControlLabel
-                    key={item.id}
-                    control={
-                      <Checkbox
-                        checked={item.checked}
-                        onChange={() => togglePermission(item.id)}
-                        color="secondary"
-                      />
-                    }
-                    label={item.display_name}
-                  />
-                ))}
-              </FormGroup> */}
-
               {(() => {
                 function groupPermissionsByModule(permissions) {
                   const groups = {};

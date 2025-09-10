@@ -63,16 +63,7 @@ const RolesDetailsView = () => {
                         <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
                             {roleDetails?.name || "-"}
                         </Typography>
-                    </Box>
-                    <Divider sx={{ bgcolor: colors.gray[300] }} />
-                    <Box p="10px">
-                        <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
-                            Display Name
-                        </Typography>
-                        <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
-                            {roleDetails?.display_name || "-"}
-                        </Typography>
-                    </Box>
+                    </Box>                                
                 </Box>
             )}
         </Box>

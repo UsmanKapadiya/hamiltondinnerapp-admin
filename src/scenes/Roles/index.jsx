@@ -114,6 +114,7 @@ const Roles = () => {
   const cancelDelete = () => {
     setDialogOpen(false);
     setSelectedId(null);
+    setSelectedRoleName('')
   };
 
   const handleView = useCallback((id) => {
@@ -149,14 +150,12 @@ const Roles = () => {
   const filteredRoles = useMemo(() => {
     return roleList.filter(
       (row) =>
-        row.name?.toLowerCase().includes(searchText.toLowerCase()) ||
-        row.display_name?.toLowerCase().includes(searchText.toLowerCase())
+        row.name?.toLowerCase().includes(searchText.toLowerCase())
     );
   }, [roleList, searchText]);
 
   const columns = useMemo(() => [
     { field: "name", headerName: "Name", flex: 1 },
-    { field: "display_name", headerName: "Display", flex: 1 },
     {
       field: "actions",
       headerName: "Actions",
@@ -232,7 +231,7 @@ const Roles = () => {
         }}>
           <Box display="flex" alignItems="center" bgcolor={colors.primary[400]} borderRadius="3px" mb="10px">
             <InputBase
-              placeholder="Search by Role Name, or Display Name..."
+              placeholder="Search by Role Name"
               sx={{ ml: 2, flex: 1 }}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
