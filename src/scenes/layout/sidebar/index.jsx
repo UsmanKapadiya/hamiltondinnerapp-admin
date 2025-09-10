@@ -264,7 +264,7 @@ const SideBar = () => {
           />
 
           <Item
-            title="Forms"
+            title="Form Types"
             path="/forms"
             colors={colors}
             icon={<DynamicFormOutlined />}

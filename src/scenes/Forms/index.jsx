@@ -229,7 +229,7 @@ const Forms = () => {
     return (
         <Box m="20px">
             <Header
-                title="Forms"
+                title="Form Types"
                 icon={<DynamicFormOutlined />}
                 addNewClick={handleAddNewClick}
                 addBulkDelete={handleBulkDelete}
