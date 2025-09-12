@@ -146,23 +146,23 @@ const ItemDetailsView = () => {
             </Typography>
           </Box> */}
           <Divider sx={{ bgcolor: colors.gray[300] }} />
-          <Box p="10px">
-            <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
-              Menu Item Image
-            </Typography>
-            {itemDetails?.item_image ? (
-              <img
-                src={itemDetails.item_image}
-                alt="Item"
-                style={{ maxWidth: "200px", maxHeight: "200px", borderRadius: 8, marginTop: 8 }}
-              />
-            ) : (
-              <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
+          {itemDetails?.item_image && (
+            <>
+              <Box p="10px">
+                <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
+                  Menu Item Image
+                </Typography>
+                <img
+                  src={itemDetails.item_image}
+                  alt="Item"
+                  style={{ maxWidth: "200px", maxHeight: "200px", borderRadius: 8, marginTop: 8 }}
+                />
 
-              </Typography>
-            )}
-          </Box>
-          <Divider sx={{ bgcolor: colors.gray[300] }} />
+              </Box>
+              <Divider sx={{ bgcolor: colors.gray[300] }} />
+            </>
+          )}
+
           {optionNames && (
             <>
               <Box p="10px">
