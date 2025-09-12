@@ -218,6 +218,7 @@ const RoleDetailsForm = () => {
                 const grouped = groupPermissionsByModule(permissionsList);
                 // Custom display order
                 const displayOrder = [
+                  'Admin',
                   'MenusDetails',
                   'ItemDetails',
                   'ItemOptions',
@@ -267,6 +268,7 @@ const RoleDetailsForm = () => {
                               Form: 'Form Types',
                               CategoryDetails: 'Course Details',
                               OrderDetails: 'Order Details',
+                              Admin: 'Admin Panel'
                             };
                             return moduleMap[module] || module.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
                           })()}

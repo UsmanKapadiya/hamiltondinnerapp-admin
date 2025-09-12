@@ -43,15 +43,18 @@ const Login = () => {
         toast.error(response.error);
       } else {
         const { access_token, user } = response;
-        // console.log("response", access_token, user);
-        localStorage.setItem("authToken", access_token);
-        localStorage.setItem("userData", JSON.stringify(user));
-
-        toast.success("Login Successfully!");
-        // Delay navigation to ensure toast is displayed
-        setTimeout(() => {
-          navigate("/");
-        }, 1000);
+        console.log("response", response?.permissions?.browse_Admin);
+        if (response?.permissions?.browse_Admin === 1) {
+          localStorage.setItem("authToken", access_token);
+          localStorage.setItem("userData", JSON.stringify(user));
+          toast.success("Login Successfully!");
+          // Delay navigation to ensure toast is displayed
+          setTimeout(() => {
+            navigate("/");
+          }, 1000);
+        } else {
+          toast.warning("You don't have permission to access Admin Panel");
+        }
       }
     } catch (error) {
       hasError = true;
