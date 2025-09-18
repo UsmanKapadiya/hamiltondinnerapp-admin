@@ -20,8 +20,15 @@ const CustomTabPanel = ({ children, value, index }) => {
 };
 
 const validationSchema = yup.object().shape({
-  siteGuidelines: yup.string().required("Site Guidelines are required"),
-  siteGuidelinesChinese: yup.string().required("Site Guidelines (Chinese) are required"),
+  // siteGuidelines: yup.string().required("Site Guidelines are required"),
+  // siteGuidelinesChinese: yup.string().required("Site Guidelines (Chinese) are required"),
+
+  breakfast_guideline: yup.string().required("BreakFast Guidelines are required"),
+  breakfast_guideline_cn: yup.string().required("BreakFast Guidelines (Chinese) are required"),
+  lunch_guideline: yup.string().required("Lunch Guidelines are required"),
+  lunch_guideline_cn: yup.string().required("Lunch Guidelines (Chinese) are required"),
+  dinner_guideline: yup.string().required("Dinner Guidelines are required"),
+  dinner_guideline_cn: yup.string().required("Dinner Guidelines (Chinese) are required"),
 });
 
 const Setting = () => {
@@ -37,9 +44,17 @@ const Setting = () => {
   }, []);
 
   // Add this state to hold your initial values
+  // const [initialValues, setInitialValues] = useState({
+  //   siteGuidelines: "",
+  //   siteGuidelinesChinese: "",
+  // });
   const [initialValues, setInitialValues] = useState({
-    siteGuidelines: "",
-    siteGuidelinesChinese: "",
+    breakfast_guideline: "",
+    breakfast_guideline_cn: "",
+    lunch_guideline: "",
+    lunch_guideline_cn: "",
+    dinner_guideline: "",
+    dinner_guideline_cn: "",
   });
 
   // Memoize permissions for performance
@@ -53,13 +68,28 @@ const Setting = () => {
     try {
       const response = await SettingServices.getSettings();
       setSetting(response?.data)
-      const appMsg = response?.data.find(item => item.key === "site.app_msg");
-      const appMsgCn = response?.data.find(item => item.key === "site.app_msg_cn");
+      // const appMsg = response?.data.find(item => item.key === "site.app_msg");
+      // const appMsgCn = response?.data.find(item => item.key === "site.app_msg_cn");
+
+      const breakfastMsg = response?.data.find(item => item.key === "site.app_breakfast_msg");
+      const breakfasMsgCn = response?.data.find(item => item.key === "site.app_breakfast_msg_cn");
+      const lunchMsg = response?.data.find(item => item.key === "site.app_lunch_msg");
+      const lunchMsgCn = response?.data.find(item => item.key === "site.app_lunch_msg_cn");
+      const dinnerMsg = response?.data.find(item => item.key === "site.app_dinner_msg");
+      const dinnerMsgCn = response?.data.find(item => item.key === "site.app_dinner_msg_cn");
+
       // console.log(appMsg?.value)
       // console.log(appMsgCn?.value)
       setInitialValues({
-        siteGuidelines: appMsg?.value || "test", //Chocolate Chip Cookies can served as snacks.
-        siteGuidelinesChinese: appMsgCn?.value || "dummy",//巧克力曲奇可以当零食吃。
+        // siteGuidelines: appMsg?.value || "test", //Chocolate Chip Cookies can served as snacks.
+        // siteGuidelinesChinese: appMsgCn?.value || "dummy",//巧克力曲奇可以当零食吃。
+
+        breakfast_guideline: breakfastMsg?.value || "",
+        breakfast_guideline_cn: breakfasMsgCn?.value || "",
+        lunch_guideline: lunchMsg?.value || "",
+        lunch_guideline_cn: lunchMsgCn?.value || "",
+        dinner_guideline: dinnerMsg?.value || "",
+        dinner_guideline_cn: dinnerMsgCn?.value || "",
       });
     } catch (error) {
       console.error("Error fetching room list:", error);
@@ -71,40 +101,30 @@ const Setting = () => {
 
   const handleFormSubmit = async (values, actions) => {
     setLoading(true);
-    const appMsg = setting.find(item => item.key === "site.app_msg");
-    const appMsgCn = setting.find(item => item.key === "site.app_msg_cn");
+    // Find the original setting objects
+    const breakfastMsg = setting?.find(item => item.key === "site.app_breakfast_msg");
+    const breakfasMsgCn = setting?.find(item => item.key === "site.app_breakfast_msg_cn");
+    const lunchMsg = setting?.find(item => item.key === "site.app_lunch_msg");
+    const lunchMsgCn = setting.find(item => item.key === "site.app_lunch_msg_cn");
+    const dinnerMsg = setting.find(item => item.key === "site.app_dinner_msg");
+    const dinnerMsgCn = setting.find(item => item.key === "site.app_dinner_msg_cn");
 
     const payload = [
-      {
-        "id": appMsg?.id || "",
-        "key": "site.app_msg",
-        "display_name": "Guidelines",
-        "value": values?.siteGuidelines,
-        "details": "The name of the application", //now static set because db in compalsary
-        "type": "text", //now static set because db in compalsary
-        "order": 1, //now static set because db in compalsary
-        "group": "general" //now static set because db in compalsary
-      }, {
-        "id": appMsgCn?.id || "",
-        "key": "site.app_msg_cn",
-        "display_name": "Guidelines Chinese",
-        "value": values?.siteGuidelinesChinese,
-        "details": "The name of the application",
-        "type": "text",
-        "order": 1,
-        "group": "general"
-      }]
-    // console.log(payload)
+      breakfastMsg ? { ...breakfastMsg, value: values.breakfast_guideline } : null,
+      breakfasMsgCn ? { ...breakfasMsgCn, value: values.breakfast_guideline_cn } : null,
+      lunchMsg ? { ...lunchMsg, value: values.lunch_guideline } : null,
+      lunchMsgCn ? { ...lunchMsgCn, value: values.lunch_guideline_cn } : null,
+      dinnerMsg ? { ...dinnerMsg, value: values.dinner_guideline } : null,
+      dinnerMsgCn ? { ...dinnerMsgCn, value: values.dinner_guideline_cn } : null,
+    ].filter(Boolean);
+
     try {
       let response;
-      if (appMsg?.id && appMsgCn?.id) {
-        // console.log("update call")
+      if (payload.length > 0) {
         response = await SettingServices.updateSettings(payload);
         toast.success("Setting updated successfully!");
       } else {
-        // console.log("create call")
-        response = await SettingServices.createSettings(payload);
-        toast.success("Setting created successfully!");
+        toast.error("No settings found to update.");
       }
     } catch (error) {
       const errors = error?.response?.data?.errors;
@@ -116,9 +136,6 @@ const Setting = () => {
     } finally {
       setLoading(false);
     }
-    // actions.resetForm({
-    //   values: initialValues,
-    // });
   };
 
 
@@ -266,7 +283,7 @@ const Setting = () => {
                     </Box>
 
                     {/* Site Guidelines   */}
-                    <Box
+                    {/* <Box
                       display="grid"
                       gap="20px"
                       mt="20px"
@@ -310,49 +327,7 @@ const Setting = () => {
                           sx={{ gridColumn: "span 2" }}
                         />
                       </Box>
-                      {/* Right Side Dropdown */}
-                      {/* <Box
-                      display="flex"
-                      flexDirection="column"
-                      alignItems="flex-end" // Align content to the left
-                      justifyContent="flex-start"
-                      sx={{ gridColumn: "span 2" }}
-                      flex={1}
-                    >
-                      <Box
-                        display="flex"
-                        justifyContent="flex-end" // Align buttons to the right
-                        alignItems="flex-end"
-                        gap="10px" // Small gap between buttons
-                        mb="10px"
-                        mt="10px"
-                      >
-                        <ArrowUpwardOutlined sx={{ color: colors.gray[100] }} />
-                        <ArrowDownwardOutlined sx={{ color: colors.gray[100] }} />
-                        <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
-                      </Box>
-
-                      <Autocomplete
-                        fullWidth // Makes the dropdown full width
-                        options={mockDataSiteRole}
-                        getOptionLabel={(option) => option.label} // Ensure proper label rendering
-                        value={mockDataSiteRole.find((option) => option.label === values.siteGuidelinesOptions) || null}
-                        onChange={(event, newValue) => {
-                          setFieldValue("siteGuidelinesOptions", newValue ? newValue.label : ""); // Fix selection issue
-                        }}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            variant="filled"
-                            error={touched.siteGuidelinesOptions && Boolean(errors.siteGuidelinesOptions)}
-                            helperText={touched.siteGuidelinesOptions && errors.siteGuidelinesOptions}
-                          />
-                        )}
-                        sx={{ gridColumn: "span 4" }}
-                      />
-                    </Box> */}
                     </Box>
-                    {/* Site Guidelines Chinese  */}
                     <Box
                       display="grid"
                       gap="20px"
@@ -397,49 +372,284 @@ const Setting = () => {
                           sx={{ gridColumn: "span 2" }}
                         />
                       </Box>
-                      {/* Right Side Dropdown */}
-                      {/* <Box
-                      display="flex"
-                      flexDirection="column"
-                      alignItems="flex-end" // Align content to the left
-                      justifyContent="flex-start"
-                      sx={{ gridColumn: "span 2" }}
-                      flex={1}
-                    >
-                      <Box
-                        display="flex"
-                        justifyContent="flex-end" // Align buttons to the right
-                        alignItems="flex-end"
-                        gap="10px" // Small gap between buttons
-                        mb="10px"
-                        mt="10px"
-                      >
-                        <ArrowUpwardOutlined sx={{ color: colors.gray[100] }} />
-                        <ArrowDownwardOutlined sx={{ color: colors.gray[100] }} />
-                        <DeleteOutlined sx={{ color: colors.redAccent[500] }} />
-                      </Box>
 
-                      <Autocomplete
-                        fullWidth // Makes the dropdown full width
-                        options={mockDataSiteRole}
-
-                        getOptionLabel={(option) => option.label} // Ensure proper label rendering
-                        value={mockDataSiteRole.find((option) => option.label === values.siteGuidelinesChineseOptions) || null}
-                        onChange={(event, newValue) => {
-                          setFieldValue("siteGuidelinesChineseOptions", newValue ? newValue.label : ""); // Fix selection issue
-                        }}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            variant="filled"
-                            error={touched.siteGuidelinesChineseOptions && Boolean(errors.siteGuidelinesChineseOptions)}
-                            helperText={touched.siteGuidelinesChineseOptions && errors.siteGuidelinesChineseOptions}
-                          />
-                        )}
-                        sx={{ gridColumn: "span 4" }}
-                      />
                     </Box> */}
-                    </Box>
+                    <>
+                      <Box
+                        display="grid"
+                        gap="20px"
+                        mt="20px"
+                        gridTemplateColumns="repeat(12, 1fr)"
+                      >
+                        <Box
+                          display="flex"
+                          sx={{ gridColumn: "span 12" }}
+                          flexDirection="column"
+                          alignItems="flex-start" // Align content to the left
+                          justifyContent="flex-start"
+                          flex={1}
+                        >
+                          <Typography color={colors.gray[100]} mb="20px" fontWeight="500">
+                            BreakFast Guidelines
+                            <Box
+                              component="span"
+                              ml="5px"
+                              sx={{
+                                color: `red`,
+                                padding: "2px 4px",
+                                borderRadius: "4px",
+                              }}
+                            >
+                              setting('site.app_msg')
+                            </Box>
+                          </Typography>
+                          <TextField
+                            fullWidth
+                            variant="filled"
+                            type="text"
+                            multiline // Enables textarea functionality
+                            rows={4} // Sets the number of visible rows
+                            onBlur={handleBlur}
+                            onChange={handleChange}
+                            value={values.breakfast_guideline}
+                            name="breakfast_guideline"
+                            error={touched.breakfast_guideline && Boolean(errors.breakfast_guideline)}
+                            helperText={touched.breakfast_guideline && errors.breakfast_guideline}
+                            disabled={!canAdd && !canEdit}
+                            sx={{ gridColumn: "span 2" }}
+                          />
+                        </Box>
+                      </Box>
+                      <Box
+                        display="grid"
+                        gap="20px"
+                        mt="20px"
+                        gridTemplateColumns="repeat(12, 1fr)" //8
+                      >
+                        <Box
+                          display="flex"
+                          sx={{ gridColumn: "span 12" }} // "span 6"
+                          flexDirection="column"
+                          alignItems="flex-start" // Align content to the left
+                          justifyContent="flex-start"
+                          flex={1}
+                        >
+                          <Typography color={colors.gray[100]} mb="20px" fontWeight="500">
+                            BreakFast Guidelines Chinese
+                            <Box
+                              component="span"
+                              ml="5px"
+                              sx={{
+                                color: `red`,
+                                padding: "2px 4px",
+                                borderRadius: "4px",
+                              }}
+                            >
+                              setting('site.app_msg_cn')
+                            </Box>
+                          </Typography>
+                          <TextField
+                            fullWidth
+                            variant="filled"
+                            type="text"
+                            multiline // Enables textarea functionality
+                            rows={4} // Sets the number of visible rows
+                            onBlur={handleBlur}
+                            onChange={handleChange}
+                            value={values.breakfast_guideline_cn}
+                            name="breakfast_guideline_cn"
+                            disabled={!canAdd && !canEdit}
+                            error={touched.breakfast_guideline_cn && Boolean(errors.breakfast_guideline_cn)}
+                            helperText={touched.breakfast_guideline_cn && errors.breakfast_guideline_cn}
+                            sx={{ gridColumn: "span 2" }}
+                          />
+                        </Box>
+
+                      </Box>
+                      {/* Lunch */}
+                      <Box
+                        display="grid"
+                        gap="20px"
+                        mt="20px"
+                        gridTemplateColumns="repeat(12, 1fr)"
+                      >
+                        <Box
+                          display="flex"
+                          sx={{ gridColumn: "span 12" }}
+                          flexDirection="column"
+                          alignItems="flex-start" // Align content to the left
+                          justifyContent="flex-start"
+                          flex={1}
+                        >
+                          <Typography color={colors.gray[100]} mb="20px" fontWeight="500">
+                            Lunch Guidelines
+                            <Box
+                              component="span"
+                              ml="5px"
+                              sx={{
+                                color: `red`,
+                                padding: "2px 4px",
+                                borderRadius: "4px",
+                              }}
+                            >
+                              setting('site.app_msg')
+                            </Box>
+                          </Typography>
+                          <TextField
+                            fullWidth
+                            variant="filled"
+                            type="text"
+                            multiline // Enables textarea functionality
+                            rows={4} // Sets the number of visible rows
+                            onBlur={handleBlur}
+                            onChange={handleChange}
+                            value={values.lunch_guideline}
+                            name="lunch_guideline"
+                            error={touched.lunch_guideline && Boolean(errors.lunch_guideline)}
+                            helperText={touched.lunch_guideline && errors.lunch_guideline}
+                            disabled={!canAdd && !canEdit}
+                            sx={{ gridColumn: "span 2" }}
+                          />
+                        </Box>
+                      </Box>
+                      <Box
+                        display="grid"
+                        gap="20px"
+                        mt="20px"
+                        gridTemplateColumns="repeat(12, 1fr)" //8
+                      >
+                        <Box
+                          display="flex"
+                          sx={{ gridColumn: "span 12" }} // "span 6"
+                          flexDirection="column"
+                          alignItems="flex-start" // Align content to the left
+                          justifyContent="flex-start"
+                          flex={1}
+                        >
+                          <Typography color={colors.gray[100]} mb="20px" fontWeight="500">
+                            Lunch Guidelines Chinese
+                            <Box
+                              component="span"
+                              ml="5px"
+                              sx={{
+                                color: `red`,
+                                padding: "2px 4px",
+                                borderRadius: "4px",
+                              }}
+                            >
+                              setting('site.app_msg_cn')
+                            </Box>
+                          </Typography>
+                          <TextField
+                            fullWidth
+                            variant="filled"
+                            type="text"
+                            multiline // Enables textarea functionality
+                            rows={4} // Sets the number of visible rows
+                            onBlur={handleBlur}
+                            onChange={handleChange}
+                            value={values.lunch_guideline_cn}
+                            name="lunch_guideline_cn"
+                            disabled={!canAdd && !canEdit}
+                            error={touched.lunch_guideline_cn && Boolean(errors.lunch_guideline_cn)}
+                            helperText={touched.lunch_guideline_cn && errors.lunch_guideline_cn}
+                            sx={{ gridColumn: "span 2" }}
+                          />
+                        </Box>
+                      </Box>
+                      {/* Dinner  */}
+                      <Box
+                        display="grid"
+                        gap="20px"
+                        mt="20px"
+                        gridTemplateColumns="repeat(12, 1fr)"
+                      >
+                        <Box
+                          display="flex"
+                          sx={{ gridColumn: "span 12" }}
+                          flexDirection="column"
+                          alignItems="flex-start" // Align content to the left
+                          justifyContent="flex-start"
+                          flex={1}
+                        >
+                          <Typography color={colors.gray[100]} mb="20px" fontWeight="500">
+                            Dinner Guidelines
+                            <Box
+                              component="span"
+                              ml="5px"
+                              sx={{
+                                color: `red`,
+                                padding: "2px 4px",
+                                borderRadius: "4px",
+                              }}
+                            >
+                              setting('site.app_msg')
+                            </Box>
+                          </Typography>
+                          <TextField
+                            fullWidth
+                            variant="filled"
+                            type="text"
+                            multiline // Enables textarea functionality
+                            rows={4} // Sets the number of visible rows
+                            onBlur={handleBlur}
+                            onChange={handleChange}
+                            value={values.dinner_guideline}
+                            name="dinner_guideline"
+                            error={touched.dinner_guideline && Boolean(errors.dinner_guideline)}
+                            helperText={touched.dinner_guideline && errors.dinner_guideline}
+                            disabled={!canAdd && !canEdit}
+                            sx={{ gridColumn: "span 2" }}
+                          />
+                        </Box>
+                      </Box>
+                      <Box
+                        display="grid"
+                        gap="20px"
+                        mt="20px"
+                        gridTemplateColumns="repeat(12, 1fr)" //8
+                      >
+                        <Box
+                          display="flex"
+                          sx={{ gridColumn: "span 12" }} // "span 6"
+                          flexDirection="column"
+                          alignItems="flex-start" // Align content to the left
+                          justifyContent="flex-start"
+                          flex={1}
+                        >
+                          <Typography color={colors.gray[100]} mb="20px" fontWeight="500">
+                            Dinner Guidelines Chinese
+                            <Box
+                              component="span"
+                              ml="5px"
+                              sx={{
+                                color: `red`,
+                                padding: "2px 4px",
+                                borderRadius: "4px",
+                              }}
+                            >
+                              setting('site.app_msg_cn')
+                            </Box>
+                          </Typography>
+                          <TextField
+                            fullWidth
+                            variant="filled"
+                            type="text"
+                            multiline // Enables textarea functionality
+                            rows={4} // Sets the number of visible rows
+                            onBlur={handleBlur}
+                            onChange={handleChange}
+                            value={values.dinner_guideline_cn}
+                            name="dinner_guideline_cn"
+                            disabled={!canAdd && !canEdit}
+                            error={touched.dinner_guideline_cn && Boolean(errors.dinner_guideline_cn)}
+                            helperText={touched.dinner_guideline_cn && errors.dinner_guideline_cn}
+                            sx={{ gridColumn: "span 2" }}
+                          />
+                        </Box>
+
+                      </Box>
+                    </>
                     {(canAdd || canEdit) && (
                       <Box
                         display="flex"
