@@ -400,7 +400,7 @@ const Setting = () => {
                                 borderRadius: "4px",
                               }}
                             >
-                              setting('site.app_msg')
+                              setting('site.app_breakfast_msg')
                             </Box>
                           </Typography>
                           <TextField
@@ -445,7 +445,7 @@ const Setting = () => {
                                 borderRadius: "4px",
                               }}
                             >
-                              setting('site.app_msg_cn')
+                              setting('site.app_breakfast_msg_cn')
                             </Box>
                           </Typography>
                           <TextField
@@ -492,7 +492,7 @@ const Setting = () => {
                                 borderRadius: "4px",
                               }}
                             >
-                              setting('site.app_msg')
+                              setting('site.app_lunch_msg')
                             </Box>
                           </Typography>
                           <TextField
@@ -537,7 +537,7 @@ const Setting = () => {
                                 borderRadius: "4px",
                               }}
                             >
-                              setting('site.app_msg_cn')
+                              setting('site.app_lunch_msg_cn')
                             </Box>
                           </Typography>
                           <TextField
@@ -583,7 +583,7 @@ const Setting = () => {
                                 borderRadius: "4px",
                               }}
                             >
-                              setting('site.app_msg')
+                              setting('site.app_dinner_msg')
                             </Box>
                           </Typography>
                           <TextField
@@ -628,7 +628,7 @@ const Setting = () => {
                                 borderRadius: "4px",
                               }}
                             >
-                              setting('site.app_msg_cn')
+                              setting('site.app_dinner_msg_cn')
                             </Box>
                           </Typography>
                           <TextField
