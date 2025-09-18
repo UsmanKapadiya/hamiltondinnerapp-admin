@@ -23,12 +23,13 @@ const validationSchema = yup.object().shape({
   // siteGuidelines: yup.string().required("Site Guidelines are required"),
   // siteGuidelinesChinese: yup.string().required("Site Guidelines (Chinese) are required"),
 
-  breakfast_guideline: yup.string().required("BreakFast Guidelines are required"),
-  breakfast_guideline_cn: yup.string().required("BreakFast Guidelines (Chinese) are required"),
-  lunch_guideline: yup.string().required("Lunch Guidelines are required"),
-  lunch_guideline_cn: yup.string().required("Lunch Guidelines (Chinese) are required"),
-  dinner_guideline: yup.string().required("Dinner Guidelines are required"),
-  dinner_guideline_cn: yup.string().required("Dinner Guidelines (Chinese) are required"),
+  // Validation Commented
+  // breakfast_guideline: yup.string().required("BreakFast Guidelines are required"),
+  // breakfast_guideline_cn: yup.string().required("BreakFast Guidelines (Chinese) are required"),
+  // lunch_guideline: yup.string().required("Lunch Guidelines are required"),
+  // lunch_guideline_cn: yup.string().required("Lunch Guidelines (Chinese) are required"),
+  // dinner_guideline: yup.string().required("Dinner Guidelines are required"),
+  // dinner_guideline_cn: yup.string().required("Dinner Guidelines (Chinese) are required"),
 });
 
 const Setting = () => {
