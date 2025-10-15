@@ -22,20 +22,21 @@ import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
 import RoomServices from "../../services/roomServices";
 import { toast } from "react-toastify";
 
+const residentSchema = yup.object({
+  resident_name: yup.string().required("Resident Name is required"),
+  language: yup.string().required("Language Preference is required"),
+  password: yup.string().required("Password is required").min(3, "Password must be at least 3 characters"),
+  food_texture: yup.string(),
+  special_instrucations: yup.string(),
+});
+
 const validationSchema = yup.object({
   room_name: yup.string().required("Unit Number is required"),
-  resident_name: yup.string().required("Resident Name is required"),
   occupancy: yup
     .number()
     .typeError("Occupancy must be a number")
     .required("Occupancy is required"),
-  password: yup
-    .string()
-    .required("Password is required")
-    .min(3, "Password must be at least 3 characters"),
-  language: yup.string().required("Language Preference is required"),
-  // food_texture: yup.string().required("Food Texture is required"),
-  // special_instrucations: yup.string(),
+  residents: yup.array().of(residentSchema),
   is_active: yup.boolean(),
 });
 
@@ -56,20 +57,36 @@ const RoomDetailsForm = () => {
     return () => clearTimeout(timer);
   }, [location.state]);
 
-  const initialValues = useMemo(
-    () => ({
+  const initialValues = useMemo(() => {
+    const occupancy = parseInt(roomDetails?.occupancy) || 1;
+    const residents = [];
+    for (let i = 0; i < occupancy; i++) {
+      if (roomDetails?.residents && roomDetails.residents[i]) {
+        residents.push({
+          resident_name: roomDetails.residents[i].resident_name || "",
+          language: roomDetails.residents[i].language?.toString() || "1",
+          password: roomDetails.residents[i].password || "",
+          food_texture: roomDetails.residents[i].food_texture || "",
+          special_instrucations: roomDetails.residents[i].special_instrucations || "",
+        });
+      } else {
+        residents.push({
+          resident_name: "",
+          language: "1",
+          password: "",
+          food_texture: "",
+          special_instrucations: "",
+        });
+      }
+    }
+    return {
       id: roomDetails?.id || "",
       room_name: roomDetails?.room_name || "",
-      resident_name: roomDetails?.resident_name || "",
-      occupancy: roomDetails?.occupancy || "1",
-      language: roomDetails?.language?.toString() || "1",
-      password: roomDetails?.password,
-      food_texture: roomDetails?.food_texture || "",
-      special_instrucations: roomDetails?.special_instrucations || "",
+      occupancy: occupancy,
+      residents,
       is_active: roomDetails?.is_active === 1 || roomDetails?.is_active === true || roomDetails?.id === undefined,
-    }),
-    [roomDetails]
-  );
+    };
+  }, [roomDetails]);
 
   const handleFormSubmit = useCallback(
     async (values, actions) => {
@@ -87,7 +104,6 @@ const RoomDetailsForm = () => {
           toast.success("Resident created successfully!");
           actions.resetForm({ values: initialValues });
         }
-        // After save, navigate to the room list to show latest data
         navigate("/resident-details");
       } catch (error) {
         toast.error("Failed to process resident. Please try again.");
@@ -163,117 +179,120 @@ const RoomDetailsForm = () => {
                 <TextField
                   fullWidth
                   variant="filled"
-                  type="text"
-                  label="Resident Name"
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  value={values.resident_name}
-                  name="resident_name"
-                  error={touched.resident_name && Boolean(errors.resident_name)}
-                  helperText={touched.resident_name && errors.resident_name}
-                  sx={{ gridColumn: "span 2" }}
-                />
-                <TextField
-                  fullWidth
-                  variant="filled"
                   type="number"
                   label="Occupancy"
                   onBlur={handleBlur}
-                  onChange={handleChange}
+                  onChange={e => {
+                    let val = parseInt(e.target.value) || 1;
+                    val = Math.max(1, Math.min(10, val));
+                    handleChange({
+                      target: {
+                        name: "occupancy",
+                        value: val,
+                      },
+                    });
+                  }}
                   value={values.occupancy}
                   name="occupancy"
                   error={touched.occupancy && Boolean(errors.occupancy)}
                   helperText={touched.occupancy && errors.occupancy}
                   sx={{ gridColumn: "span 2" }}
                   inputProps={{ min: 1, max: 10, step: 1 }}
-                  onInput={e => {
-                    if (e.target.value !== "") {
-                      let val = parseInt(e.target.value) || 1;
-                      val = Math.max(1, Math.min(10, val));
-                      e.target.value = val;
-                    }
-                  }}
                 />
-                <TextField
-                  fullWidth
-                  select
-                  variant="filled"
-                  label="Language Preference"
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  value={values.language}
-                  name="language"
-                  error={touched.language && Boolean(errors.language)}
-                  helperText={touched.language && errors.language}
-                  sx={{ gridColumn: "span 2" }}
-                >
-                  <MenuItem value="1">English</MenuItem>
-                  <MenuItem value="0">Chinese</MenuItem>
-                </TextField>
-                <TextField
-                  fullWidth
-                  variant="filled"
-                  type={showPassword ? "text" : "password"}
-                  label="Password"
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  value={values.password}
-                  name="password"
-                  error={touched.password && Boolean(errors.password)}
-                  helperText={touched.password && errors.password}
-                  sx={{ gridColumn: "span 4" }}
-                  InputProps={{
-                    endAdornment: (
-                      <IconButton
-                        onClick={() => setShowPassword((prev) => !prev)}
-                        tabIndex={-1}
-                        edge="end"
-                        size="small"
-                        sx={{ minWidth: 0, padding: 0 }}
-                        aria-label={showPassword ? "Hide password" : "Show password"}
+                {/* Render resident sections dynamically */}
+                {Array.from({ length: values.occupancy }).map((_, idx) => (
+                  <Box key={idx} sx={{ gridColumn: "span 4", border: "1px solid #eee", borderRadius: 2, p: 2, mb: 2 }}>
+                    <Typography variant="h6" fontWeight="600" mb={2}>
+                      {`${idx + 1}${idx === 0 ? 'st' : idx === 1 ? 'nd' : idx === 2 ? 'rd' : 'th'} resident`}
+                    </Typography>
+                    <Box display="grid" gap="20px" gridTemplateColumns="repeat(4, minmax(0, 1fr))">
+                      <TextField
+                        fullWidth
+                        variant="filled"
+                        type="text"
+                        label="Resident Name"
+                        onBlur={handleBlur}
+                        onChange={handleChange}
+                        value={values.residents[idx]?.resident_name || ""}
+                        name={`residents[${idx}].resident_name`}
+                        error={touched.residents?.[idx]?.resident_name && Boolean(errors.residents?.[idx]?.resident_name)}
+                        helperText={touched.residents?.[idx]?.resident_name && errors.residents?.[idx]?.resident_name}
+                        sx={{ gridColumn: "span 2" }}
+                      />
+                      <TextField
+                        fullWidth
+                        select
+                        variant="filled"
+                        label="Language Preference"
+                        onBlur={handleBlur}
+                        onChange={handleChange}
+                        value={values.residents[idx]?.language || "1"}
+                        name={`residents[${idx}].language`}
+                        error={touched.residents?.[idx]?.language && Boolean(errors.residents?.[idx]?.language)}
+                        helperText={touched.residents?.[idx]?.language && errors.residents?.[idx]?.language}
+                        sx={{ gridColumn: "span 2" }}
                       >
-                        {showPassword ? (
-                          <VisibilityOffIcon />
-                        ) : (
-                          <VisibilityIcon />
-                        )}
-                      </IconButton>
-                    ),
-                  }}
-                />
-                <TextField
-                  fullWidth
-                  variant="filled"
-                  type="text"
-                  label="Food Texture"
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  value={values.food_texture}
-                  name="food_texture"
-                  error={touched.food_texture && Boolean(errors.food_texture)}
-                  helperText={touched.food_texture && errors.food_texture}
-                  sx={{ gridColumn: "span 4" }}
-                />
-                <TextField
-                  fullWidth
-                  variant="filled"
-                  type="text"
-                  label="Special Instructions"
-                  multiline
-                  rows={4}
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  value={values.special_instrucations}
-                  name="special_instrucations"
-                  error={
-                    touched.special_instrucations &&
-                    Boolean(errors.special_instrucations)
-                  }
-                  helperText={
-                    touched.special_instrucations && errors.special_instrucations
-                  }
-                  sx={{ gridColumn: "span 4" }}
-                />
+                        <MenuItem value="1">English</MenuItem>
+                        <MenuItem value="0">Chinese</MenuItem>
+                      </TextField>
+                      <TextField
+                        fullWidth
+                        variant="filled"
+                        type={showPassword ? "text" : "password"}
+                        label="Password"
+                        onBlur={handleBlur}
+                        onChange={handleChange}
+                        value={values.residents[idx]?.password || ""}
+                        name={`residents[${idx}].password`}
+                        error={touched.residents?.[idx]?.password && Boolean(errors.residents?.[idx]?.password)}
+                        helperText={touched.residents?.[idx]?.password && errors.residents?.[idx]?.password}
+                        sx={{ gridColumn: "span 4" }}
+                        InputProps={{
+                          endAdornment: (
+                            <IconButton
+                              onClick={() => setShowPassword((prev) => !prev)}
+                              tabIndex={-1}
+                              edge="end"
+                              size="small"
+                              sx={{ minWidth: 0, padding: 0 }}
+                              aria-label={showPassword ? "Hide password" : "Show password"}
+                            >
+                              {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                            </IconButton>
+                          ),
+                        }}
+                      />
+                      <TextField
+                        fullWidth
+                        variant="filled"
+                        type="text"
+                        label="Food Texture"
+                        onBlur={handleBlur}
+                        onChange={handleChange}
+                        value={values.residents[idx]?.food_texture || ""}
+                        name={`residents[${idx}].food_texture`}
+                        error={touched.residents?.[idx]?.food_texture && Boolean(errors.residents?.[idx]?.food_texture)}
+                        helperText={touched.residents?.[idx]?.food_texture && errors.residents?.[idx]?.food_texture}
+                        sx={{ gridColumn: "span 4" }}
+                      />
+                      <TextField
+                        fullWidth
+                        variant="filled"
+                        type="text"
+                        label="Special Instructions"
+                        multiline
+                        rows={4}
+                        onBlur={handleBlur}
+                        onChange={handleChange}
+                        value={values.residents[idx]?.special_instrucations || ""}
+                        name={`residents[${idx}].special_instrucations`}
+                        error={touched.residents?.[idx]?.special_instrucations && Boolean(errors.residents?.[idx]?.special_instrucations)}
+                        helperText={touched.residents?.[idx]?.special_instrucations && errors.residents?.[idx]?.special_instrucations}
+                        sx={{ gridColumn: "span 4" }}
+                      />
+                    </Box>
+                  </Box>
+                ))}
                 <Box
                   display="flex"
                   alignItems="center"
