@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { Avatar, Box, IconButton, Typography, useTheme, Collapse, List, ListItemButton, ListItemText, ListItemIcon } from "@mui/material";
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, useMemo, useCallback } from "react";
 import { tokens } from "../../../theme";
 import { Menu, MenuItem, Sidebar } from "react-pro-sidebar";
 import {
@@ -31,8 +31,6 @@ import {
   WavesOutlined,
 
 } from "@mui/icons-material";
-// import avatar from "../../../assets/images/avatar.png";
-// import logo from "../../../assets/images/logo.png";
 import logos from "../../../assets/images/hamilton-logo.png";
 import Item from "./Item";
 import { ToggledContext } from "../../../App";
@@ -46,19 +44,39 @@ const SideBar = () => {
   const colors = tokens(theme.palette.mode);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [reportsDropdownOpen, setReportsDropdownOpen] = useState(false);
-  const userData = JSON.parse(localStorage.getItem('userData'));
-  const [avatarSrc, setAvatarSrc] = useState(userData?.avatar && userData?.avatar !== "" ? userData.avatar : defaultAvtar);
+  const [avatarSrc, setAvatarSrc] = useState(defaultAvtar);
+
+  // Memoize userData to prevent repeated parsing
+  const userData = useMemo(() => {
+    const data = localStorage.getItem('userData');
+    return data ? JSON.parse(data) : null;
+  }, []);
 
   useEffect(() => {
-    setAvatarSrc(userData?.avatar && userData?.avatar !== "" ? userData.avatar : defaultAvtar);
+    if (userData?.avatar && userData.avatar !== "") {
+      setAvatarSrc(userData.avatar);
+    } else {
+      setAvatarSrc(defaultAvtar);
+    }
   }, [userData?.avatar]);
 
-  const handleDropdownToggle = () => {
-    setDropdownOpen(!dropdownOpen);
-  };
-  const handleReportsDropdownToggle = () => {
-    setReportsDropdownOpen(!reportsDropdownOpen);
-  };
+  const handleDropdownToggle = useCallback(() => {
+    setDropdownOpen((prev) => !prev);
+  }, []);
+
+  const handleReportsDropdownToggle = useCallback(() => {
+    setReportsDropdownOpen((prev) => !prev);
+  }, []);
+
+  const handleToggleCollapsed = useCallback(() => {
+    setCollapsed((prev) => !prev);
+  }, []);
+
+  const handleAvatarError = useCallback(() => {
+    if (avatarSrc !== defaultAvtar) {
+      setAvatarSrc(defaultAvtar);
+    }
+  }, [avatarSrc]);
   return (
     <Sidebar
       backgroundColor={colors.primary[400]}
@@ -111,7 +129,7 @@ const SideBar = () => {
                 </Typography>
               </Box>
             )}
-            <IconButton onClick={() => setCollapsed(!collapsed)}>
+            <IconButton onClick={handleToggleCollapsed}>
               <MenuOutlined />
             </IconButton>
           </Box>
@@ -131,11 +149,7 @@ const SideBar = () => {
             alt="avatar"
             src={avatarSrc}
             sx={{ width: "100px", height: "100px" }}
-            onError={e => {
-              if (avatarSrc !== defaultAvtar) {
-                setAvatarSrc(defaultAvtar);
-              }
-            }}
+            onError={handleAvatarError}
           />
           <Box sx={{ textAlign: "center" }}>
             <Typography variant="h3" fontWeight="bold" color={colors.gray[100]}>

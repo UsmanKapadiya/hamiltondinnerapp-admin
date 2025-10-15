@@ -1,12 +1,8 @@
-export const setPermissionList = (data) => {
-    return async (dispatch) => {
-        try {
-            dispatch({
-                type: "SET_PERMISSION_LIST",
-                payload: data
-            })
-        } catch (error) {
-            console.log(error)
-        }
-    }
-}
+// Action types
+export const SET_PERMISSION_LIST = "SET_PERMISSION_LIST";
+
+// Action creators
+export const setPermissionList = (data) => ({
+  type: SET_PERMISSION_LIST,
+  payload: data,
+});

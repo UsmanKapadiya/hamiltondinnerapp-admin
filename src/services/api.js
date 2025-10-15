@@ -1,9 +1,16 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
+// Constants
+const API_BASE_URL = 'http://hamiltondinnerapp.staging.intelligrp.com/api/admin/';
+const API_TIMEOUT = 50000;
+const AUTH_TOKEN_KEY = 'authToken';
+const USER_DATA_KEY = 'userData';
+const USER_TOKEN_COOKIE = 'userToken';
+
 const instance = axios.create({
-  baseURL: `http://hamiltondinnerapp.staging.intelligrp.com/api/admin/`,
-  timeout: 50000,
+  baseURL: API_BASE_URL,
+  timeout: API_TIMEOUT,
   headers: {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -12,37 +19,31 @@ const instance = axios.create({
 
 // Request Interceptor
 instance.interceptors.request.use(
-  function (config) {
-    let token;
-    if (Cookies.get('userToken')) {
-      token = JSON.parse(Cookies.get('userToken')).token; // Ensure you're accessing the correct field
-    }
-    const isAuthenticated = localStorage.getItem('authToken'); // Use the correct key for the token
-    // console.log("TOKEN ====>>", token);
+  (config) => {
+    const token = localStorage.getItem(AUTH_TOKEN_KEY);
 
-    if (isAuthenticated && !config.headers['Authorization']) {
-      config.headers['Authorization'] = `Bearer ${isAuthenticated}`;
+    if (token && !config.headers['Authorization']) {
+      config.headers['Authorization'] = `Bearer ${token}`;
     }
 
     return config;
   },
-  function (error) {
-    // Handle request errors
+  (error) => {
     return Promise.reject(error);
   }
 );
 
 // Response Interceptor
 instance.interceptors.response.use(
-  (response) => response, // If response is successful, return it
+  (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
-      // Clear authentication data (cookies/localStorage)
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('userData');
-      Cookies.remove('userToken'); // Ensure the correct cookie key is removed
+    if (error.response?.status === 401) {
+      // Clear authentication data
+      localStorage.removeItem(AUTH_TOKEN_KEY);
+      localStorage.removeItem(USER_DATA_KEY);
+      Cookies.remove(USER_TOKEN_COOKIE);
 
-      window.location.href = '/login'; // Redirect to the login page
+      window.location.href = '/login';
     }
     return Promise.reject(error);
   }
@@ -54,7 +55,8 @@ const requests = {
   get: (url, params, headers) =>
     instance.get(url, { params, headers }).then(responseBody),
 
-  post: (url, body) => instance.post(url, body).then(responseBody),
+  post: (url, body) => 
+    instance.post(url, body).then(responseBody),
 
   uploadPosts: (url, body) =>
     instance.post(url, body, {
@@ -70,18 +72,19 @@ const requests = {
       },
     }).then(responseBody),
 
-  customPost: (url, body, token) => {
-    return instance.post(url, body, {
+  customPost: (url, body, token) =>
+    instance.post(url, body, {
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-    }).then(responseBody);
-  },
+    }).then(responseBody),
 
-  put: (url, body) => instance.put(url, body).then(responseBody),
+  put: (url, body) => 
+    instance.put(url, body).then(responseBody),
 
-  patch: (url, body) => instance.patch(url, body).then(responseBody),
+  patch: (url, body) => 
+    instance.patch(url, body).then(responseBody),
 
   delete: (url, body) =>
     instance.delete(url, { data: body }).then(responseBody),

@@ -150,7 +150,7 @@ const Item = () => {
     },
   ], [categoryListData, canView, canEdit, canDelete]);
 
-  // Handlers
+  // Handlers with useCallback
   const handleDelete = useCallback((data) => {
     setSelectedIds([]);
     setSelectedId(data?.id);
@@ -158,100 +158,7 @@ const Item = () => {
     setDialogOpen(true);
   }, []);
 
-  const confirmDelete = useCallback(() => {
-    if (selectedIds.length > 0 && !selectedItemName) {
-      bulkDeleteItems(selectedIds);
-    } else {
-      deleteItem(selectedId);
-    }
-    setDialogOpen(false);
-  }, [selectedIds, selectedItemName, selectedId]);
-
-  const cancelDelete = () => {
-    setDialogOpen(false);
-    setSelectedId(null);
-    setSelectedItemName("");
-  };
-
-  const handleView = (id) => {
-    navigate(`/menu-item-details/${id}`, {
-      state: {
-        id,
-        categoryListData,
-        optionsList: optionsListData,
-        preferencesList: preferencesListData,
-      },
-    });
-  };
-
-  const handleEdit = (id) => {
-    const selectedRow = itemListData.find((row) => row.id === id);
-    navigate(`/menu-item-details/${id}/edit`, {
-      state: {
-        selectedRow,
-        categoryListData,
-        optionsList: optionsListData,
-        preferencesList: preferencesListData,
-      },
-    });
-  };
-
-  const handleAddNewClick = () => {
-    navigate("/menu-item-details/create", {
-      state: {
-        categoryListData,
-        optionsList: optionsListData,
-        preferencesList: preferencesListData,
-      },
-    });
-  };
-
-  const handleBulkDelete = () => {
-    if (selectedIds.length > 0) {
-      setDialogOpen(true);
-    } else {
-      toast.warning("Please select at least one Menu Item to delete.");
-    }
-  };
-
-  const handleOrderClick = () => {
-    navigate("/menu-item-details/order");
-  };
-
-  const handleRowSelection = (ids) => {
-    setSelectedIds(ids);
-  };
-
-  const handlePaginationChange = (newPaginationModel) => {
-    setPagination((prev) => ({
-      ...prev,
-      page: newPaginationModel.page + 1,
-      pageSize: newPaginationModel.pageSize,
-    }));
-  };
-
-  // API calls
-  const bulkDeleteItems = async (ids) => {
-    setLoading(true);
-    try {
-      await ItemServices.bulkdeleteItems(JSON.stringify({ ids }));
-      toast.success("Multiple Items Deleted successfully!");
-      // Refresh list
-      const response = await ItemServices.getItemList();
-      setItemListData(response.data);
-      setPagination((prev) => ({
-        ...prev,
-        total: response.count,
-      }));
-    } catch (error) {
-      console.error("Error deleting items:", error);
-      toast.error("Failed to delete items. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const deleteItem = async (id) => {
+  const deleteItem = useCallback(async (id) => {
     setLoading(true);
     try {
       await ItemServices.deleteItems(id);
@@ -270,7 +177,99 @@ const Item = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  const bulkDeleteItems = useCallback(async (ids) => {
+    setLoading(true);
+    try {
+      await ItemServices.bulkdeleteItems(JSON.stringify({ ids }));
+      toast.success("Multiple Items Deleted successfully!");
+      // Refresh list
+      const response = await ItemServices.getItemList();
+      setItemListData(response.data);
+      setPagination((prev) => ({
+        ...prev,
+        total: response.count,
+      }));
+    } catch (error) {
+      console.error("Error deleting items:", error);
+      toast.error("Failed to delete items. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const confirmDelete = useCallback(() => {
+    if (selectedIds.length > 0 && !selectedItemName) {
+      bulkDeleteItems(selectedIds);
+    } else {
+      deleteItem(selectedId);
+    }
+    setDialogOpen(false);
+  }, [selectedIds, selectedItemName, selectedId, bulkDeleteItems, deleteItem]);
+
+  const cancelDelete = useCallback(() => {
+    setDialogOpen(false);
+    setSelectedId(null);
+    setSelectedItemName("");
+  }, []);
+
+  const handleView = useCallback((id) => {
+    navigate(`/menu-item-details/${id}`, {
+      state: {
+        id,
+        categoryListData,
+        optionsList: optionsListData,
+        preferencesList: preferencesListData,
+      },
+    });
+  }, [navigate, categoryListData, optionsListData, preferencesListData]);
+
+  const handleEdit = useCallback((id) => {
+    const selectedRow = itemListData.find((row) => row.id === id);
+    navigate(`/menu-item-details/${id}/edit`, {
+      state: {
+        selectedRow,
+        categoryListData,
+        optionsList: optionsListData,
+        preferencesList: preferencesListData,
+      },
+    });
+  }, [navigate, itemListData, categoryListData, optionsListData, preferencesListData]);
+
+  const handleAddNewClick = useCallback(() => {
+    navigate("/menu-item-details/create", {
+      state: {
+        categoryListData,
+        optionsList: optionsListData,
+        preferencesList: preferencesListData,
+      },
+    });
+  }, [navigate, categoryListData, optionsListData, preferencesListData]);
+
+  const handleBulkDelete = useCallback(() => {
+    if (selectedIds.length > 0) {
+      setDialogOpen(true);
+    } else {
+      toast.warning("Please select at least one Menu Item to delete.");
+    }
+  }, [selectedIds]);
+
+  const handleOrderClick = useCallback(() => {
+    navigate("/menu-item-details/order");
+  }, [navigate]);
+
+  const handleRowSelection = useCallback((ids) => {
+    setSelectedIds(ids);
+  }, []);
+
+  const handlePaginationChange = useCallback((newPaginationModel) => {
+    setPagination((prev) => ({
+      ...prev,
+      page: newPaginationModel.page + 1,
+      pageSize: newPaginationModel.pageSize,
+    }));
+  }, []);
 
   return (
     <Box m="20px">

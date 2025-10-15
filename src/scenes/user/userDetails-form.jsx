@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import {
   Box,
   Button,
@@ -44,7 +44,12 @@ const UserDetailsForm = () => {
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState(null);
   const [roles, setRoles] = useState([]);
-  const loginUserData = JSON.parse(localStorage.getItem('userData'));
+
+  // Memoize loginUserData to prevent repeated parsing
+  const loginUserData = useMemo(() => {
+    const data = localStorage.getItem('userData');
+    return data ? JSON.parse(data) : null;
+  }, []);
 
   const user = location?.state?.selectedRow;
 
@@ -53,20 +58,21 @@ const UserDetailsForm = () => {
     setLoading(false);
   }, [user]);
 
-  useEffect(() => {
-    fetchRoles();
-  }, []);
-
-  const fetchRoles = async () => {
+  const fetchRoles = useCallback(async () => {
     try {
       const response = await RoleServices.getRoleList();
       setRoles(response?.data || []);
     } catch (error) {
       console.error("Error fetching roles:", error);
+      toast.error("Failed to fetch roles. Please try again.");
     }
-  };
+  }, []);
 
-  const initialValues = {
+  useEffect(() => {
+    fetchRoles();
+  }, [fetchRoles]);
+
+  const initialValues = useMemo(() => ({
     id: userData?.id || "",
     name: userData?.name || "",
     user_name: userData?.user_name || "",
@@ -78,9 +84,9 @@ const UserDetailsForm = () => {
     role: userData?.role || "",
     role_id: userData?.role_id || "",
     is_admin: userData?.is_admin || false,
-  };
+  }), [userData]);
 
-  const handleFormSubmit = async (values) => {
+  const handleFormSubmit = useCallback(async (values) => {
     setLoading(true);
     try {
       const formData = new FormData();
@@ -103,9 +109,11 @@ const UserDetailsForm = () => {
         formData.append("avatar", "");
       }
       if (values.id) formData.append("id", values.id);
+      
       const response = values.id
         ? await UserServices.updatetUser(values.id, formData)
         : await UserServices.createUser(formData);
+      
       if (response?.success === true) {
         if (loginUserData?.id === response?.data?.id) {
           localStorage.setItem("userData", JSON.stringify(response?.data));
@@ -121,7 +129,7 @@ const UserDetailsForm = () => {
         } else {
           toast.error("Failed to process user. Please try again.");
         }
-        return; // Stop here if error
+        return;
       }
 
       toast.success(`User ${values.id ? "updated" : "created"} successfully!`);
@@ -130,7 +138,6 @@ const UserDetailsForm = () => {
         setUserData(response?.data);
       }
 
-      // Redirect to users screen after success
       navigate("/users-details");
     } catch (error) {
       console.error("Submission error:", error);
@@ -145,7 +152,7 @@ const UserDetailsForm = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [loginUserData, navigate]);
 
 
   return (

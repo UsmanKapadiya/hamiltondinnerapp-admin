@@ -1,12 +1,11 @@
-import React, { useState } from "react";
+import { useState, useCallback } from "react";
 import { Box, TextField, Button, Typography, useTheme, useMediaQuery, FormControlLabel, Checkbox } from "@mui/material";
 import shipImage from "../../assets/images/ship.jpg";
 import AuthServices from "../../services/authServices";
 import { toast, ToastContainer } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { use } from "react";
 import { tokens } from "../../theme";
-import { DownloadOutlined, LoginOutlined } from "@mui/icons-material";
+import { LoginOutlined } from "@mui/icons-material";
 
 const Login = () => {
   const theme = useTheme();
@@ -17,13 +16,19 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
+  const handleChange = useCallback((e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    // Clear error for the field being edited
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  }, [errors]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
+    
+    // Validation
     const newErrors = {};
     if (!formData.email) newErrors.email = "Email is required";
     if (!formData.password) newErrors.password = "Password is required";
@@ -33,46 +38,39 @@ const Login = () => {
       return;
     }
 
-    // console.log("Form submitted", formData);
-
-    let hasError = false;
+    setLoading(true);
+    
     try {
-      setLoading(true);
-      let response = await AuthServices.login(formData);
+      const response = await AuthServices.login(formData);
+      
       if (response.error) {
         toast.error(response.error);
+        setLoading(false);
+        return;
+      }
+
+      const { access_token, user, permissions } = response;
+      
+      if (permissions?.browse_Admin === 1) {
+        localStorage.setItem("authToken", access_token);
+        localStorage.setItem("userData", JSON.stringify(user));
+        toast.success("Login Successfully!");
+        
+        // Navigate after toast is visible
+        setTimeout(() => {
+          navigate("/");
+        }, 1000);
       } else {
-        const { access_token, user } = response;
-        console.log("response", response?.permissions?.browse_Admin);
-        if (response?.permissions?.browse_Admin === 1) {
-          localStorage.setItem("authToken", access_token);
-          localStorage.setItem("userData", JSON.stringify(user));
-          toast.success("Login Successfully!");
-          // Delay navigation to ensure toast is displayed
-          setTimeout(() => {
-            navigate("/");
-          }, 1000);
-        } else {
-          toast.warning("You don't have permission to access Admin Panel");
-        }
+        toast.warning("You don't have permission to access Admin Panel");
+        setLoading(false);
       }
     } catch (error) {
-      hasError = true;
       console.error("Error processing login:", error);
-
-      const errorMessage =
-        error.response?.data?.error || "An unexpected error occurred. Please try again.";
+      const errorMessage = error.response?.data?.error || "An unexpected error occurred. Please try again.";
       toast.error(errorMessage);
-
-      setTimeout(() => {
-        setLoading(false);
-      }, 1500);
-    } finally {
-      if (!hasError) {
-        setLoading(false);
-      }
+      setLoading(false);
     }
-  };
+  }, [formData, navigate]);
 
   return (
     <Box
