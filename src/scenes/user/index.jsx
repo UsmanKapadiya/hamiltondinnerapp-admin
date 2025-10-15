@@ -8,7 +8,7 @@ import {
   SearchOutlined,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
 import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
 import { toast } from "react-toastify";
@@ -50,12 +50,14 @@ const User = () => {
     total: 0,
   });
 
-  useEffect(() => {
-    fetchALLUserList();
-    // eslint-disable-next-line
-  }, []);
+  // Memoize permission checks
+  const canAdd = useMemo(() => hasPermission(permissionList, "add_Users"), [permissionList]);
+  const canView = useMemo(() => hasPermission(permissionList, "read_Users"), [permissionList]);
+  const canEdit = useMemo(() => hasPermission(permissionList, "edit_Users"), [permissionList]);
+  const canDelete = useMemo(() => hasPermission(permissionList, "delete_Users"), [permissionList]);
+  const canBrowse = useMemo(() => hasPermission(permissionList, "browse_Users"), [permissionList]);
 
-  const fetchALLUserList = async () => {
+  const fetchALLUserList = useCallback(async () => {
     setLoading(true);
     try {
       const response = await UserServices.getUserList();
@@ -66,65 +68,39 @@ const User = () => {
       }));
     } catch (error) {
       console.error("Error fetching user list:", error);
+      toast.error("Failed to fetch users. Please try again.");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const handleDelete = (data) => {
+  useEffect(() => {
+    fetchALLUserList();
+  }, [fetchALLUserList]);
+
+  const handleDelete = useCallback((data) => {
     setSelectedIds([]);
     setSelectedId(data?.id);
     setSelectedItemName(data?.name);
     setDialogOpen(true);
-  };
+  }, []);
 
-  const confirmDelete = () => {
-    selectedIds.length > 0 && !selectedItemName
-      ? bulkDeleteUsers(selectedIds)
-      : deleteUser(selectedId);
-    setDialogOpen(false);
-  };
-
-  const cancelDelete = () => {
-    setDialogOpen(false);
-    setSelectedId(null);
-    setSelectedItemName("");
-  };
-
-  const handleView = (id) => {
-    navigate(`/users-details/${id}`, { state: { id } });
-  };
-
-  const handleEdit = (id) => {
-    const selectedRow = userListData.find((row) => row.id === id);
-    navigate(`/users-details/${id}/edit`, { state: { selectedRow } });
-  };
-
-  const handleAddNewClick = () => {
-    navigate("/users-details/create");
-  };
-
-  const handleBulkDelete = () => {
-    if (selectedIds.length > 0) {
-      setDialogOpen(true);
-    } else {
-      toast.warning("Please select at least one User to delete.");
+  const deleteUser = useCallback(async (id) => {
+    setLoading(true);
+    try {
+      await UserServices.deleteUser(id);
+      toast.success("User Deleted successfully!");
+      fetchALLUserList();
+      setSelectedItemName("");
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      toast.error("Failed to process User. Please try again.");
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [fetchALLUserList]);
 
-  const handleRowSelection = (ids) => {
-    setSelectedIds(ids);
-  };
-
-  const handlePaginationChange = (newPaginationModel) => {
-    setPagination((prev) => ({
-      ...prev,
-      page: newPaginationModel.page + 1,
-      pageSize: newPaginationModel.pageSize,
-    }));
-  };
-
-  const bulkDeleteUsers = async (ids) => {
+  const bulkDeleteUsers = useCallback(async (ids) => {
     if (!ids || ids.length === 0) {
       toast.error("No users selected for deletion.");
       return;
@@ -145,30 +121,56 @@ const User = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [fetchALLUserList]);
 
-  const deleteUser = async (id) => {
-    setLoading(true);
-    try {
-      await UserServices.deleteUser(id);
-      toast.success("User Deleted successfully!");
-      fetchALLUserList();
-      setSelectedItemName("");
-    } catch (error) {
-      console.error("Error deleting user:", error);
-      toast.error("Failed to process User. Please try again.");
-    } finally {
-      setLoading(false);
+  const confirmDelete = useCallback(() => {
+    selectedIds.length > 0 && !selectedItemName
+      ? bulkDeleteUsers(selectedIds)
+      : deleteUser(selectedId);
+    setDialogOpen(false);
+  }, [selectedIds, selectedItemName, selectedId, bulkDeleteUsers, deleteUser]);
+
+  const cancelDelete = useCallback(() => {
+    setDialogOpen(false);
+    setSelectedId(null);
+    setSelectedItemName("");
+  }, []);
+
+  const handleView = useCallback((id) => {
+    navigate(`/users-details/${id}`, { state: { id } });
+  }, [navigate]);
+
+  const handleEdit = useCallback((id) => {
+    const selectedRow = userListData.find((row) => row.id === id);
+    navigate(`/users-details/${id}/edit`, { state: { selectedRow } });
+  }, [navigate, userListData]);
+
+  const handleAddNewClick = useCallback(() => {
+    navigate("/users-details/create");
+  }, [navigate]);
+
+  const handleBulkDelete = useCallback(() => {
+    if (selectedIds.length > 0) {
+      setDialogOpen(true);
+    } else {
+      toast.warning("Please select at least one User to delete.");
     }
-  };
+  }, [selectedIds]);
 
-  const canAdd = hasPermission(permissionList, "add_Users");
-  const canView = hasPermission(permissionList, "read_Users");
-  const canEdit = hasPermission(permissionList, "edit_Users");
-  const canDelete = hasPermission(permissionList, "delete_Users");
-  const canBrowse = hasPermission(permissionList, "browse_Users");
+  const handleRowSelection = useCallback((ids) => {
+    setSelectedIds(ids);
+  }, []);
 
-  const columns = [
+  const handlePaginationChange = useCallback((newPaginationModel) => {
+    setPagination((prev) => ({
+      ...prev,
+      page: newPaginationModel.page + 1,
+      pageSize: newPaginationModel.pageSize,
+    }));
+  }, []);
+
+  // Memoized columns
+  const columns = useMemo(() => [
     { field: "name", headerName: "Name", flex: 1 },
     { field: "user_name", headerName: "User Name" },
     { field: "email", headerName: "Email", flex: 1 },
@@ -190,7 +192,8 @@ const User = () => {
         ) : (
           <span>No Image</span>
         ),
-    }, { field: "role", headerName: "Role" },
+    }, 
+    { field: "role", headerName: "Role" },
     {
       field: "actions",
       headerName: "Actions",
@@ -227,7 +230,7 @@ const User = () => {
         </Box>
       ),
     },
-  ];
+  ], [canView, canEdit, canDelete, handleView, handleEdit, handleDelete]);
 
   // Memoized filtered rows
   const filteredRows = useMemo(() => {

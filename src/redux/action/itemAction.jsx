@@ -1,12 +1,8 @@
-export const setItemList = (data) => {
-    return async (dispatch) => {
-        try {
-            dispatch({
-                type: "SET_ITEM_LIST",
-                payload: data
-            })
-        } catch (error) {
-            console.log(error)
-        }
-    }
-}
+// Action types
+export const SET_ITEM_LIST = "SET_ITEM_LIST";
+
+// Action creators
+export const setItemList = (data) => ({
+  type: SET_ITEM_LIST,
+  payload: data,
+});
