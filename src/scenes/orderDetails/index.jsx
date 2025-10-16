@@ -31,7 +31,7 @@ const OrderDetails = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [date, setDate] = useState(dayjs());
-  const [startDate, setStartDate] = useState(dayjs());
+  const [startDate, setStartDate] = useState(dayjs().startOf('month'));
   const [endDate, setEndDate] = useState(dayjs());
   const [menuAnchor, setMenuAnchor] = useState(null);
   const [summaryAnchor, setSummaryAnchor] = useState(null);
@@ -344,7 +344,7 @@ const OrderDetails = () => {
                         align="center"
                         sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
                       >
-                        {item.title}1
+                        {item.title}
                       </TableCell>
                     ))}
                   </TableRow>
@@ -368,16 +368,15 @@ const OrderDetails = () => {
                     >
                     </TableCell>
                     {/* Display total data */}
-                    {getColumns(data?.columns?.length - 1).map((item, key) => {
-                     <TableCell
+                   {getColumns(data?.columns?.length - 1).map((item, key) => (
+                      <TableCell
                         key={key}
                         align="center"
                         sx={{ border: '1px solid rgba(224, 224, 224, 1)', fontWeight: 'bold', backgroundColor: colors.primary[400],color:colors.redAccent[800] }}
                       >
                         {data?.total[item.field] !== undefined ? data?.total[item.field] : ''}
                       </TableCell>
-                    
-                    })}
+                    ))}
                   </TableRow>
                 </TableHead>
                 <TableBody>
