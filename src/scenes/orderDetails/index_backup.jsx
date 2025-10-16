@@ -16,7 +16,7 @@ import {
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { Header } from "../../components";
 import { tokens } from "../../theme";
-import { FileDownload, LocalPizzaOutlined, RestartAltOutlined, SummarizeOutlined, WidgetsOutlined } from "@mui/icons-material";
+import { FileDownload, LocalPizzaOutlined, RestartAltOutlined, WidgetsOutlined } from "@mui/icons-material";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -31,121 +31,79 @@ const OrderDetails = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [date, setDate] = useState(dayjs());
-  const [startDate, setStartDate] = useState(dayjs().startOf('month'));
-  const [endDate, setEndDate] = useState(dayjs());
   const [menuAnchor, setMenuAnchor] = useState(null);
-  const [summaryAnchor, setSummaryAnchor] = useState(null);
-  const [selectedSummaryType, setSelectedSummaryType] = useState("Single Date Record");
   const [exportAnchor, setExportAnchor] = useState(null);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState({});
-  const [rowsArray, setRowsArray] = useState([]);
   const permissionList = useSelector((state) => state?.permissionState?.permissionsList);
 
   useEffect(() => {
-    // Single Date Record fetch
-    if (selectedSummaryType === "Single Date Record") {
-      const fetchReports = async () => {
-        try {
-          setLoading(true);
-          const response = await ReportServices.getReportList(date.format("YYYY-MM-DD"));
-          const rowsArray = Object.values(response?.result?.rows || {});
-          setRowsArray(rowsArray);
-          setData(response);
-        } catch (error) {
-          console.error("Error fetching menu list:", error);
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchReports();
-    }
-  }, [date, selectedSummaryType]);
-
-  useEffect(() => {
-    // Multiple Date Record fetch
-    if (
-      selectedSummaryType === "Multiple Date Record" &&
-      startDate && endDate &&
-      dayjs(startDate).isValid() && dayjs(endDate).isValid()
-    ) {
-      const fetchReportsRange = async () => {
-        try {
-          setLoading(true);
-          const response = await ReportServices.getMultipleDateReportList(
-            dayjs(startDate).format("YYYY-MM-DD"),
-            dayjs(endDate).format("YYYY-MM-DD")
-          );
-          const rowsArray = Object.values(response?.result?.rows || {});
-          setRowsArray(rowsArray);
-          setData(response);
-        } catch (error) {
-          console.error("Error fetching menu list:", error);
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchReportsRange();
-    }
-  }, [startDate, endDate, selectedSummaryType]);
+    const fetchReports = async () => {
+      try {
+        setLoading(true);
+        const response = await ReportServices.getReportList(date.format("YYYY-MM-DD"));
+        setData(response);
+      } catch (error) {
+        console.error("Error fetching menu list:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchReports();
+  }, [date]);
 
   const handleMenuClick = (event) => setMenuAnchor(event.currentTarget);
   const handleMenuClose = () => setMenuAnchor(null);
-  const handleSummaryClick = (event) => {
-    setSummaryAnchor(event.currentTarget);
-    setSelectedSummaryType("Single Date Record"); // default selection when opened
-  };
-  const handleSummaryClose = () => setSummaryAnchor(null);
   const handleExportClick = (event) => setExportAnchor(event.currentTarget);
   const handleExportClose = () => setExportAnchor(null);
 
-  const handleExportOption = async (option) => {
-    handleExportClose();
-    try {
-      setLoading(true);
-      const rows = data?.result?.rows || [];
-      // Get columns for export
-      const columns =
-        Array.isArray(data?.columns) &&
-          Array.isArray(data.columns[data.columns.length - 1])
-          ? data.columns[data.columns.length - 1]
-          : [];
-      // Add Room No column at the beginning
-      const exportColumns = [{ field: "room_id", title: "Room No" }, ...columns];
-      const exportData = rows.map(row =>
-        exportColumns.reduce((acc, col) => {
-          acc[col.title || col.field] = row[col.field];
-          return acc;
-        }, {})
-      );
-      // Set header row as titles
-      const header = exportColumns.map(col => col.title || col.field);
-      const worksheet = XLSX.utils.json_to_sheet(exportData, { header });
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "OrderReport");
-      const fileExt = option === "Excel" ? "xlsx" : "xls";
-      const fileType = option === "Excel"
-        ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        : "application/vnd.ms-excel";
-      const wbout = XLSX.write(workbook, { bookType: fileExt, type: "array" });
-      const blob = new Blob([wbout], { type: fileType });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute(
-        "download",
-        `OrderReport_${date.format("YYYY-MM-DD")}.${fileExt}`
-      );
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Export failed:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+const handleExportOption = async (option) => {
+  handleExportClose();
+  try {
+    setLoading(true);
+    const rows = data?.result?.rows || [];
+    // Get columns for export
+    const columns =
+      Array.isArray(data?.columns) &&
+      Array.isArray(data.columns[data.columns.length - 1])
+        ? data.columns[data.columns.length - 1]
+        : [];
+    // Add Room No column at the beginning
+    const exportColumns = [{ field: "room_id", title: "Room No" }, ...columns];
+    const exportData = rows.map(row =>
+      exportColumns.reduce((acc, col) => {
+        acc[col.title || col.field] = row[col.field];
+        return acc;
+      }, {})
+    );
+    // Set header row as titles
+    const header = exportColumns.map(col => col.title || col.field);
+    const worksheet = XLSX.utils.json_to_sheet(exportData, { header });
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "OrderReport");
+    const fileExt = option === "Excel" ? "xlsx" : "xls";
+    const fileType = option === "Excel"
+      ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      : "application/vnd.ms-excel";
+    const wbout = XLSX.write(workbook, { bookType: fileExt, type: "array" });
+    const blob = new Blob([wbout], { type: fileType });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute(
+      "download",
+      `OrderReport_${date.format("YYYY-MM-DD")}.${fileExt}`
+    );
+    document.body.appendChild(link);
+    link.click();
+    link.parentNode.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error("Export failed:", error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const canView = hasPermission(permissionList, "read_OrderDetails");
 
@@ -154,6 +112,7 @@ const OrderDetails = () => {
     Array.isArray(data?.columns) && Array.isArray(data.columns[idx])
       ? data.columns[idx]
       : [];
+
   return (
     <Box m="20px">
       <Header
@@ -189,85 +148,25 @@ const OrderDetails = () => {
           }}
         >
           <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-            {/* Left Side: Date Picker(s) */}
+            {/* Left Side: Date Picker */}
             <LocalizationProvider dateAdapter={AdapterDayjs}>
-              {selectedSummaryType === "Multiple Date Record" ? (
-                <Box display="flex" gap={2}>
-                  <DatePicker
-                    label="Start Date"
-                    value={startDate}
-                    onChange={(newValue) => setStartDate(newValue)}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        fullWidth
-                        variant="filled"
-                        sx={{ gridColumn: "span 1" }}
-                      />
-                    )}
+              <DatePicker
+                label="Date"
+                value={date}
+                onChange={(newValue) => setDate(newValue)}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    fullWidth
+                    variant="filled"
+                    sx={{ gridColumn: "span 1" }}
                   />
-                  <DatePicker
-                    label="End Date"
-                    value={endDate}
-                    onChange={(newValue) => setEndDate(newValue)}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        fullWidth
-                        variant="filled"
-                        sx={{ gridColumn: "span 1" }}
-                      />
-                    )}
-                  />
-                </Box>
-              ) : (
-                <DatePicker
-                  label="Date"
-                  value={date}
-                  onChange={(newValue) => setDate(newValue)}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      fullWidth
-                      variant="filled"
-                      sx={{ gridColumn: "span 1" }}
-                    />
-                  )}
-                />
-              )}
+                )}
+              />
             </LocalizationProvider>
 
             {/* Right Side: Buttons */}
             <Box display="flex" alignItems="center" gap={2}>
-              <Tooltip title="Summary Export">
-                <IconButton onClick={handleSummaryClick}>
-                  <SummarizeOutlined />
-                </IconButton>
-              </Tooltip>
-              <Menu
-                anchorEl={summaryAnchor}
-                open={Boolean(summaryAnchor)}
-                onClose={handleSummaryClose}
-              >
-                <MenuItem
-                  selected={selectedSummaryType === "Single Date Record"}
-                  onClick={() => {
-                    setSelectedSummaryType("Single Date Record");
-                    handleSummaryClose();
-                  }}
-                >
-                  Single Date Record
-                </MenuItem>
-                <MenuItem
-                  selected={selectedSummaryType === "Multiple Date Record"}
-                  onClick={() => {
-                    setSelectedSummaryType("Multiple Date Record");
-                    handleSummaryClose();
-                  }}
-                >
-                  Multiple Date Record
-                </MenuItem>
-              </Menu>
               <Tooltip title="Refresh">
                 <IconButton onClick={() => window.location.reload()}>
                   <RestartAltOutlined />
@@ -318,7 +217,7 @@ const OrderDetails = () => {
           </Box>
           {loading ? (
             <CustomLoadingOverlay />
-          ) : rowsArray.length > 0 ? (
+          ) : data?.result?.rows?.length > 0 ? (
             <TableContainer component={Paper}>
               <Table sx={{ border: '1px solid rgba(224, 224, 224, 1)', borderCollapse: 'collapse' }}>
                 <TableHead>
@@ -347,7 +246,6 @@ const OrderDetails = () => {
                       </TableCell>
                     ))}
                   </TableRow>
-                  {/* Display BA B1 La .... */}
                   <TableRow sx={{ backgroundColor: colors.blueAccent[700] }}>
                     {getColumns(data?.columns?.length - 1).map((item, key) => (
                       <TableCell
@@ -367,7 +265,7 @@ const OrderDetails = () => {
                     >
                     </TableCell>
                     {/* Display total data */}
-                   {getColumns(data?.columns?.length - 1).map((item, key) => (
+                    {getColumns(data?.columns?.length - 1).map((item, key) => (
                       <TableCell
                         key={key}
                         align="center"
@@ -379,7 +277,7 @@ const OrderDetails = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {rowsArray.map((room, index) => (
+                  {data?.result?.rows.map((room, index) => (
                     <TableRow key={index}>
                       <TableCell
                         align="center"
