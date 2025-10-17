@@ -339,7 +339,7 @@ const ChargesReports = () => {
                     {loading ? (
                         <CustomLoadingOverlay />
                     ) : (
-                        <TableContainer component={Paper} sx={{ width: '90%', overflow: 'auto' }}>
+                        <TableContainer component={Paper} sx={{ width: '95%', overflow: 'auto' }}>
                             <Table sx={{ border: '1px solid rgba(224, 224, 224, 1)', borderCollapse: 'collapse' }}>
                                 <TableHead>
                                     <TableRow sx={{ backgroundColor: colors.blueAccent[700] }}>
