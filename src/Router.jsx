@@ -36,6 +36,7 @@ import NotFound from "./scenes/pageNotFounf/NotFound";
 import Forms from "./scenes/Forms";
 import FormsAddUpdate from "./scenes/Forms/forms-addUpdate";
 import FormsDetailsView from "./scenes/Forms/formsDetails-view";
+import ChargesReports from "./scenes/chargesReports";
 
 
 const ProtectedRoute = ({ children }) => {
@@ -88,6 +89,7 @@ const AppRouter = () => {
           <Route path="/menu-details/:id" element={<MenuDetailsView />} />
           {/*Order Details */}
           <Route path="/order-details" element={<OrderDetails />} />
+          <Route path="/charges-reports" element={<ChargesReports />} />
 
           {/*Menu Details */}
           <Route path="/settings" element={<Setting />} />

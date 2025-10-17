@@ -4,6 +4,7 @@ import { useContext, useState, useEffect } from "react";
 import { tokens } from "../../../theme";
 import { Menu, MenuItem, Sidebar } from "react-pro-sidebar";
 import {
+  AssessmentOutlined,
   BarChartOutlined,
   CalendarTodayOutlined,
   ContactsOutlined,
@@ -249,6 +250,12 @@ const SideBar = () => {
             path="/order-details"
             colors={colors}
             icon={<LocalPizzaOutlined />}
+          />
+          <Item
+            title="Charges Reports"
+            path="/charges-reports"
+            colors={colors}
+            icon={<AssessmentOutlined />}
           />
           <Item
             title="Users"
