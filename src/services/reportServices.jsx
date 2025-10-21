@@ -11,7 +11,7 @@ const ReportServices = {
     return requests.post(`/temp-get-charges-report?date=${date}`);
   },
   getMultipleDateChargesReportList: async (date) => {
-    return requests.post(`/temp-get-charges-reportstart_date=${date}&end_date=${date}`);
+    return requests.post(`/temp-get-charges-report?start_date=${date}&end_date=${date}`);
   },
 }
 export default ReportServices;

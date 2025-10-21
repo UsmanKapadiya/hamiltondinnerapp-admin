@@ -273,7 +273,7 @@ const ChargesReports = () => {
                         {/* Right Side: Buttons */}
                         <Box display="flex" alignItems="center" gap={2}>
                             <Tooltip title="Summary Export">
-                                <IconButton onClick={handleSummaryClick} disabled>
+                                <IconButton onClick={handleSummaryClick}>
                                     <SummarizeOutlined />
                                 </IconButton>
                             </Tooltip>
