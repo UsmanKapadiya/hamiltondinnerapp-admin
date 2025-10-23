@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { Header } from "../../components";
+import ConfirmationDialog from "../../components/ConfirmationDialog";
 import { tokens } from "../../theme";
 import { AssessmentOutlined, FileDownload, LocalPizzaOutlined, RestartAltOutlined, SummarizeOutlined } from "@mui/icons-material";
 import { useEffect, useState } from "react";
@@ -37,6 +38,8 @@ const ChargesReports = () => {
     const [exportAnchor, setExportAnchor] = useState(null);
     const [loading, setLoading] = useState(false);
     const [data, setData] = useState({});
+    const [alertOpen, setAlertOpen] = useState(false);
+    const [alertMessage, setAlertMessage] = useState('');
     const permissionList = useSelector((state) => state?.permissionState?.permissionsList);
 
     useEffect(() => {
@@ -89,6 +92,16 @@ const ChargesReports = () => {
     const handleSummaryClose = () => setSummaryAnchor(null);
     const handleExportClick = (event) => setExportAnchor(event.currentTarget);
     const handleExportClose = () => setExportAnchor(null);
+
+    const showAlert = (message) => {
+        setAlertMessage(message);
+        setAlertOpen(true);
+    };
+
+    const handleAlertConfirm = () => {
+        setAlertOpen(false);
+        setAlertMessage('');
+    };
 
     const handleExportOption = async (option) => {
         handleExportClose();
@@ -483,23 +496,86 @@ const ChargesReports = () => {
                                                         {roomNo}
                                                     </TableCell>
                                                     {/* Breakfast quantities */}
-                                                    {data?.breakfast_item_list?.map((_, i) => (
-                                                        <TableCell key={`b-${i}`} align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>
-                                                            {(breakfastRow?.quantity?.[i] ?? breakfastRow?.data?.[i] ?? '-')}
-                                                        </TableCell>
-                                                    ))}
+                                                    {data?.breakfast_item_list?.map((item, i) => {
+                                                        const quantity = breakfastRow?.quantity?.[i] ?? breakfastRow?.data?.[i] ?? '-';
+                                                        const optionText = breakfastRow?.option?.[i] ?? '';
+                                                        const hasOption = optionText && optionText.trim() !== '';
+
+                                                        return (
+                                                            <TableCell key={`b-${i}`} align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>
+                                                                {hasOption ? (
+                                                                    <Tooltip title={optionText} arrow>
+                                                                        <span
+                                                                            onClick={() => showAlert(`${item.real_item_name} - ${optionText}`)}
+                                                                            style={{
+                                                                                textDecoration: 'underline',
+                                                                                cursor: 'pointer',
+                                                                                color: colors.greenAccent[400]
+                                                                            }}
+                                                                        >
+                                                                            {quantity}
+                                                                        </span>
+                                                                    </Tooltip>
+                                                                ) : (
+                                                                    quantity
+                                                                )}
+                                                            </TableCell>
+                                                        );
+                                                    })}
                                                     {/* Lunch quantities */}
-                                                    {data?.lunch_item_list?.map((_, i) => (
-                                                        <TableCell key={`l-${i}`} align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>
-                                                            {(lunchRow?.quantity?.[i] ?? lunchRow?.data?.[i] ?? '-')}
-                                                        </TableCell>
-                                                    ))}
+                                                    {data?.lunch_item_list?.map((item, i) => {
+                                                        const quantity = lunchRow?.quantity?.[i] ?? lunchRow?.data?.[i] ?? '-';
+                                                        const optionText = lunchRow?.option?.[i] ?? '';
+                                                        const hasOption = optionText && optionText.trim() !== '';
+
+                                                        return (
+                                                            <TableCell key={`l-${i}`} align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>
+                                                                {hasOption ? (
+                                                                    <Tooltip title={optionText} arrow>
+                                                                        <span
+                                                                            onClick={() => showAlert(`${item.real_item_name} - ${optionText}`)}
+                                                                            style={{
+                                                                                textDecoration: 'underline',
+                                                                                cursor: 'pointer',
+                                                                                color: colors.greenAccent[400]
+                                                                            }}
+                                                                        >
+                                                                            {quantity}
+                                                                        </span>
+                                                                    </Tooltip>
+                                                                ) : (
+                                                                    quantity
+                                                                )}
+                                                            </TableCell>
+                                                        );
+                                                    })}
                                                     {/* Dinner quantities */}
-                                                    {data?.dinner_item_list?.map((_, i) => (
-                                                        <TableCell key={`d-${i}`} align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>
-                                                            {(dinnerRow?.quantity?.[i] ?? dinnerRow?.data?.[i] ?? '-')}
-                                                        </TableCell>
-                                                    ))}
+                                                    {data?.dinner_item_list?.map((item, i) => {
+                                                        const quantity = dinnerRow?.quantity?.[i] ?? dinnerRow?.data?.[i] ?? '-';
+                                                        const optionText = dinnerRow?.option?.[i] ?? '';
+                                                        const hasOption = optionText && optionText.trim() !== '';
+
+                                                        return (
+                                                            <TableCell key={`d-${i}`} align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>
+                                                                {hasOption ? (
+                                                                    <Tooltip title={optionText} arrow>
+                                                                        <span
+                                                                            onClick={() => showAlert(`${item.real_item_name} - ${optionText}`)}
+                                                                            style={{
+                                                                                textDecoration: 'underline',
+                                                                                cursor: 'pointer',
+                                                                                color: colors.greenAccent[400]
+                                                                            }}
+                                                                        >
+                                                                            {quantity}
+                                                                        </span>
+                                                                    </Tooltip>
+                                                                ) : (
+                                                                    quantity
+                                                                )}
+                                                            </TableCell>
+                                                        );
+                                                    })}
                                                 </TableRow>
                                             );
                                         });
@@ -515,6 +591,15 @@ const ChargesReports = () => {
                     message="Please contact your administrator if you believe this is a mistake."
                 />
             )}
+
+            {/* Custom Alert Dialog */}
+            <ConfirmationDialog
+                open={alertOpen}
+                title=""
+                message={alertMessage}
+                onConfirm={handleAlertConfirm}
+                onCancel={handleAlertConfirm}
+            />
         </Box>
     );
 };
