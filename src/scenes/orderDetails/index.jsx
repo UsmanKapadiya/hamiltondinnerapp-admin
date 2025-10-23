@@ -355,7 +355,11 @@ const OrderDetails = () => {
                         align="center"
                         sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
                       >
-                        {item.field}
+                        <Tooltip title={item?.tooltip || ''} arrow>
+                          <span style={{ display: 'inline-block', width: '100%' }}>
+                            {item?.field || ''}
+                          </span>
+                        </Tooltip>
                       </TableCell>
                     ))}
                   </TableRow>
@@ -367,11 +371,11 @@ const OrderDetails = () => {
                     >
                     </TableCell>
                     {/* Display total data */}
-                   {getColumns(data?.columns?.length - 1).map((item, key) => (
+                    {getColumns(data?.columns?.length - 1).map((item, key) => (
                       <TableCell
                         key={key}
                         align="center"
-                        sx={{ border: '1px solid rgba(224, 224, 224, 1)', fontWeight: 'bold', backgroundColor: colors.primary[400],color:colors.redAccent[800] }}
+                        sx={{ border: '1px solid rgba(224, 224, 224, 1)', fontWeight: 'bold', backgroundColor: colors.primary[400], color: colors.redAccent[800] }}
                       >
                         {data?.total[item.field] !== undefined ? data?.total[item.field] : ''}
                       </TableCell>
