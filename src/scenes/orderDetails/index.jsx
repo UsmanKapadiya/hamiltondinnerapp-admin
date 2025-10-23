@@ -355,11 +355,13 @@ const OrderDetails = () => {
                         align="center"
                         sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
                       >
-                        <Tooltip title={item?.tooltip || ''} arrow>
+                          {item?.field || ''}
+                          {/* Currently toolTip Commented */}
+                        {/* <Tooltip title={item?.tooltip || ''} arrow>
                           <span style={{ display: 'inline-block', width: '100%' }}>
                             {item?.field || ''}
                           </span>
-                        </Tooltip>
+                        </Tooltip> */}
                       </TableCell>
                     ))}
                   </TableRow>
