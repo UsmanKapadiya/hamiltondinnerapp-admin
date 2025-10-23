@@ -10,8 +10,8 @@ const ReportServices = {
   getChargesReportList: async (date) => {
     return requests.post(`/temp-get-charges-report?date=${date}`);
   },
-  getMultipleDateChargesReportList: async (date) => {
-    return requests.post(`/temp-get-charges-report?start_date=${date}&end_date=${date}`);
+  getMultipleDateChargesReportList: async (startDate, endDate) => {
+    return requests.post(`/temp-get-charges-report?start_date=${startDate}&end_date=${endDate}`);
   },
 }
 export default ReportServices;
