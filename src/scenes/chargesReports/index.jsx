@@ -107,7 +107,7 @@ const ChargesReports = () => {
         handleExportClose();
         try {
             setLoading(true);
-            
+
             // Combine all unique room numbers
             const allRoomNos = new Set([
                 ...(data?.report_breakfast_list || []).map(r => r.room_no),
@@ -117,13 +117,13 @@ const ChargesReports = () => {
 
             // Build export data
             const exportData = [];
-            
+
             // Add header row
             const headers = ["Room No"];
             data?.breakfast_item_list?.forEach(item => headers.push(`Breakfast - ${item.item_name}`));
             data?.lunch_item_list?.forEach(item => headers.push(`Lunch - ${item.item_name}`));
             data?.dinner_item_list?.forEach(item => headers.push(`Dinner - ${item.item_name}`));
-            
+
             // Add Total row
             const totalRow = { "Room No": "Total" };
             data?.breakfast_item_list?.forEach((_, i) => {
@@ -147,22 +147,22 @@ const ChargesReports = () => {
                 const dinnerRow = data?.report_dinner_list?.find(d => d.room_no === roomNo) || {};
 
                 const row = { "Room No": roomNo };
-                
+
                 // Add breakfast quantities
                 data?.breakfast_item_list?.forEach((item, i) => {
                     row[`Breakfast - ${item.item_name}`] = breakfastRow?.quantity?.[i] ?? breakfastRow?.data?.[i] ?? '-';
                 });
-                
+
                 // Add lunch quantities
                 data?.lunch_item_list?.forEach((item, i) => {
                     row[`Lunch - ${item.item_name}`] = lunchRow?.quantity?.[i] ?? lunchRow?.data?.[i] ?? '-';
                 });
-                
+
                 // Add dinner quantities
                 data?.dinner_item_list?.forEach((item, i) => {
                     row[`Dinner - ${item.item_name}`] = dinnerRow?.quantity?.[i] ?? dinnerRow?.data?.[i] ?? '-';
                 });
-                
+
                 exportData.push(row);
             });
 
@@ -170,22 +170,22 @@ const ChargesReports = () => {
             const worksheet = XLSX.utils.json_to_sheet(exportData);
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "ChargesReport");
-            
+
             const fileExt = option === "Excel" ? "xlsx" : "xls";
             const fileType = option === "Excel"
                 ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 : "application/vnd.ms-excel";
-            
+
             const wbout = XLSX.write(workbook, { bookType: fileExt, type: "array" });
             const blob = new Blob([wbout], { type: fileType });
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement("a");
             link.href = url;
-            
+
             const fileName = selectedSummaryType === "Multiple Date Record"
                 ? `ChargesReport_${startDate.format("YYYY-MM-DD")}_to_${endDate.format("YYYY-MM-DD")}.${fileExt}`
                 : `ChargesReport_${date.format("YYYY-MM-DD")}.${fileExt}`;
-            
+
             link.setAttribute("download", fileName);
             document.body.appendChild(link);
             link.click();
@@ -599,6 +599,7 @@ const ChargesReports = () => {
                 message={alertMessage}
                 onConfirm={handleAlertConfirm}
                 onCancel={handleAlertConfirm}
+                onCancelButton={false}
             />
         </Box>
     );
