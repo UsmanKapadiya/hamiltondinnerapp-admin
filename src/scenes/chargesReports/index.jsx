@@ -392,9 +392,32 @@ const ChargesReports = () => {
                                                 align="center"
                                                 sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
                                             >
-                                                <Tooltip title={item.real_item_name} arrow>
-                                                    <span>{item.item_name}</span>
-                                                </Tooltip>
+                                                {selectedSummaryType === "Single Date Record" ? (
+                                                    <Tooltip title={item.real_item_name} arrow>
+                                                        <span>{item.item_name}</span>
+                                                    </Tooltip>
+                                                ) : (
+                                                    Array.isArray(item.data) ? (
+                                                        <Tooltip
+                                                            title={
+                                                                <div>
+                                                                    {item.data.map((subItem, subIdx) => (
+                                                                        <div key={`tooltip-${idx}-${subIdx}`}>
+                                                                            {subItem.date} - {subItem.real_item_name}
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            }
+                                                            arrow
+                                                        >
+                                                            <span>{item?.item_name}</span>
+                                                        </Tooltip>
+                                                    ) : (
+                                                        <Tooltip title={item.data?.real_item_name} arrow>
+                                                            <span>{item?.item_name}</span>
+                                                        </Tooltip>
+                                                    )
+                                                )}
                                             </TableCell>
                                         ))}
                                         {data?.lunch_item_list?.map((item, idx) => (
@@ -403,9 +426,32 @@ const ChargesReports = () => {
                                                 align="center"
                                                 sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
                                             >
-                                                <Tooltip title={item.real_item_name} arrow>
-                                                    <span>{item.item_name}</span>
-                                                </Tooltip>
+                                                {selectedSummaryType === "Single Date Record" ? (
+                                                    <Tooltip title={item.real_item_name} arrow>
+                                                        <span>{item.item_name}</span>
+                                                    </Tooltip>
+                                                ) : (
+                                                    Array.isArray(item.data) ? (
+                                                        <Tooltip
+                                                            title={
+                                                                <div>
+                                                                    {item.data.map((subItem, subIdx) => (
+                                                                        <div key={`tooltip-${idx}-${subIdx}`}>
+                                                                            {subItem.date} - {subItem.real_item_name}
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            }
+                                                            arrow
+                                                        >
+                                                            <span>{item?.item_name}</span>
+                                                        </Tooltip>
+                                                    ) : (
+                                                        <Tooltip title={item.data?.real_item_name} arrow>
+                                                            <span>{item?.item_name}</span>
+                                                        </Tooltip>
+                                                    )
+                                                )}
                                             </TableCell>
                                         ))}
                                         {data?.dinner_item_list?.map((item, idx) => (
@@ -414,9 +460,32 @@ const ChargesReports = () => {
                                                 align="center"
                                                 sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
                                             >
-                                                <Tooltip title={item.real_item_name} arrow>
-                                                    <span>{item.item_name}</span>
-                                                </Tooltip>
+                                                {selectedSummaryType === "Single Date Record" ? (
+                                                    <Tooltip title={item.real_item_name} arrow>
+                                                        <span>{item.item_name}</span>
+                                                    </Tooltip>
+                                                ) : (
+                                                    Array.isArray(item.data) ? (
+                                                        <Tooltip
+                                                            title={
+                                                                <div>
+                                                                    {item.data.map((subItem, subIdx) => (
+                                                                        <div key={`tooltip-${idx}-${subIdx}`}>
+                                                                            {subItem.date} - {subItem.real_item_name}
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            }
+                                                            arrow
+                                                        >
+                                                            <span>{item?.item_name}</span>
+                                                        </Tooltip>
+                                                    ) : (
+                                                        <Tooltip title={item.data?.real_item_name} arrow>
+                                                            <span>{item?.item_name}</span>
+                                                        </Tooltip>
+                                                    )
+                                                )}
                                             </TableCell>
                                         ))}
                                     </TableRow>
@@ -497,16 +566,31 @@ const ChargesReports = () => {
                                                     </TableCell>
                                                     {/* Breakfast quantities */}
                                                     {data?.breakfast_item_list?.map((item, i) => {
-                                                        const quantity = breakfastRow?.quantity?.[i] ?? breakfastRow?.data?.[i] ?? '-';
-                                                        const optionText = breakfastRow?.option?.[i] ?? '';
+                                                        const quantity = Array.isArray(breakfastRow?.data?.[item.item_name])
+                                                            ? breakfastRow?.data?.[item.item_name].reduce((sum, val) => sum + val, 0)
+                                                            : breakfastRow?.data?.[item.item_name] ?? '-';
+                                                        const optionText = Array.isArray(breakfastRow?.option?.[item.item_name])
+                                                            ? breakfastRow?.option?.[item.item_name]
+                                                                .map(opt => `${opt.date}: ${opt.optionName} (${opt.timesSelected}x)`)
+                                                                .join('\n')
+                                                            : breakfastRow?.option?.[item.item_name] ?? '';
                                                         const hasOption = optionText && optionText.trim() !== '';
 
                                                         return (
                                                             <TableCell key={`b-${i}`} align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>
                                                                 {hasOption ? (
-                                                                    <Tooltip title={optionText} arrow>
+                                                                    <Tooltip
+                                                                        title={
+                                                                            <div style={{ whiteSpace: 'pre-line' }}>
+                                                                                {optionText.split('\n').map((line, idx) => (
+                                                                                    <div key={idx}>{line}</div>
+                                                                                ))}
+                                                                            </div>
+                                                                        }
+                                                                        arrow
+                                                                    >
                                                                         <span
-                                                                            onClick={() => showAlert(`${item.real_item_name} - ${optionText}`)}
+                                                                            onClick={() => showAlert(`${optionText}`)}
                                                                             style={{
                                                                                 textDecoration: 'underline',
                                                                                 cursor: 'pointer',
@@ -524,16 +608,34 @@ const ChargesReports = () => {
                                                     })}
                                                     {/* Lunch quantities */}
                                                     {data?.lunch_item_list?.map((item, i) => {
-                                                        const quantity = lunchRow?.quantity?.[i] ?? lunchRow?.data?.[i] ?? '-';
-                                                        const optionText = lunchRow?.option?.[i] ?? '';
+                                                        const quantity = Array.isArray(lunchRow?.data?.[item.item_name])
+                                                            ? lunchRow?.data?.[item.item_name].reduce((sum, val) => sum + val, 0)
+                                                            : lunchRow?.data?.[item.item_name] ?? '-';
+                                                        const optionText = Array.isArray(lunchRow?.option?.[item.item_name])
+                                                            ? lunchRow?.option?.[item.item_name]
+                                                                .map(opt => `${opt.date}: ${opt.optionName} (${opt.timesSelected}x)`)
+                                                                .join('\n')
+                                                            : lunchRow?.option?.[item.item_name] ?? '';
                                                         const hasOption = optionText && optionText.trim() !== '';
+                                                        console.log(hasOption);
+                                                        console.log(optionText);
+                                                        // console.log(hasOption);
 
                                                         return (
                                                             <TableCell key={`l-${i}`} align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>
                                                                 {hasOption ? (
-                                                                    <Tooltip title={optionText} arrow>
+                                                                    <Tooltip
+                                                                        title={
+                                                                            <div style={{ whiteSpace: 'pre-line' }}>
+                                                                                {optionText.split('\n').map((line, idx) => (
+                                                                                    <div key={idx}>{line}</div>
+                                                                                ))}
+                                                                            </div>
+                                                                        }
+                                                                        arrow
+                                                                    >
                                                                         <span
-                                                                            onClick={() => showAlert(`${item.real_item_name} - ${optionText}`)}
+                                                                            onClick={() => showAlert(`${optionText}`)}
                                                                             style={{
                                                                                 textDecoration: 'underline',
                                                                                 cursor: 'pointer',
@@ -551,16 +653,31 @@ const ChargesReports = () => {
                                                     })}
                                                     {/* Dinner quantities */}
                                                     {data?.dinner_item_list?.map((item, i) => {
-                                                        const quantity = dinnerRow?.quantity?.[i] ?? dinnerRow?.data?.[i] ?? '-';
-                                                        const optionText = dinnerRow?.option?.[i] ?? '';
+                                                        const quantity = Array.isArray(dinnerRow?.data?.[item.item_name])
+                                                            ? dinnerRow?.data?.[item.item_name].reduce((sum, val) => sum + val, 0)
+                                                            : dinnerRow?.data?.[item.item_name] ?? '-';
+                                                        const optionText = Array.isArray(dinnerRow?.option?.[item.item_name])
+                                                            ? dinnerRow?.option?.[item.item_name]
+                                                                .map(opt => `${opt.date}: ${opt.optionName} (${opt.timesSelected}x)`)
+                                                                .join('\n')
+                                                            : dinnerRow?.option?.[item.item_name] ?? '';
                                                         const hasOption = optionText && optionText.trim() !== '';
 
                                                         return (
                                                             <TableCell key={`d-${i}`} align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>
                                                                 {hasOption ? (
-                                                                    <Tooltip title={optionText} arrow>
+                                                                    <Tooltip
+                                                                        title={
+                                                                            <div style={{ whiteSpace: 'pre-line' }}>
+                                                                                {optionText.split('\n').map((line, idx) => (
+                                                                                    <div key={idx}>{line}</div>
+                                                                                ))}
+                                                                            </div>
+                                                                        }
+                                                                        arrow
+                                                                    >
                                                                         <span
-                                                                            onClick={() => showAlert(`${item.real_item_name} - ${optionText}`)}
+                                                                            onClick={() => showAlert(`${optionText}`)}
                                                                             style={{
                                                                                 textDecoration: 'underline',
                                                                                 cursor: 'pointer',
