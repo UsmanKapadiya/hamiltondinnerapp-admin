@@ -413,9 +413,9 @@ const ChargesReports = () => {
                                                             <span>{item?.item_name}</span>
                                                         // </Tooltip>
                                                     ) : (
-                                                        <Tooltip title={item.data?.real_item_name} arrow>
+                                                        // <Tooltip title={item.data?.real_item_name} arrow>
                                                             <span>{item?.item_name}</span>
-                                                        </Tooltip>
+                                                        // </Tooltip>
                                                     )
                                                 )}
                                             </TableCell>
@@ -427,29 +427,29 @@ const ChargesReports = () => {
                                                 sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
                                             >
                                                 {selectedSummaryType === "Single Date Record" ? (
-                                                    <Tooltip title={item.real_item_name} arrow>
+                                                    // <Tooltip title={item.real_item_name} arrow>
                                                         <span>{item.item_name}</span>
-                                                    </Tooltip>
+                                                    // </Tooltip>
                                                 ) : (
                                                     Array.isArray(item.data) ? (
-                                                        <Tooltip
-                                                            title={
-                                                                <div>
-                                                                    {item.data.map((subItem, subIdx) => (
-                                                                        <div key={`tooltip-${idx}-${subIdx}`}>
-                                                                            {subItem.date} - {subItem.real_item_name}
-                                                                        </div>
-                                                                    ))}
-                                                                </div>
-                                                            }
-                                                            arrow
-                                                        >
+                                                        // <Tooltip
+                                                        //     title={
+                                                        //         <div>
+                                                        //             {item.data.map((subItem, subIdx) => (
+                                                        //                 <div key={`tooltip-${idx}-${subIdx}`}>
+                                                        //                     {subItem.date} - {subItem.real_item_name}
+                                                        //                 </div>
+                                                        //             ))}
+                                                        //         </div>
+                                                        //     }
+                                                        //     arrow
+                                                        // >
                                                             <span>{item?.item_name}</span>
-                                                        </Tooltip>
+                                                        // </Tooltip>
                                                     ) : (
-                                                        <Tooltip title={item.data?.real_item_name} arrow>
+                                                        // <Tooltip title={item.data?.real_item_name} arrow>
                                                             <span>{item?.item_name}</span>
-                                                        </Tooltip>
+                                                        // </Tooltip>
                                                     )
                                                 )}
                                             </TableCell>
@@ -461,29 +461,29 @@ const ChargesReports = () => {
                                                 sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
                                             >
                                                 {selectedSummaryType === "Single Date Record" ? (
-                                                    <Tooltip title={item.real_item_name} arrow>
+                                                    // <Tooltip title={item.real_item_name} arrow>
                                                         <span>{item.item_name}</span>
-                                                    </Tooltip>
+                                                    // </Tooltip>
                                                 ) : (
                                                     Array.isArray(item.data) ? (
-                                                        <Tooltip
-                                                            title={
-                                                                <div>
-                                                                    {item.data.map((subItem, subIdx) => (
-                                                                        <div key={`tooltip-${idx}-${subIdx}`}>
-                                                                            {subItem.date} - {subItem.real_item_name}
-                                                                        </div>
-                                                                    ))}
-                                                                </div>
-                                                            }
-                                                            arrow
-                                                        >
+                                                        // <Tooltip
+                                                        //     title={
+                                                        //         <div>
+                                                        //             {item.data.map((subItem, subIdx) => (
+                                                        //                 <div key={`tooltip-${idx}-${subIdx}`}>
+                                                        //                     {subItem.date} - {subItem.real_item_name}
+                                                        //                 </div>
+                                                        //             ))}
+                                                        //         </div>
+                                                        //     }
+                                                        //     arrow
+                                                        // >
                                                             <span>{item?.item_name}</span>
-                                                        </Tooltip>
+                                                        // </Tooltip>
                                                     ) : (
-                                                        <Tooltip title={item.data?.real_item_name} arrow>
+                                                        // <Tooltip title={item.data?.real_item_name} arrow>
                                                             <span>{item?.item_name}</span>
-                                                        </Tooltip>
+                                                        // </Tooltip>
                                                     )
                                                 )}
                                             </TableCell>
