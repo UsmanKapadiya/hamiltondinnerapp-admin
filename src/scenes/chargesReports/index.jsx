@@ -717,6 +717,7 @@ const ChargesReports = () => {
                 onConfirm={handleAlertConfirm}
                 onCancel={handleAlertConfirm}
                 onCancelButton={false}
+                confirmButtonLabel={true}
             />
         </Box>
     );

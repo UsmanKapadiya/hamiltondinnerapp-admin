@@ -8,7 +8,7 @@ import {
   Button,
 } from "@mui/material";
 
-const ConfirmationDialog = ({ open, title, message, onConfirm, onCancel, onCancelButton }) => {
+const ConfirmationDialog = ({ open, title, message, onConfirm, onCancel, onCancelButton, confirmButtonLabel }) => {
   return (
     <Dialog open={open} onClose={onCancel}>
       <DialogTitle>{title}</DialogTitle>
@@ -22,7 +22,7 @@ const ConfirmationDialog = ({ open, title, message, onConfirm, onCancel, onCance
           </Button>
         )}
         <Button onClick={onConfirm} color="primary" autoFocus>
-          Confirm
+          {confirmButtonLabel ? "Ok" :  "Confirm"}
         </Button>
       </DialogActions>
     </Dialog>
