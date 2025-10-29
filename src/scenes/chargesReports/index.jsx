@@ -512,38 +512,39 @@ const ChargesReports = () => {
                                             </TableCell>
                                         </TableRow>
                                     ) : (
-                                        <TableRow sx={{ backgroundColor: colors.blueAccent[800] }}>
-                                            <TableCell align="center" sx={{ fontWeight: 700, border: '1px solid rgba(224, 224, 224, 1)' }}>
-                                                Total
-                                            </TableCell>
-                                            {/* Breakfast  */}
-                                            {data?.breakfast_item_list?.map((_, i) => {
-                                                const total = data?.report_breakfast_list?.reduce((sum, row) => sum + (row?.quantity?.[i] ?? row?.data?.[i] ?? 0), 0);
-                                                return (
-                                                    <TableCell key={`btot-${i}`} align="center" sx={{ fontWeight: 700, border: '1px solid rgba(224, 224, 224, 1)', color: 'red' }}>
-                                                        {total}
-                                                    </TableCell>
-                                                );
-                                            })}
-
-                                            {data?.lunch_item_list?.map((_, i) => {
-                                                const total = data?.report_lunch_list?.reduce((sum, row) => sum + (row?.quantity?.[i] ?? row?.data?.[i] ?? 0), 0);
-                                                return (
-                                                    <TableCell key={`ltot-${i}`} align="center" sx={{ fontWeight: 700, border: '1px solid rgba(224, 224, 224, 1)', color: 'red' }}>
-                                                        {total}
-                                                    </TableCell>
-                                                );
-                                            })}
-
-                                            {data?.dinner_item_list?.map((_, i) => {
-                                                const total = data?.report_dinner_list?.reduce((sum, row) => sum + (row?.quantity?.[i] ?? row?.data?.[i] ?? 0), 0);
-                                                return (
-                                                    <TableCell key={`dtot-${i}`} align="center" sx={{ fontWeight: 700, border: '1px solid rgba(224, 224, 224, 1)', color: 'red' }}>
-                                                        {total}
-                                                    </TableCell>
-                                                );
-                                            })}
-                                        </TableRow>
+                                        // <TableRow sx={{ backgroundColor: colors.blueAccent[800] }}>
+                                        //     <TableCell align="center" sx={{ fontWeight: 700, border: '1px solid rgba(224, 224, 224, 1)' }}>
+                                        //         Total
+                                        //     </TableCell>
+                                        //     {/* Breakfast  */}
+                                        //     {data?.breakfast_item_list?.map((_, i) => {
+                                        //         const total = data?.report_breakfast_list?.reduce((sum, row) => sum + (row?.quantity?.[i] ?? row?.data?.[i] ?? 0), 0);
+                                        //         return (
+                                        //             <TableCell key={`btot-${i}`} align="center" sx={{ fontWeight: 700, border: '1px solid rgba(224, 224, 224, 1)', color: 'red' }}>
+                                        //                 {total}
+                                        //             </TableCell>
+                                        //         );
+                                        //     })}
+                                        //
+                                        //     {data?.lunch_item_list?.map((_, i) => {
+                                        //         const total = data?.report_lunch_list?.reduce((sum, row) => sum + (row?.quantity?.[i] ?? row?.data?.[i] ?? 0), 0);
+                                        //         return (
+                                        //             <TableCell key={`ltot-${i}`} align="center" sx={{ fontWeight: 700, border: '1px solid rgba(224, 224, 224, 1)', color: 'red' }}>
+                                        //                 {total}
+                                        //             </TableCell>
+                                        //         );
+                                        //     })}
+                                        //
+                                        //     {data?.dinner_item_list?.map((_, i) => {
+                                        //         const total = data?.report_dinner_list?.reduce((sum, row) => sum + (row?.quantity?.[i] ?? row?.data?.[i] ?? 0), 0);
+                                        //         return (
+                                        //             <TableCell key={`dtot-${i}`} align="center" sx={{ fontWeight: 700, border: '1px solid rgba(224, 224, 224, 1)', color: 'red' }}>
+                                        //                 {total}
+                                        //             </TableCell>
+                                        //         );
+                                        //     })}
+                                        // </TableRow>
+                                        null
                                     )}
                                     {/* Data displayed*/}
                                     {(() => {
@@ -569,11 +570,23 @@ const ChargesReports = () => {
                                                         const quantity = Array.isArray(breakfastRow?.data?.[item.item_name])
                                                             ? breakfastRow?.data?.[item.item_name].reduce((sum, val) => sum + val, 0)
                                                             : breakfastRow?.data?.[item.item_name] ?? '-';
-                                                        const optionText = Array.isArray(breakfastRow?.option?.[item.item_name])
-                                                            ? breakfastRow?.option?.[item.item_name]
-                                                                .map(opt => `${opt.date}: ${opt.optionName} (${opt.timesSelected}x)`)
-                                                                .join('\n')
-                                                            : breakfastRow?.option?.[item.item_name] ?? '';
+                                                        let optionText = '';
+                                                        if (Array.isArray(breakfastRow?.option?.[item.item_name])) {
+                                                            optionText = breakfastRow?.option?.[item.item_name]
+                                                                .map(opt => {
+                                                                    let realName = '';
+                                                                    if (Array.isArray(item.data)) {
+                                                                        const found = item.data.find(d => d.date === opt.date);
+                                                                        if (found) realName = found.real_item_name;
+                                                                    } else if (item.data && item.data.real_item_name) {
+                                                                        realName = item.data.real_item_name;
+                                                                    }
+                                                                    return `${opt.date}${realName ? `: ${realName}` : ''} - ${opt.optionName} (${opt.timesSelected}x)`;
+                                                                })
+                                                                .join('\n');
+                                                        } else if (breakfastRow?.option?.[item.item_name]) {
+                                                            optionText = `${item?.real_item_name} - ${breakfastRow?.option?.[item.item_name]}`;
+                                                        }
                                                         const hasOption = optionText && optionText.trim() !== '';
 
                                                         return (
@@ -611,14 +624,26 @@ const ChargesReports = () => {
                                                         const quantity = Array.isArray(lunchRow?.data?.[item.item_name])
                                                             ? lunchRow?.data?.[item.item_name].reduce((sum, val) => sum + val, 0)
                                                             : lunchRow?.data?.[item.item_name] ?? '-';
-                                                        const optionText = Array.isArray(lunchRow?.option?.[item.item_name])
-                                                            ? lunchRow?.option?.[item.item_name]
-                                                                .map(opt => `${opt.date}: ${opt.optionName} (${opt.timesSelected}x)`)
-                                                                .join('\n')
-                                                            : lunchRow?.option?.[item.item_name] ?? '';
+                                                        let optionText = '';
+                                                        if (Array.isArray(lunchRow?.option?.[item.item_name])) {
+                                                            optionText = lunchRow?.option?.[item.item_name]
+                                                                .map(opt => {
+                                                                    let realName = '';
+                                                                    if (Array.isArray(item.data)) {
+                                                                        const found = item.data.find(d => d.date === opt.date);
+                                                                        if (found) realName = found.real_item_name;
+                                                                    } else if (item.data && item.data.real_item_name) {
+                                                                        realName = item.data.real_item_name;
+                                                                    }
+                                                                    return `${opt.date}${realName ? `: ${realName}` : ''} - ${opt.optionName} (${opt.timesSelected}x)`;
+                                                                })
+                                                                .join('\n');
+                                                        } else if (lunchRow?.option?.[item.item_name]) {
+                                                            optionText = `${item?.real_item_name} - ${lunchRow?.option?.[item.item_name]}`;
+                                                        }
                                                         const hasOption = optionText && optionText.trim() !== '';
-                                                        console.log(hasOption);
-                                                        console.log(optionText);
+                                                        // console.log(hasOption);
+                                                        // console.log(optionText);
                                                         // console.log(hasOption);
 
                                                         return (
@@ -656,11 +681,23 @@ const ChargesReports = () => {
                                                         const quantity = Array.isArray(dinnerRow?.data?.[item.item_name])
                                                             ? dinnerRow?.data?.[item.item_name].reduce((sum, val) => sum + val, 0)
                                                             : dinnerRow?.data?.[item.item_name] ?? '-';
-                                                        const optionText = Array.isArray(dinnerRow?.option?.[item.item_name])
-                                                            ? dinnerRow?.option?.[item.item_name]
-                                                                .map(opt => `${opt.date}: ${opt.optionName} (${opt.timesSelected}x)`)
-                                                                .join('\n')
-                                                            : dinnerRow?.option?.[item.item_name] ?? '';
+                                                        let optionText = '';
+                                                        if (Array.isArray(dinnerRow?.option?.[item.item_name])) {
+                                                            optionText = dinnerRow?.option?.[item.item_name]
+                                                                .map(opt => {
+                                                                    let realName = '';
+                                                                    if (Array.isArray(item.data)) {
+                                                                        const found = item.data.find(d => d.date === opt.date);
+                                                                        if (found) realName = found.real_item_name;
+                                                                    } else if (item.data && item.data.real_item_name) {
+                                                                        realName = item.data.real_item_name;
+                                                                    }
+                                                                    return `${opt.date}${realName ? `: ${realName}` : ''} - ${opt.optionName} (${opt.timesSelected}x)`;
+                                                                })
+                                                                .join('\n');
+                                                        } else if (dinnerRow?.option?.[item.item_name]) {
+                                                            optionText = `${item?.real_item_name} - ${dinnerRow?.option?.[item.item_name]}`;
+                                                        }
                                                         const hasOption = optionText && optionText.trim() !== '';
 
                                                         return (
