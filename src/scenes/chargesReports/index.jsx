@@ -27,6 +27,445 @@ import { useSelector } from "react-redux";
 import NoPermissionMessage from "../../components/NoPermissionMessage";
 import * as XLSX from "xlsx";
 
+
+let responseData = {
+  "ResponseCode": "1",
+  "ResponseText": "",
+  "breakfast_item_list": [
+    {
+      "item_name": "T",
+      "real_item_name": "Tray Service"
+    },
+    {
+      "item_name": "E",
+      "real_item_name": "Escort Service"
+    },
+    {
+      "item_name": "TO",
+      "real_item_name": "TakeOut"
+    },
+    {
+      "item_name": "G",
+      "real_item_name": "No. Of Guests"
+    },
+    {
+      "item_name": "O1",
+      "real_item_name": "Yam Fries",
+      "item_id": 735
+    },
+    {
+      "item_name": "O2",
+      "real_item_name": "Noodles",
+      "item_id": 736
+    }
+  ],
+  "report_breakfast_list": [
+    {
+      "room_no": "311",
+      "room_id": 72,
+      "is_for_guest": 0,
+      "data": {
+        "T": 0,
+        "E": 0,
+        "TO": 1,
+        "G": 0,
+        "O1": 1,
+        "O2": 1
+      },
+      "option": {
+        "T": [],
+        "E": [],
+        "TO": [],
+        "G": [],
+        "O1": [],
+        "O2": [
+          {
+            "itemName": "item1_name"
+          }
+        ]
+      }
+    }
+  ],
+  "lunch_item_list": [
+    {
+      "item_name": "T",
+      "real_item_name": "Tray Service"
+    },
+    {
+      "item_name": "E",
+      "real_item_name": "Escort Service"
+    },
+    {
+      "item_name": "TO",
+      "real_item_name": "TakeOut"
+    },
+    {
+      "item_name": "G",
+      "real_item_name": "No. Of Guests"
+    },
+    {
+      "item_name": "O1",
+      "real_item_name": "Yam Fries",
+      "item_id": 735
+    },
+    {
+      "item_name": "O2",
+      "real_item_name": "Noodles",
+      "item_id": 736
+    }
+  ],
+  "report_lunch_list": [
+    {
+      "room_no": "311",
+      "room_id": 72,
+      "is_for_guest": 0,
+      "data": {
+        "T": 0,
+        "E": 0,
+        "TO": 1,
+        "G": 0,
+        "O1": 1,
+        "O2": 1
+      },
+      "option": {
+        "T": [],
+        "E": [],
+        "TO": [],
+        "G": [],
+        "O1": [
+          {
+            "itemName": "item1_name"
+          },
+          {
+            "itemName": "item2_name"
+          }
+        ],
+        "O2": [
+          {
+            "itemName": "item1_name"
+          }
+        ]
+      }
+    }
+  ],
+  "dinner_item_list": [
+    {
+      "item_name": "T",
+      "real_item_name": "Tray Service"
+    },
+    {
+      "item_name": "E",
+      "real_item_name": "Escort Service"
+    },
+    {
+      "item_name": "TO",
+      "real_item_name": "TakeOut"
+    },
+    {
+      "item_name": "G",
+      "real_item_name": "No. Of Guests"
+    },
+    {
+      "item_name": "O1",
+      "real_item_name": "Yam Fries",
+      "item_id": 735
+    },
+    {
+      "item_name": "O2",
+      "real_item_name": "Noodles",
+      "item_id": 736
+    }
+  ],
+  "report_dinner_list": [
+    {
+      "room_no": "311",
+      "room_id": 72,
+      "is_for_guest": 0,
+      "data": {
+        "T": 0,
+        "E": 0,
+        "TO": 1,
+        "G": 0,
+        "O1": 1,
+        "O2": 1
+      },
+      "option": {
+        "T": [],
+        "E": [],
+        "TO": [],
+        "G": [],
+        "O1": [
+          {
+            "itemName": "item1_name"
+          },
+          {
+            "itemName": "item2_name"
+          }
+        ],
+        "O2": [
+          {
+            "itemName": "item1_name"
+          }
+        ]
+      }
+    }
+  ]
+}
+let multipleDateResponseData = {
+  "ResponseCode": "1",
+  "ResponseText": "",
+  "breakfast_item_list": [
+    {
+      "item_name": "T",
+      "real_item_name": "Tray Service"
+    },
+    {
+      "item_name": "E",
+      "real_item_name": "Escort Service"
+    },
+    {
+      "item_name": "TO",
+      "real_item_name": "TakeOut"
+    },
+    {
+      "item_name": "G",
+      "real_item_name": "No. Of Guests"
+    },
+    {
+      "item_name": "O1",
+      "real_item_name": "Yam Fries",
+      "item_id": 735
+    },
+    {
+      "item_name": "O2",
+      "real_item_name": "Noodles",
+      "item_id": 736
+    }
+  ],
+  "report_breakfast_list": [
+    {
+      "room_no": "311",
+      "room_id": 72,
+      "is_for_guest": 0,
+      "data": {
+        "T": 0,
+        "E": 0,
+        "TO": 1,
+        "G": 0,
+        "O1": 2,
+        "O2": 3
+      },
+      "option": {
+        "T": [],
+        "E": [],
+        "TO": [],
+        "G": [],
+        "O1": [
+          {
+            "date": "2025-10-15",
+            "items": [
+              {
+                "itemName": "item1_name"
+              },
+              {
+                "itemName": "item2_name"
+              }
+            ]
+          }
+        ],
+        "O2": [
+          {
+            "date": "2025-10-15",
+            "items": [
+              {
+                "itemName": "item1_name"
+              }
+            ]
+          },
+          {
+            "date": "2025-10-16",
+            "items": [
+              {
+                "itemName": "item1_name"
+              },
+              {
+                "itemName": "item2_name"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "lunch_item_list": [
+    {
+      "item_name": "T",
+      "real_item_name": "Tray Service"
+    },
+    {
+      "item_name": "E",
+      "real_item_name": "Escort Service"
+    },
+    {
+      "item_name": "TO",
+      "real_item_name": "TakeOut"
+    },
+    {
+      "item_name": "G",
+      "real_item_name": "No. Of Guests"
+    },
+    {
+      "item_name": "O1",
+      "real_item_name": "Yam Fries",
+      "item_id": 735
+    },
+    {
+      "item_name": "O2",
+      "real_item_name": "Noodles",
+      "item_id": 736
+    }
+  ],
+  "report_lunch_list": [
+    {
+      "room_no": "311",
+      "room_id": 72,
+      "is_for_guest": 0,
+      "data": {
+        "T": 0,
+        "E": 0,
+        "TO": 1,
+        "G": 0,
+        "O1": 2,
+        "O2": 3
+      },
+      "option": {
+        "T": [],
+        "E": [],
+        "TO": [],
+        "G": [],
+        "O1": [
+          {
+            "date": "2025-10-15",
+            "items": [
+              {
+                "itemName": "item1_name"
+              },
+              {
+                "itemName": "item2_name"
+              }
+            ]
+          }
+        ],
+        "O2": [
+          {
+            "date": "2025-10-15",
+            "items": [
+              {
+                "itemName": "item1_name"
+              }
+            ]
+          },
+          {
+            "date": "2025-10-16",
+            "items": [
+              {
+                "itemName": "item1_name"
+              },
+              {
+                "itemName": "item2_name"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "dinner_item_list": [
+    {
+      "item_name": "T",
+      "real_item_name": "Tray Service"
+    },
+    {
+      "item_name": "E",
+      "real_item_name": "Escort Service"
+    },
+    {
+      "item_name": "TO",
+      "real_item_name": "TakeOut"
+    },
+    {
+      "item_name": "G",
+      "real_item_name": "No. Of Guests"
+    },
+    {
+      "item_name": "O1",
+      "real_item_name": "Yam Fries",
+      "item_id": 735
+    },
+    {
+      "item_name": "O2",
+      "real_item_name": "Noodles",
+      "item_id": 736
+    }
+  ],
+  "report_dinner_list": [
+    {
+      "room_no": "311",
+      "room_id": 72,
+      "is_for_guest": 0,
+      "data": {
+        "T": 0,
+        "E": 0,
+        "TO": 1,
+        "G": 0,
+        "O1": 2,
+        "O2": 3
+      },
+      "option": {
+        "T": [],
+        "E": [],
+        "TO": [],
+        "G": [],
+        "O1": [
+          {
+            "date": "2025-10-15",
+            "items": [
+              {
+                "itemName": "item1_name"
+              },
+              {
+                "itemName": "item2_name"
+              }
+            ]
+          }
+        ],
+        "O2": [
+          {
+            "date": "2025-10-15",
+            "items": [
+              {
+                "itemName": "item1_name"
+              }
+            ]
+          },
+          {
+            "date": "2025-10-16",
+            "items": [
+              {
+                "itemName": "item1_name"
+              },
+              {
+                "itemName": "item2_name"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
+
+
 const ChargesReports = () => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
@@ -49,7 +488,8 @@ const ChargesReports = () => {
                 try {
                     setLoading(true);
                     const response = await ReportServices.getChargesReportList(date.format("YYYY-MM-DD"));
-                    setData(response);
+                    // setData(response);
+                    setData(responseData)
                 } catch (error) {
                     console.error("Error fetching menu list:", error);
                 } finally {
@@ -74,7 +514,8 @@ const ChargesReports = () => {
                         dayjs(startDate).format("YYYY-MM-DD"),
                         dayjs(endDate).format("YYYY-MM-DD")
                     );
-                    setData(response);
+                    // setData(response);
+                    setData(multipleDateResponseData)
                 } catch (error) {
                     console.error("Error fetching menu list:", error);
                 } finally {
@@ -567,27 +1008,36 @@ const ChargesReports = () => {
                                                     </TableCell>
                                                     {/* Breakfast quantities */}
                                                     {data?.breakfast_item_list?.map((item, i) => {
-                                                        const quantity = Array.isArray(breakfastRow?.data?.[item.item_name])
-                                                            ? breakfastRow?.data?.[item.item_name].reduce((sum, val) => sum + val, 0)
-                                                            : breakfastRow?.data?.[item.item_name] ?? '-';
+                                                        const quantity = breakfastRow?.data?.[item.item_name] ?? '-';
+                                                        const optionData = breakfastRow?.option?.[item.item_name];
                                                         let optionText = '';
-                                                        if (Array.isArray(breakfastRow?.option?.[item.item_name])) {
-                                                            optionText = breakfastRow?.option?.[item.item_name]
-                                                                .map(opt => {
-                                                                    let realName = '';
-                                                                    if (Array.isArray(item.data)) {
-                                                                        const found = item.data.find(d => d.date === opt.date);
-                                                                        if (found) realName = found.real_item_name;
-                                                                    } else if (item.data && item.data.real_item_name) {
-                                                                        realName = item.data.real_item_name;
-                                                                    }
-                                                                    return `${opt.date}${realName ? `: ${realName}` : ''} - ${opt.optionName} (${opt.timesSelected}x)`;
-                                                                })
-                                                                .join('\n');
-                                                        } else if (breakfastRow?.option?.[item.item_name]) {
-                                                            optionText = `${item?.real_item_name} - ${breakfastRow?.option?.[item.item_name]}`;
+                                                        let hasOption = false;
+
+                                                        if (Array.isArray(optionData) && optionData.length > 0) {
+                                                            hasOption = true;
+                                                            if (selectedSummaryType === "Single Date Record") {
+                                                                // Single date format: [{itemName: "item1_name"}, ...]
+                                                                optionText = optionData
+                                                                    .map(opt => `${item.real_item_name} - ${opt?.itemName || ''}`)
+                                                                    .filter(text => text)
+                                                                    .join('\n');
+                                                            } else {
+                                                                // Multiple date format: [{date: "2025-10-15", items: [{itemName: "item1_name"}]}, ...]
+                                                                optionText = optionData
+                                                                    .map(dateGroup => {
+                                                                        if (!dateGroup?.items || !Array.isArray(dateGroup.items)) {
+                                                                            return null;
+                                                                        }
+                                                                        const itemsList = dateGroup.items
+                                                                            .map(it => `${item.real_item_name} - ${it?.itemName || ''}`)
+                                                                            .filter(name => name)
+                                                                            .join(', ');
+                                                                        return itemsList ? `${dateGroup.date}:\n${itemsList}` : null;
+                                                                    })
+                                                                    .filter(text => text)
+                                                                    .join('\n\n');
+                                                            }
                                                         }
-                                                        const hasOption = optionText && optionText.trim() !== '';
 
                                                         return (
                                                             <TableCell key={`b-${i}`} align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>
@@ -603,7 +1053,7 @@ const ChargesReports = () => {
                                                                         arrow
                                                                     >
                                                                         <span
-                                                                            onClick={() => showAlert(`${optionText}`)}
+                                                                            onClick={() => showAlert(optionText)}
                                                                             style={{
                                                                                 textDecoration: 'underline',
                                                                                 cursor: 'pointer',
@@ -621,30 +1071,36 @@ const ChargesReports = () => {
                                                     })}
                                                     {/* Lunch quantities */}
                                                     {data?.lunch_item_list?.map((item, i) => {
-                                                        const quantity = Array.isArray(lunchRow?.data?.[item.item_name])
-                                                            ? lunchRow?.data?.[item.item_name].reduce((sum, val) => sum + val, 0)
-                                                            : lunchRow?.data?.[item.item_name] ?? '-';
+                                                        const quantity = lunchRow?.data?.[item.item_name] ?? '-';
+                                                        const optionData = lunchRow?.option?.[item.item_name];
                                                         let optionText = '';
-                                                        if (Array.isArray(lunchRow?.option?.[item.item_name])) {
-                                                            optionText = lunchRow?.option?.[item.item_name]
-                                                                .map(opt => {
-                                                                    let realName = '';
-                                                                    if (Array.isArray(item.data)) {
-                                                                        const found = item.data.find(d => d.date === opt.date);
-                                                                        if (found) realName = found.real_item_name;
-                                                                    } else if (item.data && item.data.real_item_name) {
-                                                                        realName = item.data.real_item_name;
-                                                                    }
-                                                                    return `${opt.date}${realName ? `: ${realName}` : ''} - ${opt.optionName} (${opt.timesSelected}x)`;
-                                                                })
-                                                                .join('\n');
-                                                        } else if (lunchRow?.option?.[item.item_name]) {
-                                                            optionText = `${item?.real_item_name} - ${lunchRow?.option?.[item.item_name]}`;
+                                                        let hasOption = false;
+
+                                                        if (Array.isArray(optionData) && optionData.length > 0) {
+                                                            hasOption = true;
+                                                            if (selectedSummaryType === "Single Date Record") {
+                                                                // Single date format: [{itemName: "item1_name"}, ...]
+                                                                optionText = optionData
+                                                                    .map(opt => `${item.real_item_name} - ${opt?.itemName || ''}`)
+                                                                    .filter(text => text)
+                                                                    .join('\n');
+                                                            } else {
+                                                                // Multiple date format: [{date: "2025-10-15", items: [{itemName: "item1_name"}]}, ...]
+                                                                optionText = optionData
+                                                                    .map(dateGroup => {
+                                                                        if (!dateGroup?.items || !Array.isArray(dateGroup.items)) {
+                                                                            return null;
+                                                                        }
+                                                                        const itemsList = dateGroup.items
+                                                                            .map(it => `${item.real_item_name} - ${it?.itemName || ''}`)
+                                                                            .filter(name => name)
+                                                                            .join(', ');
+                                                                        return itemsList ? `${dateGroup.date}:\n${itemsList}` : null;
+                                                                    })
+                                                                    .filter(text => text)
+                                                                    .join('\n\n');
+                                                            }
                                                         }
-                                                        const hasOption = optionText && optionText.trim() !== '';
-                                                        // console.log(hasOption);
-                                                        // console.log(optionText);
-                                                        // console.log(hasOption);
 
                                                         return (
                                                             <TableCell key={`l-${i}`} align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>
@@ -660,7 +1116,7 @@ const ChargesReports = () => {
                                                                         arrow
                                                                     >
                                                                         <span
-                                                                            onClick={() => showAlert(`${optionText}`)}
+                                                                            onClick={() => showAlert(optionText)}
                                                                             style={{
                                                                                 textDecoration: 'underline',
                                                                                 cursor: 'pointer',
@@ -678,27 +1134,36 @@ const ChargesReports = () => {
                                                     })}
                                                     {/* Dinner quantities */}
                                                     {data?.dinner_item_list?.map((item, i) => {
-                                                        const quantity = Array.isArray(dinnerRow?.data?.[item.item_name])
-                                                            ? dinnerRow?.data?.[item.item_name].reduce((sum, val) => sum + val, 0)
-                                                            : dinnerRow?.data?.[item.item_name] ?? '-';
+                                                        const quantity = dinnerRow?.data?.[item.item_name] ?? '-';
+                                                        const optionData = dinnerRow?.option?.[item.item_name];
                                                         let optionText = '';
-                                                        if (Array.isArray(dinnerRow?.option?.[item.item_name])) {
-                                                            optionText = dinnerRow?.option?.[item.item_name]
-                                                                .map(opt => {
-                                                                    let realName = '';
-                                                                    if (Array.isArray(item.data)) {
-                                                                        const found = item.data.find(d => d.date === opt.date);
-                                                                        if (found) realName = found.real_item_name;
-                                                                    } else if (item.data && item.data.real_item_name) {
-                                                                        realName = item.data.real_item_name;
-                                                                    }
-                                                                    return `${opt.date}${realName ? `: ${realName}` : ''} - ${opt.optionName} (${opt.timesSelected}x)`;
-                                                                })
-                                                                .join('\n');
-                                                        } else if (dinnerRow?.option?.[item.item_name]) {
-                                                            optionText = `${item?.real_item_name} - ${dinnerRow?.option?.[item.item_name]}`;
+                                                        let hasOption = false;
+
+                                                        if (Array.isArray(optionData) && optionData.length > 0) {
+                                                            hasOption = true;
+                                                            if (selectedSummaryType === "Single Date Record") {
+                                                                // Single date format: [{itemName: "item1_name"}, ...]
+                                                                optionText = optionData
+                                                                    .map(opt => `${item.real_item_name} - ${opt?.itemName || ''}`)
+                                                                    .filter(text => text)
+                                                                    .join('\n');
+                                                            } else {
+                                                                // Multiple date format: [{date: "2025-10-15", items: [{itemName: "item1_name"}]}, ...]
+                                                                optionText = optionData
+                                                                    .map(dateGroup => {
+                                                                        if (!dateGroup?.items || !Array.isArray(dateGroup.items)) {
+                                                                            return null;
+                                                                        }
+                                                                        const itemsList = dateGroup.items
+                                                                            .map(it => `${item.real_item_name} - ${it?.itemName || ''}`)
+                                                                            .filter(name => name)
+                                                                            .join(', ');
+                                                                        return itemsList ? `${dateGroup.date}:\n${itemsList}` : null;
+                                                                    })
+                                                                    .filter(text => text)
+                                                                    .join('\n\n');
+                                                            }
                                                         }
-                                                        const hasOption = optionText && optionText.trim() !== '';
 
                                                         return (
                                                             <TableCell key={`d-${i}`} align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>
@@ -714,7 +1179,7 @@ const ChargesReports = () => {
                                                                         arrow
                                                                     >
                                                                         <span
-                                                                            onClick={() => showAlert(`${optionText}`)}
+                                                                            onClick={() => showAlert(optionText)}
                                                                             style={{
                                                                                 textDecoration: 'underline',
                                                                                 cursor: 'pointer',
