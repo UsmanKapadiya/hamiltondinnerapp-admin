@@ -89,7 +89,9 @@ const AppRouter = () => {
           <Route path="/menu-details/:id" element={<MenuDetailsView />} />
           {/*Order Details */}
           <Route path="/order-details" element={<OrderDetails />} />
-          <Route path="/charges-reports" element={<ChargesReports />} />
+          
+          {/* Temperorry Commented */}
+          {/* <Route path="/charges-reports" element={<ChargesReports />} /> */}
 
           {/*Menu Details */}
           <Route path="/settings" element={<Setting />} />
@@ -103,11 +105,13 @@ const AppRouter = () => {
           <Route path="/users-details/:id" element={<UserDetailsView />} />
           <Route path="/users-details/create" element={<UserDetailsForm />} />
           <Route path="/users-details/:id/edit" element={<UserDetailsForm />} />
-          {/* Forms */}
-          <Route path="/forms" element={<Forms />} />
+          
+          {/* Forms */}          
+          {/* Temperorry Commented */}
+          {/* <Route path="/forms" element={<Forms />} />
           <Route path="/forms/:id" element={<FormsDetailsView />} />
           <Route path="/forms/create" element={<FormsAddUpdate />} />
-          <Route path="/forms/:id/edit" element={<FormsAddUpdate />} />
+          <Route path="/forms/:id/edit" element={<FormsAddUpdate />} /> */}
 
           <Route path="/faq" element={<FAQ />} />
           <Route path="*" element={<NotFound />} />

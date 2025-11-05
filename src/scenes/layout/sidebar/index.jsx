@@ -251,12 +251,13 @@ const SideBar = () => {
             colors={colors}
             icon={<LocalPizzaOutlined />}
           />
-          <Item
+          {/* Temperorry Commented */}
+          {/* <Item
             title="Charges Reports"
             path="/charges-reports"
             colors={colors}
             icon={<AssessmentOutlined />}
-          />
+          /> */}
           <Item
             title="Users"
             path="/users-details"
@@ -269,142 +270,20 @@ const SideBar = () => {
             colors={colors}
             icon={<LockOutlined />}
           />
-
-          <Item
+          {/* Temperorry Commented */}
+          {/* <Item
             title="Form Types"
             path="/forms"
             colors={colors}
             icon={<DynamicFormOutlined />}
-          />
+          /> */}
           <Item
             title="Settings"
             path="/settings"
             colors={colors}
             icon={<SettingsOutlined />}
           />
-
-          {/* <List>
-            <ListItemButton onClick={handleReportsDropdownToggle}>
-              <ListItemText
-                primary="Reports"
-                primaryTypographyProps={{
-                  color: colors.gray[100],
-                  fontWeight: "bold",
-                }}
-              />
-              {reportsDropdownOpen ? <ExpandLessOutlined /> : <ExpandMoreOutlined />}
-            </ListItemButton>
-            <Collapse in={reportsDropdownOpen} timeout="auto" unmountOnExit>
-              <List component="div" disablePadding>
-                <Item
-                  title="Order Details"
-                  path="/order-details"
-                  colors={colors}
-                  icon={<LocalPizzaOutlined />}
-                />
-              </List>
-            </Collapse>
-          </List> */}
-
-          {/* <Item
-            title="Contacts Information"
-            path="/contacts"
-            colors={colors}
-            icon={<ContactsOutlined />}
-          /> */}
-          {/* <Item
-            title="Invoices Balances"
-            path="/invoices"
-            colors={colors}
-            icon={<ReceiptOutlined />}
-          /> */}
         </Menu>
-        {/* <Typography
-          variant="h6"
-          color={colors.gray[300]}
-          sx={{ m: "15px 0 5px 20px" }}
-        >
-          {!collapsed ? "Pages" : " "}
-        </Typography>
-        <Menu
-          menuItemStyles={{
-            button: {
-              ":hover": {
-                color: "#868dfb",
-                background: "transparent",
-                transition: ".4s ease",
-              },
-            },
-          }}
-        >
-          <Item
-            title="Profile Form"
-            path="/form"
-            colors={colors}
-            icon={<PersonOutlined />}
-          />
-          <Item
-            title="Calendar"
-            path="/calendar"
-            colors={colors}
-            icon={<CalendarTodayOutlined />}
-          />
-          <Item
-            title="FAQ Page"
-            path="/faq"
-            colors={colors}
-            icon={<HelpOutlineOutlined />}
-          />
-        </Menu>
-        <Typography
-          variant="h6"
-          color={colors.gray[300]}
-          sx={{ m: "15px 0 5px 20px" }}
-        >
-          {!collapsed ? "Charts" : " "}
-        </Typography>
-        <Menu
-          menuItemStyles={{
-            button: {
-              ":hover": {
-                color: "#868dfb",
-                background: "transparent",
-                transition: ".4s ease",
-              },
-            },
-          }}
-        >
-          <Item
-            title="Bar Chart"
-            path="/bar"
-            colors={colors}
-            icon={<BarChartOutlined />}
-          />
-          <Item
-            title="Pie Chart"
-            path="/pie"
-            colors={colors}
-            icon={<DonutLargeOutlined />}
-          />
-          <Item
-            title="Line Chart"
-            path="/line"
-            colors={colors}
-            icon={<TimelineOutlined />}
-          />
-          <Item
-            title="Geography Chart"
-            path="/geography"
-            colors={colors}
-            icon={<MapOutlined />}
-          />
-          <Item
-            title="Stream Chart"
-            path="/stream"
-            colors={colors}
-            icon={<WavesOutlined />}
-          />
-        </Menu> */}
       </Box>
     </Sidebar>
   );
