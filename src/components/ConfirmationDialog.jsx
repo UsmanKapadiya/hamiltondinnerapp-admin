@@ -13,7 +13,9 @@ const ConfirmationDialog = ({ open, title, message, onConfirm, onCancel, onCance
     <Dialog open={open} onClose={onCancel}>
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
-        <DialogContentText>{message}</DialogContentText>
+        <DialogContentText style={{ whiteSpace: 'pre-line' }}>
+          {message}
+        </DialogContentText>
       </DialogContent>
       <DialogActions>
         {onCancelButton !== false && (
