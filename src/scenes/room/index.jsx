@@ -95,7 +95,7 @@ const Room = () => {
       headerName: "Language Preference",
       renderCell: ({ value }) => (
         <Typography>
-          {value === "0" || value === 0 ? "Chinese" : "English"}
+          {value === "0" || value === 0 ? "English" : "Chinese"}
         </Typography>
       ),
     },
@@ -104,9 +104,9 @@ const Room = () => {
       headerName: "Status",
       flex: 1,
       renderCell: ({ row: { is_active } }) => (
-          <Typography textTransform="capitalize">
-            {is_active === 1 ? "Active" : "Inactive"}
-          </Typography>
+        <Typography textTransform="capitalize">
+          {is_active === 1 ? "Active" : "Inactive"}
+        </Typography>
       ),
     },
     {
@@ -155,7 +155,7 @@ const Room = () => {
     setSelectedRoomName(data?.room_name);
     setDialogOpen(true);
   }, []);
-  
+
   const confirmDelete = useCallback(() => {
     selectedIds.length > 0 && !selectedRoomName
       ? bulkDeleteRoom(selectedIds)
@@ -303,7 +303,7 @@ const Room = () => {
             components={{
               LoadingOverlay: CustomLoadingOverlay,
             }}
-            pageSizeOptions={[10, 20, 50, 100]} 
+            pageSizeOptions={[10, 20, 50, 100]}
           />
 
           <ConfirmationDialog

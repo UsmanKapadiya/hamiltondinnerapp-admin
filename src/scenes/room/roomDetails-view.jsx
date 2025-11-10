@@ -42,8 +42,8 @@ const RoomDetailsView = () => {
 
   // Helper for language display
   const getLanguageLabel = (lang) => {
-    if (lang === "1" || lang === 1) return "English";
-    if (lang === "0" || lang === 0) return "Chinese";
+    if (lang === "1" || lang === 1) return "Chinese";
+    if (lang === "0" || lang === 0) return "English";
     return lang || "-";
   };
 

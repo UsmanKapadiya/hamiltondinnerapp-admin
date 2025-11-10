@@ -207,8 +207,8 @@ const RoomDetailsForm = () => {
                   helperText={touched.language && errors.language}
                   sx={{ gridColumn: "span 2" }}
                 >
-                  <MenuItem value="1">English</MenuItem>
-                  <MenuItem value="0">Chinese</MenuItem>
+                  <MenuItem value="0">English</MenuItem>
+                  <MenuItem value="1">Chinese</MenuItem>
                 </TextField>
                 <TextField
                   fullWidth
