@@ -89,9 +89,7 @@ const AppRouter = () => {
           <Route path="/menu-details/:id" element={<MenuDetailsView />} />
           {/*Order Details */}
           <Route path="/order-details" element={<OrderDetails />} />
-          
-          {/* Temperorry Commented */}
-          {/* <Route path="/charges-reports" element={<ChargesReports />} /> */}
+          <Route path="/charges-reports" element={<ChargesReports />} />
 
           {/*Menu Details */}
           <Route path="/settings" element={<Setting />} />

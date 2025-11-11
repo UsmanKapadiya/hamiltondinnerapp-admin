@@ -499,14 +499,23 @@ const ChargesReports = () => {
                                     ) ? (
                                         <TableRow>
                                             <TableCell
-                                                align="center"
                                                 colSpan={
-                                                    1 +
-                                                    (data?.breakfast_item_list?.length || 0) +
-                                                    (data?.lunch_item_list?.length || 0) +
-                                                    (data?.dinner_item_list?.length || 0)
+                                                    Math.max(
+                                                        1 +
+                                                        (data?.breakfast_item_list?.length || 0) +
+                                                        (data?.lunch_item_list?.length || 0) +
+                                                        (data?.dinner_item_list?.length || 0),
+                                                        100
+                                                    )
                                                 }
-                                                sx={{ textAlign: 'center', fontWeight: 600, fontSize: '1.1rem' }}
+                                                sx={{ 
+                                                    textAlign: 'center',
+                                                    verticalAlign: 'middle',
+                                                    fontWeight: 600, 
+                                                    fontSize: '1.1rem',
+                                                    border: '1px solid rgba(224, 224, 224, 1)',
+                                                    padding: '40px 0'
+                                                }}
                                             >
                                                 No Report Found
                                             </TableCell>

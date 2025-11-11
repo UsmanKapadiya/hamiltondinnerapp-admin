@@ -251,13 +251,12 @@ const SideBar = () => {
             colors={colors}
             icon={<LocalPizzaOutlined />}
           />
-          {/* Temperorry Commented */}
-          {/* <Item
+          <Item
             title="Charges Reports"
             path="/charges-reports"
             colors={colors}
             icon={<AssessmentOutlined />}
-          /> */}
+          />
           <Item
             title="Users"
             path="/users-details"
