@@ -409,15 +409,21 @@ const ChargesReports = () => {
                                             data.breakfast_item_list.map((item, idx) => {
                                                 const getTooltipTitle = () => {
                                                     if (item.real_item_name) {
-                                                        return item.real_item_name;
+                                                        return <div>{item.real_item_name}</div>;
                                                     } else if (item.data) {
                                                         if (Array.isArray(item.data)) {
-                                                            return item.data.map(d => `${d.date}: ${d.real_item_name}`).join('\n');
+                                                            return (
+                                                                <div style={{ whiteSpace: 'pre-line' }}>
+                                                                    {item.data.map((d, i) => (
+                                                                        <div key={i}>{d.date}: {d.real_item_name}</div>
+                                                                    ))}
+                                                                </div>
+                                                            );
                                                         } else if (item.data.real_item_name) {
-                                                            return item.data.real_item_name;
+                                                            return <div>{item.data.real_item_name}</div>;
                                                         }
                                                     }
-                                                    return item.item_name;
+                                                    return <div>{item.item_name}</div>;
                                                 };
                                                 return (
                                                     <TableCell
@@ -443,15 +449,21 @@ const ChargesReports = () => {
                                             data.lunch_item_list.map((item, idx) => {
                                                 const getTooltipTitle = () => {
                                                     if (item.real_item_name) {
-                                                        return item.real_item_name;
+                                                        return <div>{item.real_item_name}</div>;
                                                     } else if (item.data) {
                                                         if (Array.isArray(item.data)) {
-                                                            return item.data.map(d => `${d.date}: ${d.real_item_name}`).join('\n');
+                                                            return (
+                                                                <div style={{ whiteSpace: 'pre-line' }}>
+                                                                    {item.data.map((d, i) => (
+                                                                        <div key={i}>{d.date}: {d.real_item_name}</div>
+                                                                    ))}
+                                                                </div>
+                                                            );
                                                         } else if (item.data.real_item_name) {
-                                                            return item.data.real_item_name;
+                                                            return <div>{item.data.real_item_name}</div>;
                                                         }
                                                     }
-                                                    return item.item_name;
+                                                    return <div>{item.item_name}</div>;
                                                 };
                                                 return (
                                                     <TableCell
@@ -477,15 +489,21 @@ const ChargesReports = () => {
                                             data.dinner_item_list.map((item, idx) => {
                                                 const getTooltipTitle = () => {
                                                     if (item.real_item_name) {
-                                                        return item.real_item_name;
+                                                        return <div>{item.real_item_name}</div>;
                                                     } else if (item.data) {
                                                         if (Array.isArray(item.data)) {
-                                                            return item.data.map(d => `${d.date}: ${d.real_item_name}`).join('\n');
+                                                            return (
+                                                                <div style={{ whiteSpace: 'pre-line' }}>
+                                                                    {item.data.map((d, i) => (
+                                                                        <div key={i}>{d.date}: {d.real_item_name}</div>
+                                                                    ))}
+                                                                </div>
+                                                            );
                                                         } else if (item.data.real_item_name) {
-                                                            return item.data.real_item_name;
+                                                            return <div>{item.data.real_item_name}</div>;
                                                         }
                                                     }
-                                                    return item.item_name;
+                                                    return <div>{item.item_name}</div>;
                                                 };
                                                 return (
                                                     <TableCell
@@ -592,25 +610,34 @@ const ChargesReports = () => {
                                                                         // Handle both string (single date) and array (multi date) formats
                                                                         let option = "";
                                                                         let popupText = "";
+                                                                        let popupLines = [];
+                                                                        
                                                                         if (Array.isArray(optionRaw)) {
                                                                             // Check if it's multiple date format (with date and items structure)
                                                                             const isMultipleDateFormat = optionRaw.length > 0 && optionRaw[0]?.date && optionRaw[0]?.items;
                                                                             
                                                                             if (isMultipleDateFormat) {
-                                                                                const optionLines = [];
                                                                                 optionRaw.forEach(dateGroup => {
                                                                                     if (dateGroup.date && Array.isArray(dateGroup.items)) {
                                                                                         dateGroup.items.forEach(itemObj => {
                                                                                             if (itemObj.itemName) {
-                                                                                                optionLines.push(`${dateGroup.date}: ${realItemName} - ${itemObj.itemName}`);
+                                                                                                // Get the real item name for this specific date
+                                                                                                let dateSpecificName = realItemName;
+                                                                                                if (Array.isArray(item.data)) {
+                                                                                                    const found = item.data.find(d => d.date === dateGroup.date);
+                                                                                                    if (found && found.real_item_name) {
+                                                                                                        dateSpecificName = found.real_item_name;
+                                                                                                    }
+                                                                                                }
+                                                                                                popupLines.push(`${dateGroup.date}: ${dateSpecificName} - ${itemObj.itemName}`);
                                                                                             }
                                                                                         });
                                                                                     }
                                                                                 });
-                                                                                option = optionLines.join(', ');
-                                                                                popupText = optionLines.join('\n');
+                                                                                option = popupLines.join(', ');
+                                                                                popupText = popupLines.join('\n');
                                                                             } else {
-                                                                                const optionLines = optionRaw
+                                                                                popupLines = optionRaw
                                                                                     .filter(opt => opt && (typeof opt === 'object' ? (opt.itemName || opt.optionName) : opt))
                                                                                     .map(opt => {
                                                                                         if (typeof opt === 'object' && (opt.itemName || opt.optionName)) {
@@ -620,12 +647,13 @@ const ChargesReports = () => {
                                                                                         return typeof opt === 'string' ? `${realItemName} - ${opt}` : '';
                                                                                     })
                                                                                     .filter(opt => opt.trim().length > 0);
-                                                                                option = optionLines.join(', ');
-                                                                                popupText = optionLines.join('\n');
+                                                                                option = popupLines.join(', ');
+                                                                                popupText = popupLines.join('\n');
                                                                             }
                                                                         } else if (typeof optionRaw === 'string') {
                                                                             option = optionRaw;
                                                                             popupText = `${realItemName} - ${optionRaw}`;
+                                                                            popupLines = [popupText];
                                                                         }
                                                                         
                                                                         const showPopup = qty >= 1 && option && option.trim().length > 0;
@@ -637,8 +665,8 @@ const ChargesReports = () => {
                                                                                 ) : showPopup ? (
                                                                                     <Tooltip
                                                                                         title={
-                                                                                            <div style={{ whiteSpace: 'pre-line' }}>
-                                                                                                {popupText.split('\n').map((line, lineIdx) => (
+                                                                                            <div>
+                                                                                                {popupLines.map((line, lineIdx) => (
                                                                                                     <div key={lineIdx}>{line}</div>
                                                                                                 ))}
                                                                                             </div>
@@ -646,7 +674,13 @@ const ChargesReports = () => {
                                                                                         arrow
                                                                                     >
                                                                                         <span
-                                                                                            onClick={() => showAlert(popupText)}
+                                                                                            onClick={() => showAlert(
+                                                                                                <div>
+                                                                                                    {popupLines.map((line, lineIdx) => (
+                                                                                                        <div key={lineIdx}>{line}</div>
+                                                                                                    ))}
+                                                                                                </div>
+                                                                                            )}
                                                                                             style={{
                                                                                                 textDecoration: 'underline',
                                                                                                 cursor: 'pointer',
