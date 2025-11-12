@@ -242,7 +242,16 @@ const ChargesReports = () => {
                                     <DatePicker
                                         label="Start Date"
                                         value={startDate}
+                                        maxDate={endDate}
                                         onChange={(newValue) => setStartDate(newValue)}
+                                        slotProps={{
+                                            textField: {
+                                                error: startDate && endDate && dayjs(startDate).isAfter(endDate),
+                                                helperText: startDate && endDate && dayjs(startDate).isAfter(endDate) 
+                                                    ? "Start date must be before end date" 
+                                                    : ""
+                                            }
+                                        }}
                                         renderInput={(params) => (
                                             <TextField
                                                 {...params}
@@ -255,7 +264,16 @@ const ChargesReports = () => {
                                     <DatePicker
                                         label="End Date"
                                         value={endDate}
+                                        minDate={startDate}
                                         onChange={(newValue) => setEndDate(newValue)}
+                                        slotProps={{
+                                            textField: {
+                                                error: startDate && endDate && dayjs(endDate).isBefore(startDate),
+                                                helperText: startDate && endDate && dayjs(endDate).isBefore(startDate) 
+                                                    ? "End date must be after start date" 
+                                                    : ""
+                                            }
+                                        }}
                                         renderInput={(params) => (
                                             <TextField
                                                 {...params}
