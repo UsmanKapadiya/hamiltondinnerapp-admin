@@ -17,7 +17,7 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { Header } from "../../components";
 import { tokens } from "../../theme";
 import { FileDownload, LocalPizzaOutlined, RestartAltOutlined, SummarizeOutlined, WidgetsOutlined } from "@mui/icons-material";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import dayjs from "dayjs";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import ReportServices from "../../services/reportServices";
@@ -26,10 +26,12 @@ import { hasPermission } from "../../components/permissions";
 import { useSelector } from "react-redux";
 import NoPermissionMessage from "../../components/NoPermissionMessage";
 import * as XLSX from "xlsx";
+import { CollapsedContext } from "../../App";
 
 const OrderDetails = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const { collapsed } = useContext(CollapsedContext);
   const [date, setDate] = useState(dayjs());
   const [startDate, setStartDate] = useState(dayjs().startOf('month'));
   const [endDate, setEndDate] = useState(dayjs());
@@ -337,7 +339,16 @@ const OrderDetails = () => {
           {loading ? (
             <CustomLoadingOverlay />
           ) : rowsArray.length > 0 ? (
-            <Box sx={{ overflowX: 'auto', width: '100%' }}>
+            <Box 
+              sx={{ 
+                overflowX: 'auto', 
+                width: '100%',
+                maxWidth: collapsed 
+                  ? 'calc(100vw - 80px - 40px)' // collapsed sidebar (~80px) + margin (40px)
+                  : 'calc(100vw - 250px - 40px)', // expanded sidebar (~250px) + margin (40px)
+                transition: 'max-width 0.3s ease',
+              }}
+            >
                         <TableContainer component={Paper}>
                             <Table sx={{ border: '1px solid rgba(224, 224, 224, 1)', borderCollapse: 'collapse', minWidth: 650 }}>
                                 <TableHead>

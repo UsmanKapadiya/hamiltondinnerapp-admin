@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import {
     Box, useTheme, Table,
     TableHead,
@@ -27,10 +27,13 @@ import { hasPermission } from "../../components/permissions";
 import { useSelector } from "react-redux";
 import NoPermissionMessage from "../../components/NoPermissionMessage";
 import * as XLSX from "xlsx";
+import { CollapsedContext } from "../../App";
+
 
 const ChargesReports = () => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
+    const { collapsed } = useContext(CollapsedContext);
     const [date, setDate] = useState(dayjs());
     const [startDate, setStartDate] = useState(dayjs().startOf('month'));
     const [endDate, setEndDate] = useState(dayjs());
@@ -248,8 +251,8 @@ const ChargesReports = () => {
                                         slotProps={{
                                             textField: {
                                                 error: startDate && endDate && dayjs(startDate).isAfter(endDate),
-                                                helperText: startDate && endDate && dayjs(startDate).isAfter(endDate) 
-                                                    ? "Start date must be before end date" 
+                                                helperText: startDate && endDate && dayjs(startDate).isAfter(endDate)
+                                                    ? "Start date must be before end date"
                                                     : ""
                                             }
                                         }}
@@ -270,8 +273,8 @@ const ChargesReports = () => {
                                         slotProps={{
                                             textField: {
                                                 error: startDate && endDate && dayjs(endDate).isBefore(startDate),
-                                                helperText: startDate && endDate && dayjs(endDate).isBefore(startDate) 
-                                                    ? "End date must be after start date" 
+                                                helperText: startDate && endDate && dayjs(endDate).isBefore(startDate)
+                                                    ? "End date must be after start date"
                                                     : ""
                                             }
                                         }}
@@ -371,346 +374,357 @@ const ChargesReports = () => {
                     {loading ? (
                         <CustomLoadingOverlay />
                     ) : (
-                        <TableContainer component={Paper} sx={{ width: '95%', overflow: 'auto' }}>
-                            <Table sx={{ border: '1px solid rgba(224, 224, 224, 1)', borderCollapse: 'collapse' }}>
-                                <TableHead>
-                                    <TableRow sx={{ backgroundColor: colors.blueAccent[700] }}>
-                                        <TableCell
-                                            align="center"
-                                            sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
-                                            rowSpan={2}
-                                        >
-                                            #
-                                        </TableCell>
-                                        <TableCell
-                                            align="center"
-                                            sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
-                                            colSpan={Math.max(data?.breakfast_item_list?.length || 0, 1)}
-                                        >
-                                            Breakfast
-                                        </TableCell>
-                                        <TableCell
-                                            align="center"
-                                            sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
-                                            colSpan={Math.max(data?.lunch_item_list?.length || 0, 1)}
-                                        >
-                                            Lunch
-                                        </TableCell>
-                                        <TableCell
-                                            align="center"
-                                            sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
-                                            colSpan={Math.max(data?.dinner_item_list?.length || 0, 1)}
-                                        >
-                                            Dinner
-                                        </TableCell>
-                                    </TableRow>
-                                    <TableRow sx={{ backgroundColor: colors.blueAccent[700] }}>
-                                        {data?.breakfast_item_list && data.breakfast_item_list.length > 0 ? (
-                                            data.breakfast_item_list.map((item, idx) => {
-                                                const getTooltipTitle = () => {
-                                                    if (item.real_item_name) {
-                                                        return <div>{item.real_item_name}</div>;
-                                                    } else if (item.data) {
-                                                        if (Array.isArray(item.data)) {
-                                                            return (
-                                                                <div style={{ whiteSpace: 'pre-line' }}>
-                                                                    {item.data.map((d, i) => (
-                                                                        <div key={i}>{d.date}: {d.real_item_name}</div>
-                                                                    ))}
-                                                                </div>
-                                                            );
-                                                        } else if (item.data.real_item_name) {
-                                                            return <div>{item.data.real_item_name}</div>;
-                                                        }
-                                                    }
-                                                    return <div>{item.item_name}</div>;
-                                                };
-                                                return (
-                                                    <TableCell
-                                                        key={`breakfast-${idx}`}
-                                                        align="center"
-                                                        sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
-                                                    >
-                                                        <Tooltip title={getTooltipTitle()} arrow>
-                                                            <span>{item.item_name}</span>
-                                                        </Tooltip>
-                                                    </TableCell>
-                                                );
-                                            })
-                                        ) : (
+                        <Box
+                            sx={{
+                                overflowX: 'auto',
+                                width: '100%',
+                                maxWidth: collapsed
+                                    ? 'calc(100vw - 80px - 40px)' // collapsed sidebar (~80px) + margin (40px)
+                                    : 'calc(100vw - 250px - 40px)', // expanded sidebar (~250px) + margin (40px)
+                                transition: 'max-width 0.3s ease',
+                            }}
+                        >
+                            <TableContainer component={Paper} >
+                                <Table sx={{ border: '1px solid rgba(224, 224, 224, 1)', borderCollapse: 'collapse' }}>
+                                    <TableHead>
+                                        <TableRow sx={{ backgroundColor: colors.blueAccent[700] }}>
                                             <TableCell
                                                 align="center"
                                                 sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
+                                                rowSpan={2}
                                             >
-                                                -
+                                                #
                                             </TableCell>
-                                        )}
-                                        {data?.lunch_item_list && data.lunch_item_list.length > 0 ? (
-                                            data.lunch_item_list.map((item, idx) => {
-                                                const getTooltipTitle = () => {
-                                                    if (item.real_item_name) {
-                                                        return <div>{item.real_item_name}</div>;
-                                                    } else if (item.data) {
-                                                        if (Array.isArray(item.data)) {
-                                                            return (
-                                                                <div style={{ whiteSpace: 'pre-line' }}>
-                                                                    {item.data.map((d, i) => (
-                                                                        <div key={i}>{d.date}: {d.real_item_name}</div>
-                                                                    ))}
-                                                                </div>
-                                                            );
-                                                        } else if (item.data.real_item_name) {
-                                                            return <div>{item.data.real_item_name}</div>;
-                                                        }
-                                                    }
-                                                    return <div>{item.item_name}</div>;
-                                                };
-                                                return (
-                                                    <TableCell
-                                                        key={`lunch-${idx}`}
-                                                        align="center"
-                                                        sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
-                                                    >
-                                                        <Tooltip title={getTooltipTitle()} arrow>
-                                                            <span>{item.item_name}</span>
-                                                        </Tooltip>
-                                                    </TableCell>
-                                                );
-                                            })
-                                        ) : (
                                             <TableCell
                                                 align="center"
                                                 sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
+                                                colSpan={Math.max(data?.breakfast_item_list?.length || 0, 1)}
                                             >
-                                                -
+                                                Breakfast
                                             </TableCell>
-                                        )}
-                                        {data?.dinner_item_list && data.dinner_item_list.length > 0 ? (
-                                            data.dinner_item_list.map((item, idx) => {
-                                                const getTooltipTitle = () => {
-                                                    if (item.real_item_name) {
-                                                        return <div>{item.real_item_name}</div>;
-                                                    } else if (item.data) {
-                                                        if (Array.isArray(item.data)) {
-                                                            return (
-                                                                <div style={{ whiteSpace: 'pre-line' }}>
-                                                                    {item.data.map((d, i) => (
-                                                                        <div key={i}>{d.date}: {d.real_item_name}</div>
-                                                                    ))}
-                                                                </div>
-                                                            );
-                                                        } else if (item.data.real_item_name) {
-                                                            return <div>{item.data.real_item_name}</div>;
-                                                        }
-                                                    }
-                                                    return <div>{item.item_name}</div>;
-                                                };
-                                                return (
-                                                    <TableCell
-                                                        key={`dinner-${idx}`}
-                                                        align="center"
-                                                        sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
-                                                    >
-                                                        <Tooltip title={getTooltipTitle()} arrow>
-                                                            <span>{item.item_name}</span>
-                                                        </Tooltip>
-                                                    </TableCell>
-                                                );
-                                            })
-                                        ) : (
                                             <TableCell
                                                 align="center"
                                                 sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
+                                                colSpan={Math.max(data?.lunch_item_list?.length || 0, 1)}
                                             >
-                                                -
+                                                Lunch
                                             </TableCell>
-                                        )}
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {/* No data message */}
-                                    {(
-                                        (!data?.report_breakfast_list || data.report_breakfast_list.length === 0) &&
-                                        (!data?.report_lunch_list || data.report_lunch_list.length === 0) &&
-                                        (!data?.report_dinner_list || data.report_dinner_list.length === 0)
-                                    ) ? (
-                                        <TableRow>
-                                            <TableCell 
-                                                colSpan={
-                                                    Math.max(
-                                                        1 + (data?.breakfast_item_list?.length || 0) + (data?.lunch_item_list?.length || 0) + (data?.dinner_item_list?.length || 0),
-                                                        4
-                                                    )
-                                                } 
+                                            <TableCell
                                                 align="center"
-                                                sx={{ 
-                                                    border: '1px solid rgba(224, 224, 224, 1)',
-                                                    padding: '40px',
-                                                    fontSize: '16px',
-                                                    fontWeight: 500,
-                                                    color: colors.gray[500]
-                                                }}
+                                                sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
+                                                colSpan={Math.max(data?.dinner_item_list?.length || 0, 1)}
                                             >
-                                                No Report Found
+                                                Dinner
                                             </TableCell>
                                         </TableRow>
-                                    ) : (
-                                        (() => {
-                                            const roomNos = [
-                                                ...(data?.report_breakfast_list?.map(r => r.room_no) || []),
-                                                ...(data?.report_lunch_list?.map(r => r.room_no) || []),
-                                                ...(data?.report_dinner_list?.map(r => r.room_no) || []),
-                                            ];
-                                            const uniqueRoomNos = [...new Set(roomNos)];
-                                            const baseList = uniqueRoomNos.map(room_no => ({
-                                                room_no
-                                            }));
-                                            return baseList.map((row, idx) => {
-                                                const breakfastRow = data?.report_breakfast_list?.find(b => b.room_no === row.room_no) || { data: {}, option: {} };
-                                                const lunchRow = data?.report_lunch_list?.find(l => l.room_no === row.room_no) || { data: {}, option: {} };
-                                                const dinnerRow = data?.report_dinner_list?.find(d => d.room_no === row.room_no) || { data: {}, option: {} };
-                                                return (
-                                                    <TableRow key={row.room_no}>
-                                                        <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>
-                                                            {row.room_no}
+                                        <TableRow sx={{ backgroundColor: colors.blueAccent[700] }}>
+                                            {data?.breakfast_item_list && data.breakfast_item_list.length > 0 ? (
+                                                data.breakfast_item_list.map((item, idx) => {
+                                                    const getTooltipTitle = () => {
+                                                        if (item.real_item_name) {
+                                                            return <div>{item.real_item_name}</div>;
+                                                        } else if (item.data) {
+                                                            if (Array.isArray(item.data)) {
+                                                                return (
+                                                                    <div style={{ whiteSpace: 'pre-line' }}>
+                                                                        {item.data.map((d, i) => (
+                                                                            <div key={i}>{d.date}: {d.real_item_name}</div>
+                                                                        ))}
+                                                                    </div>
+                                                                );
+                                                            } else if (item.data.real_item_name) {
+                                                                return <div>{item.data.real_item_name}</div>;
+                                                            }
+                                                        }
+                                                        return <div>{item.item_name}</div>;
+                                                    };
+                                                    return (
+                                                        <TableCell
+                                                            key={`breakfast-${idx}`}
+                                                            align="center"
+                                                            sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
+                                                        >
+                                                            <Tooltip title={getTooltipTitle()} arrow>
+                                                                <span>{item.item_name}</span>
+                                                            </Tooltip>
                                                         </TableCell>
-                                                        {/* Breakfast, Lunch, Dinner quantities */}
-                                                        {[{
-                                                            row: breakfastRow,
-                                                            itemList: data?.breakfast_item_list,
-                                                            prefix: 'b'
-                                                        }, {
-                                                            row: lunchRow,
-                                                            itemList: data?.lunch_item_list,
-                                                            prefix: 'l'
-                                                        }, {
-                                                            row: dinnerRow,
-                                                            itemList: data?.dinner_item_list,
-                                                            prefix: 'd'
-                                                        }].map(({ row, itemList, prefix }, mealIdx) => (
-                                                            <>
-                                                                {itemList && itemList.length > 0 ? (
-                                                                    itemList.map((item, i) => {
-                                                                        const itemKey = item?.item_name || "";
-                                                                        let qty = row.data?.[itemKey];
-                                                                        const optionRaw = row.option?.[itemKey];
-                                                                    
-                                                                        // Get real_item_name from either format
-                                                                        let realItemName = "";
-                                                                        if (item.real_item_name) {
-                                                                            realItemName = item.real_item_name;
-                                                                        } else if (item.data) {
-                                                                            if (Array.isArray(item.data)) {
-                                                                                realItemName = item.data[0]?.real_item_name || "";
-                                                                            } else if (item.data.real_item_name) {
-                                                                                realItemName = item.data.real_item_name;
+                                                    );
+                                                })
+                                            ) : (
+                                                <TableCell
+                                                    align="center"
+                                                    sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
+                                                >
+                                                    -
+                                                </TableCell>
+                                            )}
+                                            {data?.lunch_item_list && data.lunch_item_list.length > 0 ? (
+                                                data.lunch_item_list.map((item, idx) => {
+                                                    const getTooltipTitle = () => {
+                                                        if (item.real_item_name) {
+                                                            return <div>{item.real_item_name}</div>;
+                                                        } else if (item.data) {
+                                                            if (Array.isArray(item.data)) {
+                                                                return (
+                                                                    <div style={{ whiteSpace: 'pre-line' }}>
+                                                                        {item.data.map((d, i) => (
+                                                                            <div key={i}>{d.date}: {d.real_item_name}</div>
+                                                                        ))}
+                                                                    </div>
+                                                                );
+                                                            } else if (item.data.real_item_name) {
+                                                                return <div>{item.data.real_item_name}</div>;
+                                                            }
+                                                        }
+                                                        return <div>{item.item_name}</div>;
+                                                    };
+                                                    return (
+                                                        <TableCell
+                                                            key={`lunch-${idx}`}
+                                                            align="center"
+                                                            sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
+                                                        >
+                                                            <Tooltip title={getTooltipTitle()} arrow>
+                                                                <span>{item.item_name}</span>
+                                                            </Tooltip>
+                                                        </TableCell>
+                                                    );
+                                                })
+                                            ) : (
+                                                <TableCell
+                                                    align="center"
+                                                    sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
+                                                >
+                                                    -
+                                                </TableCell>
+                                            )}
+                                            {data?.dinner_item_list && data.dinner_item_list.length > 0 ? (
+                                                data.dinner_item_list.map((item, idx) => {
+                                                    const getTooltipTitle = () => {
+                                                        if (item.real_item_name) {
+                                                            return <div>{item.real_item_name}</div>;
+                                                        } else if (item.data) {
+                                                            if (Array.isArray(item.data)) {
+                                                                return (
+                                                                    <div style={{ whiteSpace: 'pre-line' }}>
+                                                                        {item.data.map((d, i) => (
+                                                                            <div key={i}>{d.date}: {d.real_item_name}</div>
+                                                                        ))}
+                                                                    </div>
+                                                                );
+                                                            } else if (item.data.real_item_name) {
+                                                                return <div>{item.data.real_item_name}</div>;
+                                                            }
+                                                        }
+                                                        return <div>{item.item_name}</div>;
+                                                    };
+                                                    return (
+                                                        <TableCell
+                                                            key={`dinner-${idx}`}
+                                                            align="center"
+                                                            sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
+                                                        >
+                                                            <Tooltip title={getTooltipTitle()} arrow>
+                                                                <span>{item.item_name}</span>
+                                                            </Tooltip>
+                                                        </TableCell>
+                                                    );
+                                                })
+                                            ) : (
+                                                <TableCell
+                                                    align="center"
+                                                    sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}
+                                                >
+                                                    -
+                                                </TableCell>
+                                            )}
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {/* No data message */}
+                                        {(
+                                            (!data?.report_breakfast_list || data.report_breakfast_list.length === 0) &&
+                                            (!data?.report_lunch_list || data.report_lunch_list.length === 0) &&
+                                            (!data?.report_dinner_list || data.report_dinner_list.length === 0)
+                                        ) ? (
+                                            <TableRow>
+                                                <TableCell
+                                                    colSpan={
+                                                        Math.max(
+                                                            1 + (data?.breakfast_item_list?.length || 0) + (data?.lunch_item_list?.length || 0) + (data?.dinner_item_list?.length || 0),
+                                                            4
+                                                        )
+                                                    }
+                                                    align="center"
+                                                    sx={{
+                                                        border: '1px solid rgba(224, 224, 224, 1)',
+                                                        padding: '40px',
+                                                        fontSize: '16px',
+                                                        fontWeight: 500,
+                                                        color: colors.gray[500]
+                                                    }}
+                                                >
+                                                    No Report Found
+                                                </TableCell>
+                                            </TableRow>
+                                        ) : (
+                                            (() => {
+                                                const roomNos = [
+                                                    ...(data?.report_breakfast_list?.map(r => r.room_no) || []),
+                                                    ...(data?.report_lunch_list?.map(r => r.room_no) || []),
+                                                    ...(data?.report_dinner_list?.map(r => r.room_no) || []),
+                                                ];
+                                                const uniqueRoomNos = [...new Set(roomNos)];
+                                                const baseList = uniqueRoomNos.map(room_no => ({
+                                                    room_no
+                                                }));
+                                                return baseList.map((row, idx) => {
+                                                    const breakfastRow = data?.report_breakfast_list?.find(b => b.room_no === row.room_no) || { data: {}, option: {} };
+                                                    const lunchRow = data?.report_lunch_list?.find(l => l.room_no === row.room_no) || { data: {}, option: {} };
+                                                    const dinnerRow = data?.report_dinner_list?.find(d => d.room_no === row.room_no) || { data: {}, option: {} };
+                                                    return (
+                                                        <TableRow key={row.room_no}>
+                                                            <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>
+                                                                {row.room_no}
+                                                            </TableCell>
+                                                            {/* Breakfast, Lunch, Dinner quantities */}
+                                                            {[{
+                                                                row: breakfastRow,
+                                                                itemList: data?.breakfast_item_list,
+                                                                prefix: 'b'
+                                                            }, {
+                                                                row: lunchRow,
+                                                                itemList: data?.lunch_item_list,
+                                                                prefix: 'l'
+                                                            }, {
+                                                                row: dinnerRow,
+                                                                itemList: data?.dinner_item_list,
+                                                                prefix: 'd'
+                                                            }].map(({ row, itemList, prefix }, mealIdx) => (
+                                                                <>
+                                                                    {itemList && itemList.length > 0 ? (
+                                                                        itemList.map((item, i) => {
+                                                                            const itemKey = item?.item_name || "";
+                                                                            let qty = row.data?.[itemKey];
+                                                                            const optionRaw = row.option?.[itemKey];
+
+                                                                            // Get real_item_name from either format
+                                                                            let realItemName = "";
+                                                                            if (item.real_item_name) {
+                                                                                realItemName = item.real_item_name;
+                                                                            } else if (item.data) {
+                                                                                if (Array.isArray(item.data)) {
+                                                                                    realItemName = item.data[0]?.real_item_name || "";
+                                                                                } else if (item.data.real_item_name) {
+                                                                                    realItemName = item.data.real_item_name;
+                                                                                }
                                                                             }
-                                                                        }
-                                                                        
-                                                                        // Handle both string (single date) and array (multi date) formats
-                                                                        let option = "";
-                                                                        let popupText = "";
-                                                                        let popupLines = [];
-                                                                        
-                                                                        if (Array.isArray(optionRaw)) {
-                                                                            // Check if it's multiple date format (with date and items structure)
-                                                                            const isMultipleDateFormat = optionRaw.length > 0 && optionRaw[0]?.date && optionRaw[0]?.items;
-                                                                            
-                                                                            if (isMultipleDateFormat) {
-                                                                                optionRaw.forEach(dateGroup => {
-                                                                                    if (dateGroup.date && Array.isArray(dateGroup.items)) {
-                                                                                        dateGroup.items.forEach(itemObj => {
-                                                                                            if (itemObj.itemName) {
-                                                                                                // Get the real item name for this specific date
-                                                                                                let dateSpecificName = realItemName;
-                                                                                                if (Array.isArray(item.data)) {
-                                                                                                    const found = item.data.find(d => d.date === dateGroup.date);
-                                                                                                    if (found && found.real_item_name) {
-                                                                                                        dateSpecificName = found.real_item_name;
+
+                                                                            // Handle both string (single date) and array (multi date) formats
+                                                                            let option = "";
+                                                                            let popupText = "";
+                                                                            let popupLines = [];
+
+                                                                            if (Array.isArray(optionRaw)) {
+                                                                                // Check if it's multiple date format (with date and items structure)
+                                                                                const isMultipleDateFormat = optionRaw.length > 0 && optionRaw[0]?.date && optionRaw[0]?.items;
+
+                                                                                if (isMultipleDateFormat) {
+                                                                                    optionRaw.forEach(dateGroup => {
+                                                                                        if (dateGroup.date && Array.isArray(dateGroup.items)) {
+                                                                                            dateGroup.items.forEach(itemObj => {
+                                                                                                if (itemObj.itemName) {
+                                                                                                    // Get the real item name for this specific date
+                                                                                                    let dateSpecificName = realItemName;
+                                                                                                    if (Array.isArray(item.data)) {
+                                                                                                        const found = item.data.find(d => d.date === dateGroup.date);
+                                                                                                        if (found && found.real_item_name) {
+                                                                                                            dateSpecificName = found.real_item_name;
+                                                                                                        }
                                                                                                     }
+                                                                                                    popupLines.push(`${dateGroup.date}: ${dateSpecificName} - ${itemObj.itemName}`);
                                                                                                 }
-                                                                                                popupLines.push(`${dateGroup.date}: ${dateSpecificName} - ${itemObj.itemName}`);
+                                                                                            });
+                                                                                        }
+                                                                                    });
+                                                                                    option = popupLines.join(', ');
+                                                                                    popupText = popupLines.join('\n');
+                                                                                } else {
+                                                                                    popupLines = optionRaw
+                                                                                        .filter(opt => opt && (typeof opt === 'object' ? (opt.itemName || opt.optionName) : opt))
+                                                                                        .map(opt => {
+                                                                                            if (typeof opt === 'object' && (opt.itemName || opt.optionName)) {
+                                                                                                const optName = opt.itemName || opt.optionName;
+                                                                                                return `${realItemName} - ${optName}`;
                                                                                             }
-                                                                                        });
-                                                                                    }
-                                                                                });
-                                                                                option = popupLines.join(', ');
-                                                                                popupText = popupLines.join('\n');
-                                                                            } else {
-                                                                                popupLines = optionRaw
-                                                                                    .filter(opt => opt && (typeof opt === 'object' ? (opt.itemName || opt.optionName) : opt))
-                                                                                    .map(opt => {
-                                                                                        if (typeof opt === 'object' && (opt.itemName || opt.optionName)) {
-                                                                                            const optName = opt.itemName || opt.optionName;
-                                                                                            return `${realItemName} - ${optName}`;
-                                                                                        }
-                                                                                        return typeof opt === 'string' ? `${realItemName} - ${opt}` : '';
-                                                                                    })
-                                                                                    .filter(opt => opt.trim().length > 0);
-                                                                                option = popupLines.join(', ');
-                                                                                popupText = popupLines.join('\n');
+                                                                                            return typeof opt === 'string' ? `${realItemName} - ${opt}` : '';
+                                                                                        })
+                                                                                        .filter(opt => opt.trim().length > 0);
+                                                                                    option = popupLines.join(', ');
+                                                                                    popupText = popupLines.join('\n');
+                                                                                }
+                                                                            } else if (typeof optionRaw === 'string') {
+                                                                                option = optionRaw;
+                                                                                popupText = `${realItemName} - ${optionRaw}`;
+                                                                                popupLines = [popupText];
                                                                             }
-                                                                        } else if (typeof optionRaw === 'string') {
-                                                                            option = optionRaw;
-                                                                            popupText = `${realItemName} - ${optionRaw}`;
-                                                                            popupLines = [popupText];
-                                                                        }
-                                                                        
-                                                                        const showPopup = qty >= 1 && option && option.trim().length > 0;
-                                                                        
-                                                                        return (
-                                                                            <TableCell key={`${prefix}-${i}`} align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>
-                                                                                {qty === undefined || qty === null ? (
-                                                                                    '-'
-                                                                                ) : showPopup ? (
-                                                                                    <Tooltip
-                                                                                        title={
-                                                                                            <div>
-                                                                                                {popupLines.map((line, lineIdx) => (
-                                                                                                    <div key={lineIdx}>{line}</div>
-                                                                                                ))}
-                                                                                            </div>
-                                                                                        }
-                                                                                        arrow
-                                                                                    >
-                                                                                        <span
-                                                                                            onClick={() => showAlert(
+
+                                                                            const showPopup = qty >= 1 && option && option.trim().length > 0;
+
+                                                                            return (
+                                                                                <TableCell key={`${prefix}-${i}`} align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>
+                                                                                    {qty === undefined || qty === null ? (
+                                                                                        '-'
+                                                                                    ) : showPopup ? (
+                                                                                        <Tooltip
+                                                                                            title={
                                                                                                 <div>
                                                                                                     {popupLines.map((line, lineIdx) => (
                                                                                                         <div key={lineIdx}>{line}</div>
                                                                                                     ))}
                                                                                                 </div>
-                                                                                            )}
-                                                                                            style={{
-                                                                                                textDecoration: 'underline',
-                                                                                                cursor: 'pointer',
-                                                                                                color: colors.greenAccent[400]
-                                                                                            }}
+                                                                                            }
+                                                                                            arrow
                                                                                         >
-                                                                                            {qty}
-                                                                                        </span>
-                                                                                    </Tooltip>
-                                                                                ) : (
-                                                                                    qty
-                                                                                )}
-                                                                            </TableCell>
-                                                                        );
-                                                                    })
-                                                                ) : (
-                                                                    <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>
-                                                                        -
-                                                                    </TableCell>
-                                                                )}
-                                                            </>
-                                                        ))}
-                                                    </TableRow>
-                                                );
-                                            });
-                                        })()
-                                    )}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
+                                                                                            <span
+                                                                                                onClick={() => showAlert(
+                                                                                                    <div>
+                                                                                                        {popupLines.map((line, lineIdx) => (
+                                                                                                            <div key={lineIdx}>{line}</div>
+                                                                                                        ))}
+                                                                                                    </div>
+                                                                                                )}
+                                                                                                style={{
+                                                                                                    textDecoration: 'underline',
+                                                                                                    cursor: 'pointer',
+                                                                                                    color: colors.greenAccent[400]
+                                                                                                }}
+                                                                                            >
+                                                                                                {qty}
+                                                                                            </span>
+                                                                                        </Tooltip>
+                                                                                    ) : (
+                                                                                        qty
+                                                                                    )}
+                                                                                </TableCell>
+                                                                            );
+                                                                        })
+                                                                    ) : (
+                                                                        <TableCell align="center" sx={{ border: '1px solid rgba(224, 224, 224, 1)' }}>
+                                                                            -
+                                                                        </TableCell>
+                                                                    )}
+                                                                </>
+                                                            ))}
+                                                        </TableRow>
+                                                    );
+                                                });
+                                            })()
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
+                        </Box>
                     )}
                 </Box>
             ) : (

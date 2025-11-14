@@ -36,12 +36,12 @@ import {
 // import logo from "../../../assets/images/logo.png";
 import logos from "../../../assets/images/hamilton-logo.png";
 import Item from "./Item";
-import { ToggledContext } from "../../../App";
+import { ToggledContext, CollapsedContext } from "../../../App";
 
 const defaultAvtar = "http://hamiltondinnerapp.staging.intelligrp.com/images/user.webp"
 
 const SideBar = () => {
-  const [collapsed, setCollapsed] = useState(false);
+  const { collapsed, setCollapsed } = useContext(CollapsedContext);
   const { toggled, setToggled } = useContext(ToggledContext);
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
