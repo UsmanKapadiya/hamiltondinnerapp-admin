@@ -627,13 +627,14 @@ const ChargesReports = () => {
                                                                             let option = "";
                                                                             let popupText = "";
                                                                             let popupLines = [];
-                                                                            let popupTitle = realItemName || item.item_name;
+                                                                            let popupTitle = "";
 
                                                                             if (Array.isArray(optionRaw)) {
                                                                                 // Check if it's multiple date format (with date and items structure)
                                                                                 const isMultipleDateFormat = optionRaw.length > 0 && optionRaw[0]?.date && optionRaw[0]?.items;
 
                                                                                 if (isMultipleDateFormat) {
+                                                                                    popupTitle = realItemName || item.item_name;
                                                                                     optionRaw.forEach(dateGroup => {
                                                                                         if (dateGroup.date && Array.isArray(dateGroup.items)) {
                                                                                             dateGroup.items.forEach(itemObj => {
