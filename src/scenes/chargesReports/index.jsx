@@ -44,6 +44,7 @@ const ChargesReports = () => {
     const [data, setData] = useState({});
     const [alertOpen, setAlertOpen] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
+    const [alertTitle, setAlertTitle] = useState('');
     const permissionList = useSelector((state) => state?.permissionState?.permissionsList);
 
     useEffect(() => {
@@ -97,14 +98,16 @@ const ChargesReports = () => {
     const handleExportClick = (event) => setExportAnchor(event.currentTarget);
     const handleExportClose = () => setExportAnchor(null);
 
-    const showAlert = (message) => {
+    const showAlert = (message, title = '') => {
         setAlertMessage(message);
+        setAlertTitle(title);
         setAlertOpen(true);
     };
 
     const handleAlertConfirm = () => {
         setAlertOpen(false);
         setAlertMessage('');
+        setAlertTitle('');
     };
 
     const handleExportOption = async (option) => {
@@ -624,6 +627,7 @@ const ChargesReports = () => {
                                                                             let option = "";
                                                                             let popupText = "";
                                                                             let popupLines = [];
+                                                                            let popupTitle = realItemName || item.item_name;
 
                                                                             if (Array.isArray(optionRaw)) {
                                                                                 // Check if it's multiple date format (with date and items structure)
@@ -642,7 +646,7 @@ const ChargesReports = () => {
                                                                                                             dateSpecificName = found.real_item_name;
                                                                                                         }
                                                                                                     }
-                                                                                                    popupLines.push(`${dateGroup.date}: ${dateSpecificName} - ${itemObj.itemName}`);
+                                                                                                    popupLines.push(`${dateGroup.date}: ${itemObj.itemName}`);
                                                                                                 }
                                                                                             });
                                                                                         }
@@ -679,6 +683,7 @@ const ChargesReports = () => {
                                                                                         <Tooltip
                                                                                             title={
                                                                                                 <div>
+                                                                                                    <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>{item.item_name}</div>
                                                                                                     {popupLines.map((line, lineIdx) => (
                                                                                                         <div key={lineIdx}>{line}</div>
                                                                                                     ))}
@@ -692,7 +697,8 @@ const ChargesReports = () => {
                                                                                                         {popupLines.map((line, lineIdx) => (
                                                                                                             <div key={lineIdx}>{line}</div>
                                                                                                         ))}
-                                                                                                    </div>
+                                                                                                    </div>,
+                                                                                                    popupTitle
                                                                                                 )}
                                                                                                 style={{
                                                                                                     textDecoration: 'underline',
@@ -737,7 +743,7 @@ const ChargesReports = () => {
             {/* Custom Alert Dialog */}
             <ConfirmationDialog
                 open={alertOpen}
-                title=""
+                title={alertTitle}
                 message={alertMessage}
                 onConfirm={handleAlertConfirm}
                 onCancel={handleAlertConfirm}
