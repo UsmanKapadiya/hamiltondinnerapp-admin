@@ -324,7 +324,7 @@ const ChargesReports = () => {
                         {/* Right Side: Buttons */}
                         <Box display="flex" alignItems="center" gap={2}>
                             <Tooltip title="Summary Export">
-                                <IconButton onClick={handleSummaryClick}>
+                                <IconButton onClick={handleSummaryClick} disabled={loading}>
                                     <SummarizeOutlined />
                                 </IconButton>
                             </Tooltip>
@@ -353,13 +353,13 @@ const ChargesReports = () => {
                                 </MenuItem>
                             </Menu>
                             <Tooltip title="Refresh">
-                                <IconButton onClick={() => window.location.reload()}>
+                                <IconButton onClick={() => window.location.reload()} disabled={loading}>
                                     <RestartAltOutlined />
                                 </IconButton>
                             </Tooltip>
 
                             <Tooltip title="Export Data">
-                                <IconButton onClick={handleExportClick}>
+                                <IconButton onClick={handleExportClick} disabled={loading}>
                                     <FileDownload />
                                 </IconButton>
                             </Tooltip>
@@ -370,17 +370,17 @@ const ChargesReports = () => {
                             >
                                 <MenuItem
                                     onClick={() => handleExportOption("Excel")}
-                                    disabled={(!data?.report_breakfast_list || data.report_breakfast_list.length === 0) &&
+                                    disabled={loading || ((!data?.report_breakfast_list || data.report_breakfast_list.length === 0) &&
                                         (!data?.report_lunch_list || data.report_lunch_list.length === 0) &&
-                                        (!data?.report_dinner_list || data.report_dinner_list.length === 0)}
+                                        (!data?.report_dinner_list || data.report_dinner_list.length === 0))}
                                 >
                                     Excel
                                 </MenuItem>
                                 <MenuItem
                                     onClick={() => handleExportOption("MS-Excel")}
-                                    disabled={(!data?.report_breakfast_list || data.report_breakfast_list.length === 0) &&
+                                    disabled={loading || ((!data?.report_breakfast_list || data.report_breakfast_list.length === 0) &&
                                         (!data?.report_lunch_list || data.report_lunch_list.length === 0) &&
-                                        (!data?.report_dinner_list || data.report_dinner_list.length === 0)}
+                                        (!data?.report_dinner_list || data.report_dinner_list.length === 0))}
                                 >
                                     MS-Excel
                                 </MenuItem>
