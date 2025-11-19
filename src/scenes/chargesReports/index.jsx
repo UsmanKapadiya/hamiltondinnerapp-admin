@@ -11,7 +11,8 @@ import {
     IconButton,
     Menu,
     MenuItem,
-    TextField
+    TextField,
+    Typography
 } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { Header } from "../../components";
@@ -45,6 +46,7 @@ const ChargesReports = () => {
     const [alertOpen, setAlertOpen] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
     const [alertTitle, setAlertTitle] = useState('');
+    const [error, setError] = useState(null);
     const permissionList = useSelector((state) => state?.permissionState?.permissionsList);
 
     useEffect(() => {
@@ -53,10 +55,14 @@ const ChargesReports = () => {
             const fetchReports = async () => {
                 try {
                     setLoading(true);
+                    setError(null);
                     const response = await ReportServices.getChargesReportList(date.format("YYYY-MM-DD"));
-                    setData(response);
+                    const reportData = response?.data || response;
+                    setData(reportData);
                 } catch (error) {
-                    console.error("Error fetching menu list:", error);
+                    console.error("Error details:", error.response?.data || error.message);
+                    setError("Failed to fetch report. Please try again.");
+                    setData({});
                 } finally {
                     setLoading(false);
                 }
@@ -75,13 +81,17 @@ const ChargesReports = () => {
             const fetchReportsRange = async () => {
                 try {
                     setLoading(true);
+                    setError(null);
                     const response = await ReportServices.getMultipleDateChargesReportList(
                         dayjs(startDate).format("YYYY-MM-DD"),
                         dayjs(endDate).format("YYYY-MM-DD")
-                    );
-                    setData(response);
+                    );                
+                    const reportData = response?.data || response;
+                    setData(reportData);
                 } catch (error) {
-                    console.error("Error fetching menu list:", error);
+                    console.error("Error details:", error.response?.data || error.message);
+                    setError("Failed to fetch report. Please try again.");
+                    setData({});
                 } finally {
                     setLoading(false);
                 }
@@ -250,6 +260,7 @@ const ChargesReports = () => {
                                         label="Start Date"
                                         value={startDate}
                                         maxDate={endDate}
+                                        disabled={loading}
                                         onChange={(newValue) => setStartDate(newValue)}
                                         slotProps={{
                                             textField: {
@@ -272,6 +283,7 @@ const ChargesReports = () => {
                                         label="End Date"
                                         value={endDate}
                                         minDate={startDate}
+                                        disabled={loading}
                                         onChange={(newValue) => setEndDate(newValue)}
                                         slotProps={{
                                             textField: {
@@ -295,6 +307,7 @@ const ChargesReports = () => {
                                 <DatePicker
                                     label="Date"
                                     value={date}
+                                    disabled={loading}
                                     onChange={(newValue) => setDate(newValue)}
                                     renderInput={(params) => (
                                         <TextField
@@ -376,14 +389,34 @@ const ChargesReports = () => {
                     </Box>
                     {loading ? (
                         <CustomLoadingOverlay />
+                    ) : error ? (
+                        <Box
+                            display="flex"
+                            justifyContent="center"
+                            alignItems="center"
+                            height="60vh"
+                            sx={{
+                                // backgroundColor: colors.primary[400],
+                                borderRadius: 2,
+                                padding: 4
+                            }}
+                        >
+                            <Typography
+                                variant="h5"
+                                color="error"
+                                sx={{ fontWeight: 600 }}
+                            >
+                                {error}
+                            </Typography>
+                        </Box>
                     ) : (
                         <Box
                             sx={{
                                 overflowX: 'auto',
                                 width: '100%',
                                 maxWidth: collapsed
-                                    ? 'calc(100vw - 80px - 40px)' // collapsed sidebar (~80px) + margin (40px)
-                                    : 'calc(100vw - 250px - 40px)', // expanded sidebar (~250px) + margin (40px)
+                                    ? 'calc(100vw - 80px - 40px)' 
+                                    : 'calc(100vw - 250px - 40px)',
                                 transition: 'max-width 0.3s ease',
                             }}
                         >
