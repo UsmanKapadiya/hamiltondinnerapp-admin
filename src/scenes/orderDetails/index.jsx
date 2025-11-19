@@ -199,6 +199,7 @@ const OrderDetails = () => {
                     label="Start Date"
                     value={startDate}
                     maxDate={endDate}
+                    disabled={loading}
                     onChange={(newValue) => setStartDate(newValue)}
                     slotProps={{
                       textField: {
@@ -221,6 +222,7 @@ const OrderDetails = () => {
                     label="End Date"
                     value={endDate}
                     minDate={startDate}
+                    disabled={loading}
                     onChange={(newValue) => setEndDate(newValue)}
                     slotProps={{
                       textField: {
@@ -244,6 +246,7 @@ const OrderDetails = () => {
                 <DatePicker
                   label="Date"
                   value={date}
+                  disabled={loading}
                   onChange={(newValue) => setDate(newValue)}
                   renderInput={(params) => (
                     <TextField
@@ -260,7 +263,7 @@ const OrderDetails = () => {
             {/* Right Side: Buttons */}
             <Box display="flex" alignItems="center" gap={2}>
               <Tooltip title="Summary Export">
-                <IconButton onClick={handleSummaryClick}>
+                <IconButton onClick={handleSummaryClick} disabled={loading}>
                   <SummarizeOutlined />
                 </IconButton>
               </Tooltip>
@@ -289,7 +292,7 @@ const OrderDetails = () => {
                 </MenuItem>
               </Menu>
               <Tooltip title="Refresh">
-                <IconButton onClick={() => window.location.reload()}>
+                <IconButton onClick={() => window.location.reload()} disabled={loading}>
                   <RestartAltOutlined />
                 </IconButton>
               </Tooltip>
@@ -312,7 +315,7 @@ const OrderDetails = () => {
                 ))}
               </Menu> */}
               <Tooltip title="Export Data">
-                <IconButton onClick={handleExportClick}>
+                <IconButton onClick={handleExportClick} disabled={loading}>
                   <FileDownload />
                 </IconButton>
               </Tooltip>
@@ -323,13 +326,13 @@ const OrderDetails = () => {
               >
                 <MenuItem
                   onClick={() => handleExportOption("Excel")}
-                  disabled={!data?.result?.rows?.length}
+                  disabled={loading || !data?.result?.rows?.length}
                 >
                   Excel
                 </MenuItem>
                 <MenuItem
                   onClick={() => handleExportOption("MS-Excel")}
-                  disabled={!data?.result?.rows?.length}
+                  disabled={loading || !data?.result?.rows?.length}
                 >
                   MS-Excel
                 </MenuItem>
