@@ -252,7 +252,7 @@ const SideBar = () => {
             icon={<LocalPizzaOutlined />}
           />
           <Item
-            title="Charges Reports"
+            title="Charges Report"
             path="/charges-reports"
             colors={colors}
             icon={<AssessmentOutlined />}

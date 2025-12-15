@@ -220,7 +220,7 @@ const ChargesReports = () => {
     return (
         <Box m="20px">
             <Header
-                title="Charges Reports"
+                title="Charges Report"
                 icon={<AssessmentOutlined />}
             />
             {canView ? (
