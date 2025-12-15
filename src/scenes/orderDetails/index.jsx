@@ -106,38 +106,56 @@ const OrderDetails = () => {
     try {
       setLoading(true);
       const rows = data?.result?.rows || [];
-      // Get columns for export
-      const columns =
-        Array.isArray(data?.columns) &&
-          Array.isArray(data.columns[data.columns.length - 1])
-          ? data.columns[data.columns.length - 1]
-          : [];
-      // Add Room No column at the beginning
-      const exportColumns = [{ field: "room_id", title: "Room No" }, ...columns];
-      const exportData = rows.map(row =>
-        exportColumns.reduce((acc, col) => {
-          acc[col.title || col.field] = row[col.field];
-          return acc;
-        }, {})
-      );
-      // Set header row as titles
-      const header = exportColumns.map(col => col.title || col.field);
-      const worksheet = XLSX.utils.json_to_sheet(exportData, { header });
+      
+      // Get column keys from data.columns[1]
+      const columnKeys = data?.columns?.[1] && typeof data.columns[1] === 'object' && !Array.isArray(data.columns[1]) 
+        ? Object.keys(data.columns[1]) 
+        : [];
+      
+      // Build export data
+      const exportData = [];
+      
+      // Add total row first
+      if (data?.total) {
+        const totalRow = {};
+        totalRow["Room No"] = "Total";
+        columnKeys.forEach(key => {
+          totalRow[key] = data.total[key] !== undefined ? data.total[key] : '';
+        });
+        exportData.push(totalRow);
+      }
+      
+      // Add data rows for each room
+      rows.forEach(room => {
+        const row = {};
+        row["Room No"] = room.room_name || room.room_id;
+        columnKeys.forEach(key => {
+          row[key] = room[key] !== undefined ? room[key] : '';
+        });
+        exportData.push(row);
+      });
+      
+      // Create worksheet and workbook
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "OrderReport");
+      
       const fileExt = option === "Excel" ? "xlsx" : "xls";
       const fileType = option === "Excel"
         ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         : "application/vnd.ms-excel";
+      
       const wbout = XLSX.write(workbook, { bookType: fileExt, type: "array" });
       const blob = new Blob([wbout], { type: fileType });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute(
-        "download",
-        `OrderReport_${date.format("YYYY-MM-DD")}.${fileExt}`
-      );
+      
+      const fileName = selectedSummaryType === "Multiple Date Record"
+        ? `OrderReport_${startDate.format("YYYY-MM-DD")}_to_${endDate.format("YYYY-MM-DD")}.${fileExt}`
+        : `OrderReport_${date.format("YYYY-MM-DD")}.${fileExt}`;
+      
+      link.setAttribute("download", fileName);
       document.body.appendChild(link);
       link.click();
       link.parentNode.removeChild(link);
