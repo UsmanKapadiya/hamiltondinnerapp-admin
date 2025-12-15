@@ -135,49 +135,33 @@ const ChargesReports = () => {
             // Build export data
             const exportData = [];
 
-            // Add header row
-            const headers = ["Room No"];
-            data?.breakfast_item_list?.forEach(item => headers.push(`Breakfast - ${item.item_name}`));
-            data?.lunch_item_list?.forEach(item => headers.push(`Lunch - ${item.item_name}`));
-            data?.dinner_item_list?.forEach(item => headers.push(`Dinner - ${item.item_name}`));
-
-            // Add Total row
-            const totalRow = { "Room No": "Total" };
-            data?.breakfast_item_list?.forEach((_, i) => {
-                const total = data?.report_breakfast_list?.reduce((sum, row) => sum + (row?.quantity?.[i] ?? row?.data?.[i] ?? 0), 0);
-                totalRow[`Breakfast - ${data.breakfast_item_list[i].item_name}`] = total;
-            });
-            data?.lunch_item_list?.forEach((_, i) => {
-                const total = data?.report_lunch_list?.reduce((sum, row) => sum + (row?.quantity?.[i] ?? row?.data?.[i] ?? 0), 0);
-                totalRow[`Lunch - ${data.lunch_item_list[i].item_name}`] = total;
-            });
-            data?.dinner_item_list?.forEach((_, i) => {
-                const total = data?.report_dinner_list?.reduce((sum, row) => sum + (row?.quantity?.[i] ?? row?.data?.[i] ?? 0), 0);
-                totalRow[`Dinner - ${data.dinner_item_list[i].item_name}`] = total;
-            });
-            exportData.push(totalRow);
-
             // Add data rows for each room
             Array.from(allRoomNos).forEach((roomNo) => {
                 const breakfastRow = data?.report_breakfast_list?.find(b => b.room_no === roomNo) || {};
                 const lunchRow = data?.report_lunch_list?.find(l => l.room_no === roomNo) || {};
                 const dinnerRow = data?.report_dinner_list?.find(d => d.room_no === roomNo) || {};
 
-                const row = { "Room No": roomNo };
+                const row = { "#": roomNo };
 
                 // Add breakfast quantities
-                data?.breakfast_item_list?.forEach((item, i) => {
-                    row[`Breakfast - ${item.item_name}`] = breakfastRow?.quantity?.[i] ?? breakfastRow?.data?.[i] ?? '-';
+                data?.breakfast_item_list?.forEach((item) => {
+                    const itemKey = item?.item_name || "";
+                    const qty = breakfastRow.data?.[itemKey];
+                    row[`Breakfast - ${item.item_name}`] = (qty !== undefined && qty !== null) ? qty : '-';
                 });
 
                 // Add lunch quantities
-                data?.lunch_item_list?.forEach((item, i) => {
-                    row[`Lunch - ${item.item_name}`] = lunchRow?.quantity?.[i] ?? lunchRow?.data?.[i] ?? '-';
+                data?.lunch_item_list?.forEach((item) => {
+                    const itemKey = item?.item_name || "";
+                    const qty = lunchRow.data?.[itemKey];
+                    row[`Lunch - ${item.item_name}`] = (qty !== undefined && qty !== null) ? qty : '-';
                 });
 
                 // Add dinner quantities
-                data?.dinner_item_list?.forEach((item, i) => {
-                    row[`Dinner - ${item.item_name}`] = dinnerRow?.quantity?.[i] ?? dinnerRow?.data?.[i] ?? '-';
+                data?.dinner_item_list?.forEach((item) => {
+                    const itemKey = item?.item_name || "";
+                    const qty = dinnerRow.data?.[itemKey];
+                    row[`Dinner - ${item.item_name}`] = (qty !== undefined && qty !== null) ? qty : '-';
                 });
 
                 exportData.push(row);
