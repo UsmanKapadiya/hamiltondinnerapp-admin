@@ -42,6 +42,7 @@ const OrderDetails = () => {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState({});
   const [rowsArray, setRowsArray] = useState([]);
+  const [refreshCount, setRefreshCount] = useState(0);
   const permissionList = useSelector((state) => state?.permissionState?.permissionsList);
 
   useEffect(() => {
@@ -62,7 +63,7 @@ const OrderDetails = () => {
       };
       fetchReports();
     }
-  }, [date, selectedSummaryType]);
+  }, [date, selectedSummaryType, refreshCount]);
 
   useEffect(() => {
     // Multiple Date Record fetch
@@ -89,7 +90,7 @@ const OrderDetails = () => {
       };
       fetchReportsRange();
     }
-  }, [startDate, endDate, selectedSummaryType]);
+  }, [startDate, endDate, selectedSummaryType, refreshCount]);
 
   const handleMenuClick = (event) => setMenuAnchor(event.currentTarget);
   const handleMenuClose = () => setMenuAnchor(null);
@@ -310,7 +311,10 @@ const OrderDetails = () => {
                 </MenuItem>
               </Menu>
               <Tooltip title="Refresh">
-                <IconButton onClick={() => window.location.reload()} disabled={loading}>
+                <IconButton
+                  onClick={() => setRefreshCount((prev) => prev + 1)}
+                  disabled={loading}
+                >
                   <RestartAltOutlined />
                 </IconButton>
               </Tooltip>
