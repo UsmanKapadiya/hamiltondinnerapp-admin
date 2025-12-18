@@ -43,6 +43,7 @@ const ChargesReports = () => {
     const [exportAnchor, setExportAnchor] = useState(null);
     const [loading, setLoading] = useState(false);
     const [data, setData] = useState({});
+    const [refreshCount, setRefreshCount] = useState(0);
     const [alertOpen, setAlertOpen] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
     const [alertTitle, setAlertTitle] = useState('');
@@ -69,7 +70,7 @@ const ChargesReports = () => {
             };
             fetchReports();
         }
-    }, [date, selectedSummaryType]);
+    }, [date, selectedSummaryType, refreshCount]);
 
     useEffect(() => {
         // Multiple Date Record fetch
@@ -98,7 +99,7 @@ const ChargesReports = () => {
             };
             fetchReportsRange();
         }
-    }, [startDate, endDate, selectedSummaryType]);
+    }, [startDate, endDate, selectedSummaryType, refreshCount]);
 
     const handleSummaryClick = (event) => {
         setSummaryAnchor(event.currentTarget);
@@ -337,7 +338,7 @@ const ChargesReports = () => {
                                 </MenuItem>
                             </Menu>
                             <Tooltip title="Refresh">
-                                <IconButton onClick={() => window.location.reload()} disabled={loading}>
+                                <IconButton onClick={() => setRefreshCount((prev) => prev + 1)} disabled={loading}>
                                     <RestartAltOutlined />
                                 </IconButton>
                             </Tooltip>
