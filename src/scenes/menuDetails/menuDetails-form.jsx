@@ -258,7 +258,7 @@ const MenuDetailsForm = () => {
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
                   label="Date"
-                  format="DD-MM-YYYY"
+                  format="MM-DD-YYYY"
                   value={values.date ? dayjs(values.date) : null}
                   onChange={(newValue) => {
                     setFieldValue("date", newValue ? newValue.format("YYYY-MM-DD") : "");
