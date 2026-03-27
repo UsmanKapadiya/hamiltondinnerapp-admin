@@ -187,7 +187,7 @@ const MenuDetailsForm = () => {
         response = await MenuServices.createMenu(formData);
         toast.success("Menu created successfully!");
       }
-      if(response?.success === true) {
+      if (response?.success === true) {
         navigate("/menu-details");
       }
     } catch (error) {
@@ -358,14 +358,16 @@ const MenuDetailsForm = () => {
                         display="flex"
                         alignItems="center"
                         justifyContent="center"
-                        bgcolor={selectedItems.includes(item.id) ? colors?.primary[500] : "lightgray"} // Check if item.id is in selectedItems
+                        bgcolor={selectedItems.includes(item.id) ? colors.gray[800] : "transparent"}
+                        // bgcolor={selectedItems.includes(item.id) ? colors?.primary[500] : "lightgray"} // Check if item.id is in selectedItems
                         p="10px"
                         borderRadius="8px"
-                        color={selectedItems.includes(item.id) ? "white" : "black"} // Adjust color based on selection
+                        // color={selectedItems.includes(item.id) ? "white" : "black"} // Adjust color based on selection
                         sx={{
                           cursor: "pointer",
                           transition: "background-color 0.3s",
                           height: "100px",
+                          border: "1px solid"
                         }}
                         onClick={() => handleSelectItem(item)} // Handle item selection
                       >
@@ -460,14 +462,16 @@ const MenuDetailsForm = () => {
                         display="flex"
                         alignItems="center"
                         justifyContent="center"
-                        bgcolor={selectedLunchItems.includes(item.id) ? colors?.primary[500] : "lightgray"} // Check if item.id is in selectedItems
+                        bgcolor={selectedLunchItems.includes(item.id) ? colors.gray[800] : "transparent"}
+                        // bgcolor={selectedLunchItems.includes(item.id) ? colors?.primary[500] : "lightgray"} // Check if item.id is in selectedItems
                         p="10px"
                         borderRadius="8px"
-                        color={selectedLunchItems.includes(item.id) ? "white" : "black"} // Adjust color based on selection
+                        // color={selectedLunchItems.includes(item.id) ? "white" : "black"} // Adjust color based on selection
                         sx={{
                           cursor: "pointer",
                           transition: "background-color 0.3s",
                           height: "100px",
+                          border: "1px solid"
                         }}
                         onClick={() => handleSelectLunchItem(item)} // Handle item selection
                       >
@@ -563,14 +567,16 @@ const MenuDetailsForm = () => {
                         display="flex"
                         alignItems="center"
                         justifyContent="center"
-                        bgcolor={selectedDinnerItems.includes(item.id) ? colors?.primary[500] : "lightgray"} // Check if item.id is in selectedItems
+                        bgcolor={selectedDinnerItems.includes(item.id) ? colors.gray[800] : "transparent"}
+                        // bgcolor={selectedDinnerItems.includes(item.id) ? colors?.primary[500] : "lightgray"} // Check if item.id is in selectedItems
                         p="10px"
                         borderRadius="8px"
-                        color={selectedDinnerItems.includes(item.id) ? "white" : "black"} // Adjust color based on selection
+                        // color={selectedDinnerItems.includes(item.id) ? "white" : "black"} // Adjust color based on selection
                         sx={{
                           cursor: "pointer",
                           transition: "background-color 0.3s",
                           height: "100px",
+                          border: "1px solid"
                         }}
                         onClick={() => handleSelectDinnerItem(item)} // Handle item selection
                       >
