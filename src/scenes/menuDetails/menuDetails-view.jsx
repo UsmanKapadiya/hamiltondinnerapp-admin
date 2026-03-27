@@ -73,11 +73,13 @@ const MenuDetailsView = () => {
                         </Typography>
                         <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
                             {menuDetails?.date
-                                ? new Date(menuDetails.date).toLocaleDateString("en-US", {
-                                    month: "2-digit",
-                                    day: "2-digit",
-                                    year: "numeric",
-                                })
+                                ? (() => {
+                                    const date = new Date(menuDetails.date);
+                                    const day = String(date.getDate()).padStart(2, "0");
+                                    const month = String(date.getMonth() + 1).padStart(2, "0");
+                                    const year = date.getFullYear();
+                                    return `${day}-${month}-${year}`;
+                                })()
                                 : ""}
                         </Typography>
                     </Box>
