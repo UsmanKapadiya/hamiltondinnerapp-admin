@@ -49,7 +49,7 @@ const ItemPreferencesForm = () => {
       actions.resetForm({ values: initialValues });
     }
     if (response?.success) {
-      navigate("/item-preferences");
+      navigate("/menu-item-preferences");
     }
   } catch (error) {
     toast.error("Failed to process preference. Please try again.");
