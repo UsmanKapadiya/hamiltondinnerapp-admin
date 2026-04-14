@@ -133,6 +133,19 @@ const RoomDetailsView = () => {
               <Divider sx={{ bgcolor: colors.gray[300] }} />
             </>
           )}
+           {roomDetails?.allergy_info && (
+            <>
+              <Box p="10px">
+                <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
+                  Allergy Information
+                </Typography>
+                <Typography color={colors.gray[100]} variant="h5" fontWeight="600" mt="10px">
+                  {roomDetails?.allergy_info || "-"}
+                </Typography>
+              </Box>
+              <Divider sx={{ bgcolor: colors.gray[300] }} />
+            </>
+          )} 
           <Box p="10px">
             <Typography color={colors.gray[100]} variant="h3" fontWeight="600" mb="10px">
               Status

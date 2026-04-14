@@ -37,6 +37,7 @@ const validationSchema = yup.object({
   // food_texture: yup.string().required("Food Texture is required"),
   // special_instrucations: yup.string(),
   is_active: yup.boolean(),
+  // allergy_info: yup.string(),
 });
 
 const RoomDetailsForm = () => {
@@ -66,6 +67,7 @@ const RoomDetailsForm = () => {
       password: roomDetails?.password,
       food_texture: roomDetails?.food_texture || "",
       special_instrucations: roomDetails?.special_instrucations || "",
+      allergy_info: roomDetails?.allergy_info || "",
       is_active: roomDetails?.is_active === 1 || roomDetails?.is_active === true || roomDetails?.id === undefined,
     }),
     [roomDetails]
@@ -274,6 +276,21 @@ const RoomDetailsForm = () => {
                   }
                   sx={{ gridColumn: "span 4" }}
                 />
+                  <TextField
+                    fullWidth
+                    variant="filled"
+                    type="text"
+                    label="Allergy Information"
+                    multiline
+                    rows={4}
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                    value={values.allergy_info}
+                    name="allergy_info"
+                    error={touched.allergy_info && Boolean(errors.allergy_info)}
+                    helperText={touched.allergy_info && errors.allergy_info}
+                    sx={{ gridColumn: "span 4" }}
+                  />
                 <Box
                   display="flex"
                   alignItems="center"
