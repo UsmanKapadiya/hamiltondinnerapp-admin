@@ -2,7 +2,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 
 const instance = axios.create({
-  baseURL: `https://hamiltondinnerapp.redesign.intelligrp.com/api/admin/`,
+  baseURL: `https://hamiltondinnerapp.redesign.intellimanagement.com/api/admin/`,
   // baseURL: `http://hamiltondinnerapp.staging.intelligrp.com/api/admin/`, //Old URL
   timeout: 50000,
   headers: {
