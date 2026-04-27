@@ -383,7 +383,8 @@ const MenuDetailsForm = () => {
                         sx={{
                           cursor: "pointer",
                           transition: "background-color 0.3s",
-                          height: "100px",
+                          height: "fit-content",
+                          minHeight: "100px",
                           border: "1px solid"
                         }}
                         onClick={() => handleSelectItem(item)} // Handle item selection
@@ -503,7 +504,8 @@ const MenuDetailsForm = () => {
                         sx={{
                           cursor: "pointer",
                           transition: "background-color 0.3s",
-                          height: "100px",
+                          height: "fit-content",
+                          minHeight: "100px",
                           border: "1px solid"
                         }}
                         onClick={() => handleSelectLunchItem(item)} // Handle item selection
@@ -624,7 +626,8 @@ const MenuDetailsForm = () => {
                         sx={{
                           cursor: "pointer",
                           transition: "background-color 0.3s",
-                          height: "100px",
+                          height: "fit-content",
+                          minHeight: "100px",
                           border: "1px solid"
                         }}
                         onClick={() => handleSelectDinnerItem(item)} // Handle item selection
