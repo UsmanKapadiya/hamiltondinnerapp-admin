@@ -300,7 +300,23 @@ const MenuDetailsForm = () => {
                     label="Search Menu Item..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    sx={{ mb: "20px" }}
+                    sx={{
+                      mb: "20px",
+                      '& .MuiOutlinedInput-root': {
+                        '& fieldset': {
+                          borderColor: colors.gray[200],
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: colors.gray[200],
+                        },
+                      },
+                      '& .MuiInputLabel-root': {
+                        color: colors.gray[200],
+                      },
+                      '& .MuiInputLabel-root.Mui-focused': {
+                        color: colors.gray[200],
+                      },
+                    }}
                   />
                 </Box>
                 <Box
@@ -404,7 +420,23 @@ const MenuDetailsForm = () => {
                     label="Search Menu Item..."
                     value={lunchSearchTerm}
                     onChange={(e) => setLunchSearchTerm(e.target.value)}
-                    sx={{ mb: "20px" }}
+                    sx={{
+                      mb: "20px",
+                      '& .MuiOutlinedInput-root': {
+                        '& fieldset': {
+                          borderColor: colors.gray[200],
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: colors.gray[200],
+                        },
+                      },
+                      '& .MuiInputLabel-root': {
+                        color: colors.gray[200],
+                      },
+                      '& .MuiInputLabel-root.Mui-focused': {
+                        color: colors.gray[200],
+                      },
+                    }}
                   />
                 </Box>
                 <Box
@@ -510,7 +542,23 @@ const MenuDetailsForm = () => {
                     label="Search Menu Item..."
                     value={dinnerSearchTerm}
                     onChange={(e) => setDinnerSearchTerm(e.target.value)}
-                    sx={{ mb: "20px" }}
+                    sx={{
+                      mb: "20px",
+                      '& .MuiOutlinedInput-root': {
+                        '& fieldset': {
+                          borderColor: colors.gray[200],
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: colors.gray[200],
+                        },
+                      },
+                      '& .MuiInputLabel-root': {
+                        color: colors.gray[200],
+                      },
+                      '& .MuiInputLabel-root.Mui-focused': {
+                        color: colors.gray[200],
+                      },
+                    }}
                   />
                 </Box>
                 <Box
