@@ -323,7 +323,12 @@ const MenuDetailsForm = () => {
                   display="grid"
                   gap="20px"
                   mt="15px"
-                  gridTemplateColumns="repeat(8, 1fr)"
+                  sx={{
+                    gridTemplateColumns: {
+                      xs: '1fr', // 1 column on mobile
+                      sm: 'repeat(8, 1fr)' // 8 columns on small screens and up
+                    }
+                  }}
                 >
                   <Box
                     display="flex"
@@ -332,7 +337,10 @@ const MenuDetailsForm = () => {
                     bgcolor={colors.primary[400]}
                     p="20px"
                     borderRadius="8px"
-                    sx={{ gridColumn: "span 2" }}
+                    sx={{
+                      gridColumn: { xs: 'span 1', sm: 'span 2' },
+                      mb: { xs: 2, sm: 0 }
+                    }}
                     height={350}
                   >
                     <Box p="15px">
@@ -361,11 +369,13 @@ const MenuDetailsForm = () => {
                   <Box
                     display="grid"
                     gap="20px"
-                    gridTemplateColumns="repeat(3, 1fr)"
+                    gridTemplateColumns={{ xs: '1fr', sm: 'repeat(3, 1fr)' }}
                     bgcolor={colors.primary[400]}
                     p="20px"
                     borderRadius="8px"
-                    sx={{ gridColumn: "span 6" }}
+                    sx={{
+                      gridColumn: { xs: 'span 1', sm: 'span 6' }
+                    }}
                     height={350}
                     overflow='auto'
                   >
@@ -444,7 +454,12 @@ const MenuDetailsForm = () => {
                   display="grid"
                   gap="20px"
                   mt="15px"
-                  gridTemplateColumns="repeat(8, 1fr)"
+                  sx={{
+                    gridTemplateColumns: {
+                      xs: '1fr',
+                      sm: 'repeat(8, 1fr)'
+                    }
+                  }}
                 >
                   <Box
                     display="flex"
@@ -453,16 +468,19 @@ const MenuDetailsForm = () => {
                     bgcolor={colors.primary[400]}
                     p="20px"
                     borderRadius="8px"
-                    sx={{ gridColumn: "span 2" }}
+                    sx={{
+                      gridColumn: { xs: 'span 1', sm: 'span 2' },
+                      mb: { xs: 2, sm: 0 }
+                    }}
                   >
                     <Box p="15px">
-                      {/* Dynamically display categories with type 2 (BREAKFAST) */}
+                      {/* Dynamically display categories with type 2 (LUNCH) */}
                       {categoryListData
-                        .filter((category) => category.type === 2) // Filter categories with type 2
+                        .filter((category) => category.type === 2)
                         .map((category) => (
                           <Box
                             key={category.id}
-                            onClick={() => handleSelectLunch(category.cat_name)} // Use category name for selection
+                            onClick={() => handleSelectLunch(category.cat_name)}
                             sx={{
                               cursor: "pointer",
                               bgcolor: selectedLunch === category.cat_name ? colors.gray[800] : "transparent",
@@ -481,15 +499,16 @@ const MenuDetailsForm = () => {
                   <Box
                     display="grid"
                     gap="20px"
-                    gridTemplateColumns="repeat(3, 1fr)"
+                    gridTemplateColumns={{ xs: '1fr', sm: 'repeat(3, 1fr)' }}
                     bgcolor={colors.primary[400]}
                     p="20px"
                     height={350}
                     overflow="auto"
                     borderRadius="8px"
-                    sx={{ gridColumn: "span 6" }}
+                    sx={{
+                      gridColumn: { xs: 'span 1', sm: 'span 6' }
+                    }}
                   >
-
                     {filtereLunchdData.map((item) => (
                       <Box
                         key={item.id}
@@ -497,10 +516,8 @@ const MenuDetailsForm = () => {
                         alignItems="center"
                         justifyContent="center"
                         bgcolor={selectedLunchItems.includes(item.id) ? colors.gray[800] : "transparent"}
-                        // bgcolor={selectedLunchItems.includes(item.id) ? colors?.primary[500] : "lightgray"} // Check if item.id is in selectedItems
                         p="10px"
                         borderRadius="8px"
-                        // color={selectedLunchItems.includes(item.id) ? "white" : "black"} // Adjust color based on selection
                         sx={{
                           cursor: "pointer",
                           transition: "background-color 0.3s",
@@ -508,14 +525,12 @@ const MenuDetailsForm = () => {
                           minHeight: "100px",
                           border: "1px solid"
                         }}
-                        onClick={() => handleSelectLunchItem(item)} // Handle item selection
+                        onClick={() => handleSelectLunchItem(item)}
                       >
                         {item.item_name}
                       </Box>
                     ))}
-
                   </Box>
-
                 </Box>
               </>
             )}
@@ -567,7 +582,12 @@ const MenuDetailsForm = () => {
                   display="grid"
                   gap="20px"
                   mt="15px"
-                  gridTemplateColumns="repeat(8, 1fr)"
+                  sx={{
+                    gridTemplateColumns: {
+                      xs: '1fr',
+                      sm: 'repeat(8, 1fr)'
+                    }
+                  }}
                 >
                   <Box
                     display="flex"
@@ -576,16 +596,19 @@ const MenuDetailsForm = () => {
                     bgcolor={colors.primary[400]}
                     p="20px"
                     borderRadius="8px"
-                    sx={{ gridColumn: "span 2" }}
+                    sx={{
+                      gridColumn: { xs: 'span 1', sm: 'span 2' },
+                      mb: { xs: 2, sm: 0 }
+                    }}
                   >
                     <Box p="15px">
-                      {/* Dynamically display categories with type 3 (Dinner) */}
+                      {/* Dynamically display categories with type 3 (DINNER) */}
                       {categoryListData
-                        .filter((category) => category.type === 3) // Filter categories with type 2
+                        .filter((category) => category.type === 3)
                         .map((category) => (
                           <Box
                             key={category.id}
-                            onClick={() => handleSelectDinner(category.cat_name)} // Use category name for selection
+                            onClick={() => handleSelectDinner(category.cat_name)}
                             sx={{
                               cursor: "pointer",
                               bgcolor: selectedDinner === category.cat_name ? colors.gray[800] : "transparent",
@@ -604,13 +627,15 @@ const MenuDetailsForm = () => {
                   <Box
                     display="grid"
                     gap="20px"
-                    gridTemplateColumns="repeat(3, 1fr)"
+                    gridTemplateColumns={{ xs: '1fr', sm: 'repeat(3, 1fr)' }}
                     bgcolor={colors.primary[400]}
                     p="20px"
                     height={350}
                     overflow="auto"
                     borderRadius="8px"
-                    sx={{ gridColumn: "span 6" }}
+                    sx={{
+                      gridColumn: { xs: 'span 1', sm: 'span 6' }
+                    }}
                   >
                     {filtereDinnerData.map((item) => (
                       <Box
@@ -619,10 +644,8 @@ const MenuDetailsForm = () => {
                         alignItems="center"
                         justifyContent="center"
                         bgcolor={selectedDinnerItems.includes(item.id) ? colors.gray[800] : "transparent"}
-                        // bgcolor={selectedDinnerItems.includes(item.id) ? colors?.primary[500] : "lightgray"} // Check if item.id is in selectedItems
                         p="10px"
                         borderRadius="8px"
-                        // color={selectedDinnerItems.includes(item.id) ? "white" : "black"} // Adjust color based on selection
                         sx={{
                           cursor: "pointer",
                           transition: "background-color 0.3s",
@@ -630,37 +653,12 @@ const MenuDetailsForm = () => {
                           minHeight: "100px",
                           border: "1px solid"
                         }}
-                        onClick={() => handleSelectDinnerItem(item)} // Handle item selection
+                        onClick={() => handleSelectDinnerItem(item)}
                       >
                         {item.item_name}
                       </Box>
                     ))}
-                    {/* {filtereDinnerData.map((item) => (
-                                            <Box
-                                                key={item.id}
-                                                display="flex"
-                                                alignItems="center"
-                                                justifyContent="center"
-                                                bgcolor={selectedDinnerItems.some((selected) => selected.id === item.id) ? colors?.primary[500] : "lightgray"}
-                                                p="10px"
-                                                borderRadius="8px"
-                                                color={selectedItems.some((selected) => selected.id === item.id) ? "white" : "black"}
-
-                                                s sx={{
-                                                    cursor: "pointer",
-                                                    transition: "background-color 0.3s",
-                                                    height: "100px",
-                                                    // "&:hover": {
-                                                    //     bgcolor: "lightblue",
-                                                    // },
-                                                }}
-                                                onClick={() => handleSelectDinnerItem(item)}
-                                            >
-                                                {item.item_name}
-                                            </Box>
-                                        ))} */}
                   </Box>
-
                 </Box>
               </>
             )}
