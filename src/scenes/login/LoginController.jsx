@@ -1,78 +1,16 @@
-import React, { useState } from "react";
+import React from "react";
 import { Box, TextField, Button, Typography, useTheme, useMediaQuery, FormControlLabel, Checkbox } from "@mui/material";
 import shipImage from "../../assets/images/ship.jpg";
-import AuthServices from "../../services/authServices";
-import { toast, ToastContainer } from "react-toastify";
-import { useNavigate } from "react-router-dom";
-import { use } from "react";
+import { LoginOutlined } from "@mui/icons-material";
 import { tokens } from "../../theme";
-import { DownloadOutlined, LoginOutlined } from "@mui/icons-material";
+import useLogin from "./useLogin";
+import { ToastContainer } from "react-toastify";
 
-const Login = () => {
+const LoginController = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const isMdDevices = useMediaQuery("(min-width: 724px)");
-  const [formData, setFormData] = useState({ email: "", password: "" });
-  const [errors, setErrors] = useState({ email: "", password: "" });
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const newErrors = {};
-    if (!formData.email) newErrors.email = "Email is required";
-    if (!formData.password) newErrors.password = "Password is required";
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
-
-    // console.log("Form submitted", formData);
-
-    let hasError = false;
-    try {
-      setLoading(true);
-      let response = await AuthServices.login(formData);
-      if (response.error) {
-        toast.error(response.error);
-      } else {
-        const { access_token, user } = response;
-        console.log("response", response?.permissions?.browse_Admin);
-        if (response?.permissions?.browse_Admin === 1) {
-          localStorage.setItem("authToken", access_token);
-          localStorage.setItem("userData", JSON.stringify(user));
-          toast.success("Login Successfully!");
-          // Delay navigation to ensure toast is displayed
-          setTimeout(() => {
-            navigate("/");
-          }, 1000);
-        } else {
-          toast.warning("You don't have permission to access Admin Panel");
-        }
-      }
-    } catch (error) {
-      hasError = true;
-      console.error("Error processing login:", error);
-
-      const errorMessage =
-        error.response?.data?.error || "An unexpected error occurred. Please try again.";
-      toast.error(errorMessage);
-
-      setTimeout(() => {
-        setLoading(false);
-      }, 1500);
-    } finally {
-      if (!hasError) {
-        setLoading(false);
-      }
-    }
-  };
+  const { formData, errors, loading, handleChange, handleSubmit } = useLogin();
 
   return (
     <Box
@@ -85,7 +23,7 @@ const Login = () => {
     >
       {/* Left Section: Background Image */}
       <ToastContainer />
-      <Box
+       <Box
         flex={8}
         sx={{
           backgroundImage: `url(${shipImage})`,
@@ -97,7 +35,7 @@ const Login = () => {
       />
 
       {/* Right Section: Login Form */}
-      <Box
+       <Box
         flex={4}
         display="flex"
         alignItems="center"
@@ -157,7 +95,7 @@ const Login = () => {
             label="Remember Me"
             sx={{
               marginTop: "10px",
-              color: colors.gray[700]
+              color: colors.gray[700],
             }}
           />
           <Box>
@@ -189,4 +127,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default LoginController;

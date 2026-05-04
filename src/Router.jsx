@@ -14,7 +14,7 @@ import CategoryDetailsForm from "./scenes/category/categoryDetails-form";
 import Item from "./scenes/item";
 import ItemDetailsView from "./scenes/item/itemDetails-view";
 import ItemDetailsForm from "./scenes/item/itemDetails-form";
-import Login from "./scenes/login";
+import Login from "./scenes/login/LoginController";
 import ItemOptions from "./scenes/options";
 import ItemoptionsForm from "./scenes/options/itemOptions-form";
 import ItemOptionsView from "./scenes/options/itemOptions-view";
