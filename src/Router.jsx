@@ -25,7 +25,7 @@ import MenuDetails from "./scenes/menuDetails";
 import MenuDetailsForm from "./scenes/menuDetails/menuDetails-form";
 import MenuDetailsView from "./scenes/menuDetails/menuDetails-view";
 import OrderDetails from "./scenes/orderDetails";
-import Setting from "./scenes/settings";
+import Setting from "./scenes/settings/SettingController";
 import Roles from "./scenes/Roles";
 import RolesDetailsView from "./scenes/Roles/rolesDetails-view";
 import RoleDetailsForm from "./scenes/Roles/rolesDetails-form";
