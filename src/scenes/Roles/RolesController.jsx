@@ -67,8 +67,8 @@ const Roles = () => {
         Buttons
         addNewClick={handleAdd}
         addBulkDelete={handleBulkDelete}
-        addButton={permissions.canShowAdd}      // ✅ FIXED
-        deleteButton={permissions.canShowDelete} // ✅ FIXED
+        addButton={permissions.canShowAdd}      //  FIXED
+        deleteButton={permissions.canShowDelete} //  FIXED
       />
 
       <Box

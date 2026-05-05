@@ -27,19 +27,6 @@ const useRoles = () => {
     total: 0,
   });
 
-  console.log(permissionList);
-  
-  // // ✅ permissions
-  // const permissions = useMemo(() => ({
-  //   canAdd: hasPermission(permissionList, "add_Roles"),
-  //   canView: hasPermission(permissionList, "read_Roles"),
-  //   canEdit: hasPermission(permissionList, "edit_Roles"),
-  //   canDelete: hasPermission(permissionList, "delete_Roles"),
-  //   canBrowse: hasPermission(permissionList, "browse_Roles"),
-  //   isSuperAdmin: userData?.role === "superadmin",
-  // }), [permissionList, userData]);
-
-
   const permissions = useMemo(() => {
   const base = {
     canAdd: hasPermission(permissionList, "add_Roles"),
@@ -53,7 +40,7 @@ const useRoles = () => {
   return {
     ...base,
 
-    // ✅ FINAL FLAGS (use these in UI)
+    // FINAL FLAGS (use these in UI)
     canShowAdd:
       (base.canAdd && base.canBrowse) || base.isSuperAdmin,
 
@@ -64,7 +51,7 @@ const useRoles = () => {
 
 
 
-  // ✅ fetch roles
+  // fetch roles
   const fetchRoles = useCallback(async () => {
     try {
       setLoading(true);
@@ -83,7 +70,7 @@ const useRoles = () => {
     fetchRoles();
   }, [fetchRoles]);
 
-  // ✅ actions
+  // actions
   const handleView = useCallback((id) => {
     const row = roleList.find((r) => r.id === id);
     navigate(`/roles-details/${id}`, { state: row });
