@@ -22,7 +22,7 @@ import ItemPreferences from "./scenes/preferences";
 import ItemPreferencesView from "./scenes/preferences/itemPreferences-view";
 import ItemPreferencesForm from "./scenes/preferences/itemPreferences-form";
 import MenuDetails from "./scenes/menuDetails";
-import MenuDetailsForm from "./scenes/menuDetails/menuDetails-form";
+import MenuDetailsController from "./scenes/menuDetails/MenuDetailsController";
 import MenuDetailsView from "./scenes/menuDetails/menuDetails-view";
 import OrderDetails from "./scenes/orderDetails";
 import Setting from "./scenes/settings/SettingController";
@@ -84,8 +84,8 @@ const AppRouter = () => {
           <Route path="/menu-item-preferences/:id" element={<ItemPreferencesView />} />
           {/*Menu Details */}
           <Route path="/menu-details" element={<MenuDetails />} />
-          <Route path="/menu-details/create" element={<MenuDetailsForm />} />
-          <Route path="/menu-details/:id/edit" element={<MenuDetailsForm />} />
+          <Route path="/menu-details/create" element={<MenuDetailsController />} />
+          <Route path="/menu-details/:id/edit" element={<MenuDetailsController />} />
           <Route path="/menu-details/:id" element={<MenuDetailsView />} />
           {/*Order Details */}
           <Route path="/order-details" element={<OrderDetails />} />
