@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from "react";
 import {
   Box,
   Divider,
@@ -8,39 +7,19 @@ import {
 } from "@mui/material";
 import { PersonOutlined } from "@mui/icons-material";
 import dayjs from "dayjs";
-import { useLocation } from "react-router-dom";
-import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
-import { tokens } from "../../theme";
-import { Header } from "../../components";
-import UserServices from "../../services/userServices";
+
+import CustomLoadingOverlay from "../../../components/CustomLoadingOverlay";
+import { tokens } from "../../../theme";
+import { Header } from "../../../components";
+
+import useUserView from "./useUserView";
 
 const UserDetailsView = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const isXlDevices = useMediaQuery("(min-width: 1260px)");
-  const location = useLocation();
-  const userId = location?.state?.id;
 
-  const [userDetails, setUserDetails] = useState({});
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (userId) {
-      fetchUserDetails(userId);
-    }
-  }, [userId]);
-
-  const fetchUserDetails = async (id) => {
-    try {
-      setLoading(true);
-      const response = await UserServices.getUserDetails(id);
-      setUserDetails(response?.data || {});
-    } catch (error) {
-      console.error("Error fetching user details:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { loading, userDetails } = useUserView();
 
   const DetailItem = ({ label, value }) => (
     <>
@@ -67,7 +46,7 @@ const UserDetailsView = () => {
         title="View User Detail"
         icon={<PersonOutlined />}
         Buttons={false}
-        ActionButton={true}
+        ActionButton
       />
 
       {loading ? (
@@ -89,6 +68,7 @@ const UserDetailsView = () => {
           <DetailItem label="Name" value={userDetails?.name} />
           <DetailItem label="User Name" value={userDetails?.user_name} />
           <DetailItem label="Email" value={userDetails?.email} />
+
           <DetailItem
             label="Created At"
             value={
@@ -98,17 +78,14 @@ const UserDetailsView = () => {
             }
           />
 
+          {/* Avatar */}
           <Box p="10px">
             <Typography color={colors.gray[100]} variant="h3" fontWeight="600">
               Avatar
             </Typography>
+
             {userDetails?.avatar ? (
-              <Box
-                mt="10px"
-                display="flex"
-                justifyContent="flex-start"
-                textAlign="left"
-              >
+              <Box mt="10px">
                 <img
                   src={userDetails.avatar}
                   alt="User Avatar"
@@ -132,6 +109,7 @@ const UserDetailsView = () => {
               </Typography>
             )}
           </Box>
+
           <Divider sx={{ bgcolor: colors.gray[300] }} />
 
           <DetailItem label="Role" value={userDetails?.role} />
