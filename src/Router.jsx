@@ -36,7 +36,7 @@ import NotFound from "./scenes/pageNotFounf/NotFound";
 import Forms from "./scenes/Forms";
 import FormsAddUpdate from "./scenes/Forms/forms-addUpdate";
 import FormsDetailsView from "./scenes/Forms/formsDetails-view";
-import ChargesReports from "./scenes/chargesReports";
+import ChargesReports from "./scenes/chargesReports/ChargesReportsController";
 
 
 const ProtectedRoute = ({ children }) => {
