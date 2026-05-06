@@ -42,6 +42,7 @@ const Roles = () => {
     cancelDelete,
   } = useRoles();
 
+  const canAccess = permissions.canBrowse;
   const columns = getColumns({
     handleView,
     handleEdit,
@@ -49,14 +50,7 @@ const Roles = () => {
     permissions,
   });
 
-  if (!permissions.canBrowse && !permissions.isSuperAdmin) {
-    return (
-      <NoPermissionMessage
-        title="No permission"
-        message="Contact admin"
-      />
-    );
-  }
+
 
   return (
     <Box m="20px">
@@ -67,80 +61,87 @@ const Roles = () => {
         Buttons
         addNewClick={handleAdd}
         addBulkDelete={handleBulkDelete}
-        addButton={permissions.canShowAdd}      //  FIXED
-        deleteButton={permissions.canShowDelete} //  FIXED
+        addButton={permissions.canAdd && permissions.canBrowse}
+        deleteButton={permissions.canDelete && permissions.canBrowse}
       />
 
-      <Box
-        mt="40px"
-        height="75vh"
-        sx={{
-          "& .MuiDataGrid-root": { border: "none" },
-          "& .MuiDataGrid-cell": { border: "none" },
-          "& .MuiDataGrid-columnHeaders": {
-            backgroundColor: colors.blueAccent[700],
-          },
-          "& .MuiDataGrid-virtualScroller": {
-            backgroundColor: colors.primary[400],
-          },
-          "& .MuiDataGrid-footerContainer": {
-            backgroundColor: colors.blueAccent[700],
-          },
-        }}
-      >
-        {/* Search */}
+      {!canAccess ? (
+        <NoPermissionMessage
+          title="You do not have permission to view Role Details."
+          message="Please contact your administrator if you believe this is a mistake."
+        />
+      ) : (
         <Box
-          display="flex"
-          bgcolor={colors.primary[400]}
-          borderRadius="3px"
-          mb="10px"
-        >
-          <InputBase
-            placeholder="Search Role"
-            sx={{ ml: 2, flex: 1 }}
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-          />
-          <IconButton onClick={() => setSearchText("")}>
-            {searchText ? <Close /> : <SearchOutlined />}
-          </IconButton>
-        </Box>
-
-        {/* Grid */}
-        <DataGrid
-          rows={filteredRoles}
-          columns={columns}
-          loading={loading}
-          checkboxSelection
-          onRowSelectionModelChange={(ids) => setSelectedIds(ids)}
-          pagination
-          paginationModel={{
-            page: pagination.page - 1,
-            pageSize: pagination.pageSize,
+          mt="40px"
+          height="75vh"
+          sx={{
+            "& .MuiDataGrid-root": { border: "none" },
+            "& .MuiDataGrid-cell": { border: "none" },
+            "& .MuiDataGrid-columnHeaders": {
+              backgroundColor: colors.blueAccent[700],
+            },
+            "& .MuiDataGrid-virtualScroller": {
+              backgroundColor: colors.primary[400],
+            },
+            "& .MuiDataGrid-footerContainer": {
+              backgroundColor: colors.blueAccent[700],
+            },
           }}
-          onPaginationModelChange={(model) =>
-            setPagination((p) => ({
-              ...p,
-              page: model.page + 1,
-              pageSize: model.pageSize,
-            }))
-          }
-          components={{ LoadingOverlay: CustomLoadingOverlay }}
-        />
+        >
+          {/* Search */}
+          <Box
+            display="flex"
+            bgcolor={colors.primary[400]}
+            borderRadius="3px"
+            mb="10px"
+          >
+            <InputBase
+              placeholder="Search Role"
+              sx={{ ml: 2, flex: 1 }}
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+            />
+            <IconButton onClick={() => setSearchText("")}>
+              {searchText ? <Close /> : <SearchOutlined />}
+            </IconButton>
+          </Box>
 
-        {/* Dialog */}
-        <ConfirmationDialog
-          open={dialogOpen}
-          title="Confirm Delete"
-          message={
-            selectedIds.length
-              ? `Delete ${selectedIds.length} roles?`
-              : `Delete "${selectedRoleName}"?`
-          }
-          onConfirm={confirmDelete}
-          onCancel={cancelDelete}
-        />
-      </Box>
+          {/* Grid */}
+          <DataGrid
+            rows={filteredRoles}
+            columns={columns}
+            loading={loading}
+            checkboxSelection
+            onRowSelectionModelChange={(ids) => setSelectedIds(ids)}
+            pagination
+            paginationModel={{
+              page: pagination.page - 1,
+              pageSize: pagination.pageSize,
+            }}
+            onPaginationModelChange={(model) =>
+              setPagination((p) => ({
+                ...p,
+                page: model.page + 1,
+                pageSize: model.pageSize,
+              }))
+            }
+            components={{ LoadingOverlay: CustomLoadingOverlay }}
+          />
+
+          {/* Dialog */}
+          <ConfirmationDialog
+            open={dialogOpen}
+            title="Confirm Delete"
+            message={
+              selectedIds.length
+                ? `Delete ${selectedIds.length} roles?`
+                : `Delete "${selectedRoleName}"?`
+            }
+            onConfirm={confirmDelete}
+            onCancel={cancelDelete}
+          />
+        </Box>
+      )}
     </Box>
   );
 };

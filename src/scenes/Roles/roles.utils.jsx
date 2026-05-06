@@ -19,7 +19,7 @@ export const getColumns = ({
           color="info"
           size="small"
           onClick={() => handleView(row.id)}
-          disabled={!permissions.canView && !permissions.isSuperAdmin}
+          disabled={!permissions.canView}
         >
           View
         </Button>
@@ -29,7 +29,7 @@ export const getColumns = ({
           color="primary"
           size="small"
           onClick={() => handleEdit(row.id)}
-          disabled={!permissions.canEdit && !permissions.isSuperAdmin}
+          disabled={!permissions.canEdit}
         >
           Edit
         </Button>
@@ -39,7 +39,7 @@ export const getColumns = ({
           color="secondary"
           size="small"
           onClick={() => handleDelete(row)}
-          disabled={!permissions.canDelete && !permissions.isSuperAdmin}
+          disabled={!permissions.canDelete}
         >
           Delete
         </Button>
