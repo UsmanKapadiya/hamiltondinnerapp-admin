@@ -95,7 +95,7 @@ const User = () => {
             mb="10px"
           >
             <InputBase
-              placeholder="Search User"
+              placeholder="Search by Name, Username, or Email..."
               sx={{ ml: 2, flex: 1 }}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
