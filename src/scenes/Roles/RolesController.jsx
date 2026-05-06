@@ -96,7 +96,7 @@ const Roles = () => {
             mb="10px"
           >
             <InputBase
-              placeholder="Search Role"
+              placeholder="Search by Role Name"
               sx={{ ml: 2, flex: 1 }}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
