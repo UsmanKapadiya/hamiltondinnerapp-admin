@@ -1,175 +1,309 @@
-import React, { useContext, useState } from "react";
+import React, {
+    useContext,
+    useMemo,
+    useState,
+    useCallback,
+} from "react";
 import {
-    Box, useTheme,
-    Table, TableHead, TableBody,
-    TableRow, TableCell, TableContainer,
-    Paper, Tooltip, IconButton,
-    Menu, MenuItem,
-    TextField, Typography
+    Box,
+    useTheme,
+    Table,
+    TableHead,
+    TableBody,
+    TableRow,
+    TableCell,
+    TableContainer,
+    Paper,
+    IconButton,
+    Menu,
+    MenuItem,
+    Typography,
 } from "@mui/material";
-
-import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import {
+    DatePicker,
+    LocalizationProvider,
+} from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-
-import { Header } from "../../components";
-import ConfirmationDialog from "../../components/ConfirmationDialog";
-import { tokens } from "../../theme";
-
 import {
     AssessmentOutlined,
     FileDownload,
     RestartAltOutlined,
-    SummarizeOutlined
+    SummarizeOutlined,
 } from "@mui/icons-material";
-
+import { useSelector } from "react-redux";
+import { Header } from "../../components";
+import { tokens } from "../../theme";
 import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
 import { hasPermission } from "../../components/permissions";
-import { useSelector } from "react-redux";
 import NoPermissionMessage from "../../components/NoPermissionMessage";
-import * as XLSX from "xlsx";
 import { CollapsedContext } from "../../App";
-import useChargesReports from "./useChargesReports";
+import ChargesReportRow from "./ChargesReportRow";
+import exportChargesReport from "../../utils/exportChargesReport";
+import useChargesReports, {
+    SUMMARY_TYPES,
+} from "./useChargesReports";
 
 const ChargesReports = () => {
 
     const theme = useTheme();
+
     const colors = tokens(theme.palette.mode);
+
     const { collapsed } = useContext(CollapsedContext);
-const tableBorder = "1px solid rgba(224, 224, 224, 1)";
+
+    const tableBorder = "1px solid rgba(224, 224, 224, 1)";
+
     const {
-        date, setDate,
-        startDate, setStartDate,
-        endDate, setEndDate,
-        selectedSummaryType, setSelectedSummaryType,
-        loading, data, error,
+        date,
+        setDate,
+        startDate,
+        setStartDate,
+        endDate,
+        setEndDate,
+        selectedSummaryType,
+        setSelectedSummaryType,
+        loading,
+        reportData,
+        error,
         refresh,
+        isInvalidRange,
         breakfastMap,
         lunchMap,
         dinnerMap,
-        roomNos
+        roomNos,
     } = useChargesReports();
 
     const [summaryAnchor, setSummaryAnchor] = useState(null);
     const [exportAnchor, setExportAnchor] = useState(null);
+    const permissionList = useSelector(
+        (state) => state?.permissionState?.permissionsList
+    );
+    const canView = hasPermission(
+        permissionList,
+        "read_OrderDetails"
+    );
 
-    const permissionList = useSelector((state) => state?.permissionState?.permissionsList);
-    const canView = hasPermission(permissionList, "read_OrderDetails");
+    const commonDatePickerProps = useMemo(() => ({
+        disabled: loading,
+        slotProps: {
+            textField: {
+                fullWidth: false,
+                variant: "filled",
 
-    // ---------------- EXPORT ----------------
-    const handleExport = (type) => {
+            },
+
+        },
+    }), [loading]);
+
+    const handleExport = useCallback((type) => {
+
         setExportAnchor(null);
 
-        const rows = roomNos.map((room) => {
-            const b = breakfastMap[room]?.data || {};
-            const l = lunchMap[room]?.data || {};
-            const d = dinnerMap[room]?.data || {};
-
-            const row = { Room: room };
-
-            data?.breakfast_item_list?.forEach(i => row[`B-${i.item_name}`] = b[i.item_name] ?? 0);
-            data?.lunch_item_list?.forEach(i => row[`L-${i.item_name}`] = l[i.item_name] ?? 0);
-            data?.dinner_item_list?.forEach(i => row[`D-${i.item_name}`] = d[i.item_name] ?? 0);
-
-            return row;
+        exportChargesReport({
+            type,
+            roomNos,
+            breakfastMap,
+            lunchMap,
+            dinnerMap,
+            reportData,
         });
 
-        const ws = XLSX.utils.json_to_sheet(rows);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Report");
+    }, [
+        roomNos,
+        breakfastMap,
+        lunchMap,
+        dinnerMap,
+        reportData,
+    ]);
 
-        XLSX.writeFile(
-            wb,
-            `ChargesReport.${type === "Excel" ? "xlsx" : "xls"}`
-        );
-    };
+    const breakfastItems =
+        reportData?.breakfast_item_list || [];
+
+    const lunchItems =
+        reportData?.lunch_item_list || [];
+
+    const dinnerItems =
+        reportData?.dinner_item_list || [];
 
     return (
         <Box m="20px">
 
-            <Header title="Charges Report" icon={<AssessmentOutlined />} />
+            <Header
+                title="Charges Report"
+                icon={<AssessmentOutlined />}
+            />
 
             {canView ? (
                 <>
-                    {/* ================= FILTER ================= */}
-                    <Box display="flex" justifyContent="space-between" mb={2}>
 
-                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    {/* FILTER */}
 
-                            {selectedSummaryType === "Multiple Date Record" ? (
+                    <Box
+                        display="flex"
+                        justifyContent="space-between"
+                        mb={2}
+                        gap={2}
+                        flexWrap="wrap"
+                    >
+
+                        <LocalizationProvider
+                            dateAdapter={AdapterDayjs}
+                        >
+
+                            {selectedSummaryType ===
+                                SUMMARY_TYPES.MULTIPLE ? (
+
                                 <Box display="flex" gap={2}>
+
                                     <DatePicker
-                                        label="Start"
+                                        label="Start Date"
                                         value={startDate}
+                                        maxDate={endDate}
                                         onChange={setStartDate}
-                                        slotProps={{ textField: { variant: "filled" } }}
+                                        {...commonDatePickerProps}
+                                        slotProps={{
+                                            textField: {
+                                                fullWidth: true,
+                                                variant: "filled",
+                                                error: isInvalidRange,
+                                                helperText: isInvalidRange
+                                                    ? "Start date must be before end date"
+                                                    : "",
+                                            },
+                                        }}
                                     />
+
                                     <DatePicker
-                                        label="End"
+                                        label="End Date"
                                         value={endDate}
+                                        minDate={startDate}
                                         onChange={setEndDate}
-                                        slotProps={{ textField: { variant: "filled" } }}
+                                        {...commonDatePickerProps}
+                                        slotProps={{
+                                            textField: {
+                                                fullWidth: true,
+                                                variant: "filled",
+                                                error: isInvalidRange,
+                                                helperText: isInvalidRange
+                                                    ? "End date must be after start date"
+                                                    : "",
+                                            },
+                                        }}
                                     />
+
                                 </Box>
+
                             ) : (
+
                                 <DatePicker
                                     label="Date"
                                     value={date}
                                     onChange={setDate}
-                                    slotProps={{ textField: { variant: "filled" } }}
+                                    {...commonDatePickerProps}
                                 />
+
                             )}
 
                         </LocalizationProvider>
 
+                        {/* ACTIONS */}
+
                         <Box>
 
-                            <IconButton onClick={(e) => setSummaryAnchor(e.currentTarget)}>
+                            <IconButton
+                                onClick={(e) =>
+                                    setSummaryAnchor(e.currentTarget)
+                                }
+                            >
                                 <SummarizeOutlined />
                             </IconButton>
 
                             <Menu
                                 anchorEl={summaryAnchor}
                                 open={Boolean(summaryAnchor)}
-                                onClose={() => setSummaryAnchor(null)}
+                                onClose={() =>
+                                    setSummaryAnchor(null)
+                                }
                             >
-                                <MenuItem onClick={() => setSelectedSummaryType("Single Date Record")}>
+                                <MenuItem
+                                    onClick={() => {
+                                        setSelectedSummaryType(
+                                            SUMMARY_TYPES.SINGLE
+                                        );
+                                        setSummaryAnchor(null);
+                                    }}
+                                >
                                     Single Date
                                 </MenuItem>
-                                <MenuItem onClick={() => setSelectedSummaryType("Multiple Date Record")}>
+
+                                <MenuItem
+                                    onClick={() => {
+                                        setSelectedSummaryType(
+                                            SUMMARY_TYPES.MULTIPLE
+                                        );
+                                        setSummaryAnchor(null);
+                                    }}
+                                >
                                     Multiple Date
                                 </MenuItem>
+
                             </Menu>
 
                             <IconButton onClick={refresh}>
                                 <RestartAltOutlined />
                             </IconButton>
 
-                            <IconButton onClick={(e) => setExportAnchor(e.currentTarget)}>
+                            <IconButton
+                                onClick={(e) =>
+                                    setExportAnchor(e.currentTarget)
+                                }
+                            >
                                 <FileDownload />
                             </IconButton>
 
                             <Menu
                                 anchorEl={exportAnchor}
                                 open={Boolean(exportAnchor)}
-                                onClose={() => setExportAnchor(null)}
+                                onClose={() =>
+                                    setExportAnchor(null)
+                                }
                             >
-                                <MenuItem onClick={() => handleExport("Excel")}>
+                                <MenuItem
+                                    onClick={() =>
+                                        handleExport("Excel")
+                                    }
+                                >
                                     Excel
                                 </MenuItem>
-                                <MenuItem onClick={() => handleExport("MS")}>
+
+                                <MenuItem
+                                    onClick={() =>
+                                        handleExport("MS")
+                                    }
+                                >
                                     MS Excel
                                 </MenuItem>
+
                             </Menu>
 
                         </Box>
+
                     </Box>
 
-                    {/* ================= TABLE ================= */}
+                    {/* TABLE */}
+
                     {loading ? (
+
                         <CustomLoadingOverlay />
+
                     ) : error ? (
-                        <Typography color="error">{error}</Typography>
+
+                        <Typography color="error">
+                            {error}
+                        </Typography>
+
                     ) : (
+
                         <Box
                             sx={{
                                 overflowX: "auto",
@@ -180,7 +314,9 @@ const tableBorder = "1px solid rgba(224, 224, 224, 1)";
                                 transition: "max-width 0.3s ease",
                             }}
                         >
+
                             <TableContainer component={Paper}>
+
                                 <Table
                                     sx={{
                                         border: tableBorder,
@@ -188,11 +324,16 @@ const tableBorder = "1px solid rgba(224, 224, 224, 1)";
                                     }}
                                 >
 
-                                    {/* ================= HEADER ================= */}
+                                   
                                     <TableHead>
 
                                         {/* TOP HEADER */}
-                                        <TableRow sx={{ backgroundColor: colors.blueAccent[700] }}>
+
+                                        <TableRow
+                                            sx={{
+                                                backgroundColor: colors.blueAccent[700],
+                                            }}
+                                        >
 
                                             <TableCell
                                                 rowSpan={2}
@@ -206,9 +347,11 @@ const tableBorder = "1px solid rgba(224, 224, 224, 1)";
                                                 #
                                             </TableCell>
 
+                                            {/* BREAKFAST */}
+
                                             <TableCell
                                                 align="center"
-                                                colSpan={data?.breakfast_item_list?.length || 1}
+                                                colSpan={breakfastItems.length || 1}
                                                 sx={{
                                                     border: tableBorder,
                                                     color: "#fff",
@@ -218,9 +361,11 @@ const tableBorder = "1px solid rgba(224, 224, 224, 1)";
                                                 Breakfast
                                             </TableCell>
 
+                                            {/* LUNCH */}
+
                                             <TableCell
                                                 align="center"
-                                                colSpan={data?.lunch_item_list?.length || 1}
+                                                colSpan={lunchItems.length || 1}
                                                 sx={{
                                                     border: tableBorder,
                                                     color: "#fff",
@@ -230,9 +375,11 @@ const tableBorder = "1px solid rgba(224, 224, 224, 1)";
                                                 Lunch
                                             </TableCell>
 
+                                            {/* DINNER */}
+
                                             <TableCell
                                                 align="center"
-                                                colSpan={data?.dinner_item_list?.length || 1}
+                                                colSpan={dinnerItems.length || 1}
                                                 sx={{
                                                     border: tableBorder,
                                                     color: "#fff",
@@ -245,13 +392,37 @@ const tableBorder = "1px solid rgba(224, 224, 224, 1)";
                                         </TableRow>
 
                                         {/* ITEM HEADER */}
-                                        <TableRow sx={{ backgroundColor: colors.blueAccent[600] }}>
 
-                                            {[...(data?.breakfast_item_list || []),
-                                            ...(data?.lunch_item_list || []),
-                                            ...(data?.dinner_item_list || [])].map((item, i) => (
+                                        <TableRow
+                                            sx={{
+                                                backgroundColor: colors.blueAccent[600],
+                                            }}
+                                        >
+
+                                            {/* BREAKFAST HEADER */}
+
+                                            {breakfastItems.length > 0 ? (
+
+                                                breakfastItems.map((item, index) => (
+
+                                                    <TableCell
+                                                        key={`b-${index}`}
+                                                        align="center"
+                                                        sx={{
+                                                            border: tableBorder,
+                                                            color: "#fff",
+                                                            fontSize: "12px",
+                                                            fontWeight: 500,
+                                                        }}
+                                                    >
+                                                        {item.item_name}
+                                                    </TableCell>
+
+                                                ))
+
+                                            ) : (
+
                                                 <TableCell
-                                                    key={i}
                                                     align="center"
                                                     sx={{
                                                         border: tableBorder,
@@ -260,70 +431,144 @@ const tableBorder = "1px solid rgba(224, 224, 224, 1)";
                                                         fontWeight: 500,
                                                     }}
                                                 >
-                                                    {item.item_name}
+                                                    -
                                                 </TableCell>
-                                            ))}
+
+                                            )}
+
+                                            {/* LUNCH HEADER */}
+
+                                            {lunchItems.length > 0 ? (
+
+                                                lunchItems.map((item, index) => (
+
+                                                    <TableCell
+                                                        key={`l-${index}`}
+                                                        align="center"
+                                                        sx={{
+                                                            border: tableBorder,
+                                                            color: "#fff",
+                                                            fontSize: "12px",
+                                                            fontWeight: 500,
+                                                        }}
+                                                    >
+                                                        {item.item_name}
+                                                    </TableCell>
+
+                                                ))
+
+                                            ) : (
+
+                                                <TableCell
+                                                    align="center"
+                                                    sx={{
+                                                        border: tableBorder,
+                                                        color: "#fff",
+                                                        fontSize: "12px",
+                                                        fontWeight: 500,
+                                                    }}
+                                                >
+                                                    -
+                                                </TableCell>
+
+                                            )}
+
+                                            {/* DINNER HEADER */}
+
+                                            {dinnerItems.length > 0 ? (
+
+                                                dinnerItems.map((item, index) => (
+
+                                                    <TableCell
+                                                        key={`d-${index}`}
+                                                        align="center"
+                                                        sx={{
+                                                            border: tableBorder,
+                                                            color: "#fff",
+                                                            fontSize: "12px",
+                                                            fontWeight: 500,
+                                                        }}
+                                                    >
+                                                        {item.item_name}
+                                                    </TableCell>
+
+                                                ))
+
+                                            ) : (
+
+                                                <TableCell
+                                                    align="center"
+                                                    sx={{
+                                                        border: tableBorder,
+                                                        color: "#fff",
+                                                        fontSize: "12px",
+                                                        fontWeight: 500,
+                                                    }}
+                                                >
+                                                    -
+                                                </TableCell>
+
+                                            )}
 
                                         </TableRow>
+
                                     </TableHead>
 
-                                    {/* ================= BODY ================= */}
                                     <TableBody>
 
                                         {roomNos.length === 0 ? (
+
                                             <TableRow>
+
                                                 <TableCell
                                                     colSpan={50}
                                                     align="center"
-                                                    sx={{ border: tableBorder, py: 3 }}
+                                                    sx={{
+                                                        border: tableBorder,
+                                                        py: 3,
+                                                    }}
                                                 >
-                                                    No Data Found
+                                                    No Report Found
                                                 </TableCell>
+
                                             </TableRow>
+
                                         ) : (
+
                                             roomNos.map((room) => (
-                                                <TableRow key={room}>
 
-                                                    {/* ROOM NO */}
-                                                    <TableCell align="center" sx={{ border: tableBorder }}>
-                                                        {room}
-                                                    </TableCell>
+                                                <ChargesReportRow
+                                                    key={room}
+                                                    room={room}
+                                                    breakfastItems={breakfastItems}
+                                                    lunchItems={lunchItems}
+                                                    dinnerItems={dinnerItems}
+                                                    breakfastMap={breakfastMap}
+                                                    lunchMap={lunchMap}
+                                                    dinnerMap={dinnerMap}
+                                                    tableBorder={tableBorder}
+                                                />
 
-                                                    {/* BREAKFAST */}
-                                                    {data?.breakfast_item_list?.map((i, idx) => (
-                                                        <TableCell key={`b-${idx}`} align="center" sx={{ border: tableBorder }}>
-                                                            {breakfastMap[room]?.data?.[i.item_name] ?? 0}
-                                                        </TableCell>
-                                                    ))}
-
-                                                    {/* LUNCH */}
-                                                    {data?.lunch_item_list?.map((i, idx) => (
-                                                        <TableCell key={`l-${idx}`} align="center" sx={{ border: tableBorder }}>
-                                                            {lunchMap[room]?.data?.[i.item_name] ?? 0}
-                                                        </TableCell>
-                                                    ))}
-
-                                                    {/* DINNER */}
-                                                    {data?.dinner_item_list?.map((i, idx) => (
-                                                        <TableCell key={`d-${idx}`} align="center" sx={{ border: tableBorder }}>
-                                                            {dinnerMap[room]?.data?.[i.item_name] ?? 0}
-                                                        </TableCell>
-                                                    ))}
-
-                                                </TableRow>
                                             ))
+
                                         )}
 
                                     </TableBody>
 
                                 </Table>
+
                             </TableContainer>
+
                         </Box>
+
                     )}
 
                 </>
             ) : (
-                <NoPermissionMessage title="No Permission" message="Contact Admin" />
+                <NoPermissionMessage
+                    title="No Permission"
+                    message="Contact Admin"
+                />
             )}
 
         </Box>

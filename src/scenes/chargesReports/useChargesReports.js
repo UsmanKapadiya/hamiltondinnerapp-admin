@@ -1,75 +1,150 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import dayjs from "dayjs";
 import _ from "lodash";
 import ReportServices from "../../services/reportServices";
 
+export const SUMMARY_TYPES = {
+    SINGLE: "Single Date Record",
+    MULTIPLE: "Multiple Date Record",
+};
+
 const useChargesReports = () => {
+
     const [date, setDate] = useState(dayjs());
     const [startDate, setStartDate] = useState(dayjs().startOf("month"));
     const [endDate, setEndDate] = useState(dayjs());
-    const [selectedSummaryType, setSelectedSummaryType] = useState("Single Date Record");
+
+    const [selectedSummaryType, setSelectedSummaryType] = useState(
+        SUMMARY_TYPES.SINGLE
+    );
 
     const [loading, setLoading] = useState(false);
-    const [data, setData] = useState({});
+    const [reportData, setReportData] = useState({});
     const [error, setError] = useState(null);
     const [refreshCount, setRefreshCount] = useState(0);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setLoading(true);
-                setError(null);
+    const isInvalidRange =
+        startDate &&
+        endDate &&
+        dayjs(startDate).isAfter(endDate);
 
-                let response;
+    const fetchData = useCallback(async () => {
 
-                if (selectedSummaryType === "Single Date Record") {
-                    response = await ReportServices.getChargesReportList(
-                        date.format("YYYY-MM-DD")
-                    );
-                } else {
-                    if (!startDate || !endDate) return;
+        let mounted = true;
 
-                    response = await ReportServices.getMultipleDateChargesReportList(
+        try {
+
+            setLoading(true);
+            setError(null);
+
+            let response;
+
+            if (selectedSummaryType === SUMMARY_TYPES.SINGLE) {
+
+                response = await ReportServices.getChargesReportList(
+                    date.format("YYYY-MM-DD")
+                );
+
+            } else {
+
+                if (!startDate || !endDate || isInvalidRange) {
+                    return;
+                }
+
+                response =
+                    await ReportServices.getMultipleDateChargesReportList(
                         startDate.format("YYYY-MM-DD"),
                         endDate.format("YYYY-MM-DD")
                     );
-                }
+            }
 
-                setData(response?.data ?? response ?? {});
-            } catch (err) {
-                console.error(err);
+            if (mounted) {
+                setReportData(response?.data ?? response ?? {});
+            }
+
+        } catch (err) {
+
+            console.error(err);
+
+            if (mounted) {
                 setError("Failed to fetch report");
-                setData({});
-            } finally {
+                setReportData({});
+            }
+
+        } finally {
+
+            if (mounted) {
                 setLoading(false);
             }
+        }
+
+        return () => {
+            mounted = false;
         };
 
-        fetchData();
-    }, [date, startDate, endDate, selectedSummaryType, refreshCount]);
+    }, [
+        date,
+        startDate,
+        endDate,
+        selectedSummaryType,
+        isInvalidRange
+    ]);
 
-    // 🔥 OPTIMIZED MAPS
-    const maps = useMemo(() => ({
-        breakfastMap: _.keyBy(data?.report_breakfast_list || [], "room_no"),
-        lunchMap: _.keyBy(data?.report_lunch_list || [], "room_no"),
-        dinnerMap: _.keyBy(data?.report_dinner_list || [], "room_no"),
-        roomNos: _.uniq([
-            ..._.map(data?.report_breakfast_list, "room_no"),
-            ..._.map(data?.report_lunch_list, "room_no"),
-            ..._.map(data?.report_dinner_list, "room_no"),
-        ])
-    }), [data]);
+    useEffect(() => {
+        fetchData();
+    }, [fetchData, refreshCount]);
+
+    const reportMaps = useMemo(() => {
+
+        const breakfastList = reportData?.report_breakfast_list || [];
+        const lunchList = reportData?.report_lunch_list || [];
+        const dinnerList = reportData?.report_dinner_list || [];
+
+        return {
+
+            breakfastMap: _.keyBy(breakfastList, "room_no"),
+
+            lunchMap: _.keyBy(lunchList, "room_no"),
+
+            dinnerMap: _.keyBy(dinnerList, "room_no"),
+
+            roomNos: _.sortBy(
+                _.uniq([
+                    ..._.map(breakfastList, "room_no"),
+                    ..._.map(lunchList, "room_no"),
+                    ..._.map(dinnerList, "room_no"),
+                ]),
+                (room) => Number(room)
+            ),
+        };
+
+    }, [reportData]);
 
     return {
-        date, setDate,
-        startDate, setStartDate,
-        endDate, setEndDate,
-        selectedSummaryType, setSelectedSummaryType,
+
+        date,
+        setDate,
+
+        startDate,
+        setStartDate,
+
+        endDate,
+        setEndDate,
+
+        selectedSummaryType,
+        setSelectedSummaryType,
+
         loading,
-        data,
+
+        reportData,
+
         error,
-        refresh: () => setRefreshCount(p => p + 1),
-        ...maps
+
+        isInvalidRange,
+
+        refresh: () => setRefreshCount((prev) => prev + 1),
+
+        ...reportMaps,
     };
 };
 
