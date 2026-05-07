@@ -24,7 +24,7 @@ import ItemPreferencesForm from "./scenes/preferences/itemPreferences-form";
 import MenuDetails from "./scenes/menuDetails";
 import MenuDetailsController from "./scenes/menuDetails/MenuDetailsController";
 import MenuDetailsView from "./scenes/menuDetails/menuDetails-view";
-import OrderDetails from "./scenes/orderDetails";
+import OrderDetails from "./scenes/orderDetails/OrderDetailsController";
 import Setting from "./scenes/settings/SettingController";
 import Roles from "./scenes/Roles/RolesController";
 import RolesDetailsView from "./scenes/Roles/RolesDetailsView/RolesDetailsViewController";
