@@ -5,9 +5,9 @@ import {
   Dashboard,
   FAQ
 } from "./scenes";
-import Room from "./scenes/room";
-import RoomDetailsForm from "./scenes/room/roomDetails-form";
-import RoomDetailsView from "./scenes/room/roomDetails-view";
+import Room from "./scenes/room/RoomController";
+import RoomDetailsForm from "./scenes/room/RoomDetailsForm/RoomDetailsFormController";
+import RoomDetailsView from "./scenes/room/RoomDetailsView/RoomDetailsViewController";
 import Category from "./scenes/category";
 import CategoryDetailsView from "./scenes/category/categoryDetails-view";
 import CategoryDetailsForm from "./scenes/category/categoryDetails-form";
