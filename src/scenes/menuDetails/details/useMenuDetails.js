@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import _ from "lodash";
-import CategoryServices from "../../services/categoryServices";
-import MenuServices from "../../services/menuServices";
+import CategoryServices from "../../../services/categoryServices";
+import MenuServices from "../../../services/menuServices";
 
 const useMenuDetails = (optionsDetails) => {
   const navigate = useNavigate();

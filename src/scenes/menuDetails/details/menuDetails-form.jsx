@@ -1,12 +1,12 @@
 import { Box, Button, FormGroup, FormControlLabel, Switch } from "@mui/material";
-import { Header } from "../../components";
+import { Header } from "../../../components";
 import { Formik } from "formik";
 import * as yup from "yup";
 import { CreateOutlined } from "@mui/icons-material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
+import CustomLoadingOverlay from "../../../components/CustomLoadingOverlay";
 import MealTypeSection from "./components/MealTypeSection";
 import _ from "lodash";
 

@@ -1,43 +1,16 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React from "react";
 import {
     Box,
     Divider,
     Typography,
     useMediaQuery,
-    useTheme,
 } from "@mui/material";
-import { Header } from "../../components";
+import { Header } from "../../../components";
 import { ListAltOutlined } from "@mui/icons-material";
-import { tokens } from "../../theme";
-import { useLocation } from "react-router-dom";
-import ItemServices from "../../services/itemServices";
-import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
+import CustomLoadingOverlay from "../../../components/CustomLoadingOverlay";
 
-const ItemOptionsView = () => {
-    const theme = useTheme();
-    const colors = tokens(theme.palette.mode);
+const ItemOptionsView = ({ theme, colors, optionsDetails, loading }) => {
     const isXlDevices = useMediaQuery("(min-width: 1260px)");
-    const [optionsDetails, setOptionsDetails] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const location = useLocation();
-    const itemOptionsDetails = location.state;
-
-    const getOptionsDetails = useCallback(async (id) => {
-        if (!id) return;
-        setLoading(true);
-        try {
-            const response = await ItemServices.getOptionDetails(id);
-            setOptionsDetails(response?.data);
-        } catch (error) {
-            console.error("Error fetching option list:", error);
-        } finally {
-            setLoading(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        getOptionsDetails(itemOptionsDetails?.id);
-    }, [getOptionsDetails, itemOptionsDetails?.id]);
 
     return (
         <Box m="20px">

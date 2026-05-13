@@ -1,11 +1,11 @@
 import { Box, Button, InputBase, IconButton } from "@mui/material";
-import { Header } from "../../components";
+import { Header } from "../../../components";
 import { DataGrid } from "@mui/x-data-grid";
 import { Close, CreateOutlined, SearchOutlined } from "@mui/icons-material";
 import { useMemo } from "react";
-import ConfirmationDialog from "../../components/ConfirmationDialog";
-import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
-import NoPermissionMessage from "../../components/NoPermissionMessage";
+import ConfirmationDialog from "../../../components/ConfirmationDialog";
+import CustomLoadingOverlay from "../../../components/CustomLoadingOverlay";
+import NoPermissionMessage from "../../../components/NoPermissionMessage";
 import _ from "lodash";
 
 const MenuDetailsListView = ({

@@ -1,58 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
     Box,
     Divider,
     Typography,
     useMediaQuery,
-    useTheme,
 } from "@mui/material";
 import { Header } from "../../components";
 import { ListAltOutlined } from "@mui/icons-material";
-import { tokens } from "../../theme";
-import { useLocation } from "react-router-dom";
-import CategoryServices from "../../services/categoryServices";
-import { type } from "../../data/mockData";
 import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
 
-const CategoryDetailsView = () => {
-    const theme = useTheme();
-    const colors = tokens(theme.palette.mode);
+const CategoryDetailsView = ({ colors, categoryDetails, loading, getTypeName, getParentName }) => {
     const isXlDevices = useMediaQuery("(min-width: 1260px)");
-    const location = useLocation();
-    const [categoryDetails, setCategoryDetails] = useState(null);
-    const [loading, setLoading] = useState(false);
-
-    const categoryId = location.state?.id;
-    const categoryListData = location.state?.categoryListData || [];
-
-    useEffect(() => {
-        if (categoryId) {
-            getCategoryDetails(categoryId);
-        }
-    }, [categoryId]);
-
-    const getCategoryDetails = async (id) => {
-        setLoading(true);
-        try {
-            const response = await CategoryServices.getCategoryDetails(id);
-            setCategoryDetails(response?.data || null);
-        } catch (error) {
-            setCategoryDetails(null);
-            console.error("Error fetching Course details:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const getTypeName = (typeId) => {
-        const typeObj = type.find((t) => t.id == typeId);
-        return typeObj ? typeObj.type_name : "N/A";
-    };
-
-    const getParentName = (parentId) => {
-        const parentObj = categoryListData.find((t) => t.id == parentId);
-        return parentObj ? parentObj.cat_name : "";
-    };
 
     return (
         <Box m="20px">

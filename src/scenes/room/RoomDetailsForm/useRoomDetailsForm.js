@@ -11,7 +11,7 @@ import * as yup from "yup";
 
 import { toast } from "react-toastify";
 
-import RoomServices from "../../services/roomServices";
+import RoomServices from "../../../services/roomServices";
 
 const validationSchema = yup.object({
   room_name: yup

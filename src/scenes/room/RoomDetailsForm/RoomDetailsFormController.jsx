@@ -19,8 +19,8 @@ import {
 
 import { Formik } from "formik";
 
-import Header from "../../components/Header";
-import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
+import Header from "../../../components/Header";
+import CustomLoadingOverlay from "../../../components/CustomLoadingOverlay";
 
 import useRoomDetailsForm from "./useRoomDetailsForm";
 

@@ -1,5 +1,5 @@
 import { useTheme } from "@mui/material";
-import { tokens } from "../../theme";
+import { tokens } from "../../../theme";
 import useMenuDetailsList from "./useMenuDetailsList";
 import MenuDetailsListView from "./MenuDetailsListView";
 

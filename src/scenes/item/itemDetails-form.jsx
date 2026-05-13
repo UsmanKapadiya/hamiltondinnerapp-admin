@@ -303,7 +303,9 @@ const ItemDetailsForm = () => {
                       if (file) {
                         setFieldValue("item_image", file);
                         setFieldValue("item_image_preview", URL.createObjectURL(file));
+                        setFieldValue("item_image_removed", false);
                       }
+                      event.target.value = '';
                     }}
                   />
                   <label htmlFor="item-image-upload">
@@ -332,6 +334,9 @@ const ItemDetailsForm = () => {
                             setFieldValue("item_image", null);
                             setFieldValue("item_image_preview", null);
                             setFieldValue("item_image_removed", true);
+                            // Reset file input
+                            const fileInput = document.getElementById('item-image-upload');
+                            if (fileInput) fileInput.value = '';
                           }}
                         >
                           Remove Image
