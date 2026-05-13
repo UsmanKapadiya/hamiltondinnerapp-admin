@@ -8,9 +8,9 @@ import {
 import Room from "./scenes/room";
 import RoomDetailsForm from "./scenes/room/roomDetails-form";
 import RoomDetailsView from "./scenes/room/roomDetails-view";
-import Category from "./scenes/category";
-import CategoryDetailsView from "./scenes/category/categoryDetails-view";
-import CategoryDetailsForm from "./scenes/category/categoryDetails-form";
+import Category from "./scenes/category/CategoryController";
+import CategoryDetailsView from "./scenes/category/CategoryDetailsViewController";
+import CategoryDetailsForm from "./scenes/category/CategoryDetailsFormController";
 import Item from "./scenes/item";
 import ItemDetailsView from "./scenes/item/itemDetails-view";
 import ItemDetailsForm from "./scenes/item/itemDetails-form";
