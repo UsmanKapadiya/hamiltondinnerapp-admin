@@ -1,44 +1,16 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React from "react";
 import {
     Box,
     Divider,
     Typography,
     useMediaQuery,
-    useTheme,
 } from "@mui/material";
 import { Header } from "../../../components";
 import { ListAltOutlined } from "@mui/icons-material";
-import { tokens } from "../../../theme";
-import { useLocation } from "react-router-dom";
-import ItemServices from "../../../services/itemServices";
 import CustomLoadingOverlay from "../../../components/CustomLoadingOverlay";
 
-const ItemPreferencesView = () => {
-    const theme = useTheme();
-    const colors = tokens(theme.palette.mode);
+const ItemPreferencesView = ({ theme, colors, preferencesDetails, loading }) => {
     const isXlDevices = useMediaQuery("(min-width: 1260px)");
-    const [preferencesDetails, setPreferencesDetails] = useState(null);
-    const [loading, setLoading] = useState(false);
-
-    const location = useLocation();
-    const ItemPreferencesDetails = location.state?.id;
-
-    const getPreferencesDetails = useCallback(async (id) => {
-        if (!id) return;
-        setLoading(true);
-        try {
-            const response = await ItemServices.getPreferencesDetails(id);
-            setPreferencesDetails(response?.data);
-        } catch (error) {
-            console.error("Error fetching menu list:", error);
-        } finally {
-            setLoading(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        getPreferencesDetails(ItemPreferencesDetails);
-    }, [ItemPreferencesDetails, getPreferencesDetails]);
 
     return (
         <Box m="20px">
