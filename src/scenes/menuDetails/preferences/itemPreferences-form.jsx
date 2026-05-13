@@ -1,62 +1,12 @@
-import { Box, Button, TextField, useMediaQuery } from "@mui/material";
+import { Box } from "@mui/material";
 import { Header } from "../../../components";
-import { Formik } from "formik";
-import * as yup from "yup";
 import { DvrOutlined } from "@mui/icons-material";
-import { useLocation, useNavigate } from "react-router-dom";
-import { useEffect, useMemo, useState } from "react";
 import CustomLoadingOverlay from "../../../components/CustomLoadingOverlay";
-import ItemServices from "../../../services/itemServices";
-import { toast } from "react-toastify";
-
-const validationSchema = yup.object().shape({
-  pname: yup.string().required("Preference Name is required"),
-  // pname_cn: yup.string().required("Preference Chinese Name is required"),
-});
+import useItemPreferencesForm from "./useItemPreferencesForm";
+import ItemPreferencesFormView from "./ItemPreferencesFormView";
 
 const ItemPreferencesForm = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const isNonMobile = useMediaQuery("(min-width:600px)");
-  const [loading, setLoading] = useState(true);
-  const [preferencesDetails, setPreferencesDetails] = useState(null);
-
-  useEffect(() => {
-    setPreferencesDetails(location.state || null);
-    setLoading(false);
-  }, [location.state]);
-
-  const initialValues = useMemo(
-    () => ({
-      id: preferencesDetails?.id || "",
-      pname: preferencesDetails?.pname || "",
-      pname_cn: preferencesDetails?.pname_cn || "",
-    }),
-    [preferencesDetails]
-  );
-
-  const handleFormSubmit = async (values, actions) => {
-  setLoading(true);
-  try {
-    let response;
-    if (values.id) {
-      response = await ItemServices.updatetPreferencesDetails(values.id, values);
-      setPreferencesDetails(response?.data);
-      toast.success("Item preference updated successfully!");
-    } else {
-      response = await ItemServices.createPreferencesDetails(values);
-      toast.success("Item preference created successfully!");
-      actions.resetForm({ values: initialValues });
-    }
-    if (response?.success) {
-      navigate("/menu-item-preferences");
-    }
-  } catch (error) {
-    toast.error("Failed to process preference. Please try again.");
-  } finally {
-    setLoading(false);
-  }
-};
+  const { preferencesDetails, loading, initialValues, handleFormSubmit } = useItemPreferencesForm();
 
   return (
     <Box m="20px">
@@ -68,74 +18,18 @@ const ItemPreferencesForm = () => {
               ? "Update Menu Item Preference"
               : "Add Menu Item Preference"
         }
-        icon={<DvrOutlined />} Buttons={false} />
+        icon={<DvrOutlined />} 
+        Buttons={false} 
+      />
       {loading ? (
         <Box display="flex" justifyContent="center" alignItems="center" height="calc(100vh - 100px)">
           <CustomLoadingOverlay />
         </Box>
       ) : (
-        <Formik
-          onSubmit={handleFormSubmit}
+        <ItemPreferencesFormView 
           initialValues={initialValues}
-          enableReinitialize
-          validationSchema={validationSchema}
-          validateOnBlur
-          validateOnChange
-        >
-          {({
-            values,
-            errors,
-            touched,
-            handleBlur,
-            handleChange,
-            handleSubmit,
-          }) => (
-            <form onSubmit={handleSubmit}>
-              <Box
-                display="grid"
-                gap="30px"
-                gridTemplateColumns="repeat(4, minmax(0, 1fr))"
-                sx={{
-                  "& > div": {
-                    gridColumn: isNonMobile ? undefined : "span 4",
-                  },
-                }}
-              >
-                <TextField
-                  fullWidth
-                  variant="filled"
-                  type="text"
-                  label="Preference Name"
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  value={values.pname}
-                  name="pname"
-                  error={touched.pname && Boolean(errors.pname)}
-                  helperText={touched.pname && errors.pname}
-                  sx={{ gridColumn: "span 4" }}
-                />
-                <TextField
-                  fullWidth
-                  variant="filled"
-                  type="text"
-                  label="Preference Chinese Name"
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  value={values.pname_cn}
-                  name="pname_cn"
-                  error={touched.pname_cn && Boolean(errors.pname_cn)}
-                  helperText={touched.pname_cn && errors.pname_cn}
-                  sx={{ gridColumn: "span 4" }}
-                />
-              </Box>
-              <Box display="flex" alignItems="center" justifyContent="end" mt="20px">
-                <Button type="submit" color="secondary" variant="contained">
-                  Save Menu Item Preference
-                </Button>
-              </Box>
-            </form>
-          )}
-        </Formik>
+          handleFormSubmit={handleFormSubmit}
+        />
       )}
     </Box>
   );
