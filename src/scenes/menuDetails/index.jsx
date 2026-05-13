@@ -40,206 +40,446 @@ const MenuDetails = () => {
     total: 0,
   });
 
-  // Debounce search input
+  // Debounce Search
   useEffect(() => {
-    const handler = setTimeout(() => setDebouncedSearch(searchText), 300);
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchText);
+    }, 300);
+
     return () => clearTimeout(handler);
   }, [searchText]);
 
-  // Fetch menu list on mount, pagination, or search change
+  // Fetch Menu List
   useEffect(() => {
     fetchMenuList();
-    fetchItemsList()
-  }, [pagination.page, pagination.pageSize, debouncedSearch]);
+    fetchItemsList();
+  }, [
+    pagination.page,
+    pagination.pageSize,
+    debouncedSearch,
+  ]);
 
-  const fetchMenuList = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await MenuServices.getMenuList({
-        currentPage: pagination.page,
-        perPageRecords: pagination.pageSize,
-        search: debouncedSearch,
-      });
-      setMenuList(response.data);
-      setPagination((prev) => ({
-        ...prev,
-        total: response.pagination.total,
-      }));
-    } catch (error) {
-      console.error("Error fetching menu list:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [pagination.page, pagination.pageSize, debouncedSearch]);
+  const fetchMenuList = useCallback(
+    async () => {
+      setLoading(true);
 
+      try {
+        // Detect date search
+        const isDateSearch =
+          /^\d{1,2}-\d{1,2}-\d{4}$/.test(
+            debouncedSearch
+          ) ||
+          /^\d{1,2}-\d{1,2}$/.test(
+            debouncedSearch
+          );
+
+        const response =
+          await MenuServices.getMenuList({
+            currentPage: pagination.page,
+            perPageRecords:
+              pagination.pageSize,
+
+            // Prevent API date filtering
+            search: isDateSearch
+              ? ""
+              : debouncedSearch,
+          });
+
+        setMenuList(response.data);
+
+        setPagination((prev) => ({
+          ...prev,
+          total:
+            response.pagination.total,
+        }));
+      } catch (error) {
+        console.error(
+          "Error fetching menu list:",
+          error
+        );
+      } finally {
+        setLoading(false);
+      }
+    },
+    [
+      pagination.page,
+      pagination.pageSize,
+      debouncedSearch,
+    ]
+  );
+
+  // Fetch Items
   const fetchItemsList = async () => {
     try {
-      const response = await ItemServices.getItemList();
-      // console.log("response", response)
-      dispatch(setItemList(response.data)); // Store in Redux
+      const response =
+        await ItemServices.getItemList();
+
+      dispatch(setItemList(response.data));
     } catch (error) {
-      console.error("Error fetching menu list:", error);
-    } finally {
-      setLoading(false);
+      console.error(
+        "Error fetching item list:",
+        error
+      );
     }
   };
 
-  const bulkDeleteMenu = useCallback(async (ids) => {
-    try {
-      let data = JSON.stringify({ ids });
-      await MenuServices.bulkdeleteMenus(data);
-      toast.success("Multiple Menus Deleted successfully!");
-      fetchMenuList();
-    } catch (error) {
-      console.error("Error deleting menus:", error);
-      toast.error("Failed to process menu. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  }, [fetchMenuList]);
+  // Bulk Delete
+  const bulkDeleteMenu = useCallback(
+    async (ids) => {
+      try {
+        setLoading(true);
 
-  const deleteMenu = useCallback(async (id) => {
-    try {
-      setLoading(true);
-      await MenuServices.deleteMenus(id);
-      toast.success("Menu Deleted successfully!");
-      fetchMenuList();
-      setSelectedMenuName("");
-    } catch (error) {
-      console.error("Error deleting menu:", error);
-      toast.error("Failed to process menu. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  }, [fetchMenuList]);
+        const data = JSON.stringify({
+          ids,
+        });
 
-  const handleDelete = useCallback((data) => {
-    setSelectedId(data?.id);
-    const dateObj = new Date(data.date);
-    const formattedDate = `${dateObj.getDate().toString().padStart(2, "0")}-${(dateObj.getMonth() + 1).toString().padStart(2, "0")}-${dateObj.getFullYear()}`;
-    setSelectedMenuName(formattedDate);
-    setDialogOpen(true);
-  }, []);
+        await MenuServices.bulkdeleteMenus(
+          data
+        );
 
+        toast.success(
+          "Multiple Menus Deleted successfully!"
+        );
+
+        fetchMenuList();
+      } catch (error) {
+        console.error(
+          "Error deleting menus:",
+          error
+        );
+
+        toast.error(
+          "Failed to process menu. Please try again."
+        );
+      } finally {
+        setLoading(false);
+      }
+    },
+    [fetchMenuList]
+  );
+
+  // Single Delete
+  const deleteMenu = useCallback(
+    async (id) => {
+      try {
+        setLoading(true);
+
+        await MenuServices.deleteMenus(id);
+
+        toast.success(
+          "Menu Deleted successfully!"
+        );
+
+        fetchMenuList();
+
+        setSelectedMenuName("");
+      } catch (error) {
+        console.error(
+          "Error deleting menu:",
+          error
+        );
+
+        toast.error(
+          "Failed to process menu. Please try again."
+        );
+      } finally {
+        setLoading(false);
+      }
+    },
+    [fetchMenuList]
+  );
+
+  // Handle Delete Dialog
+  const handleDelete = useCallback(
+    (data) => {
+      setSelectedId(data?.id);
+
+      const dateObj = new Date(data.date);
+
+      const formattedDate = `${(
+        dateObj.getMonth() + 1
+      )
+        .toString()
+        .padStart(2, "0")}-${dateObj
+          .getDate()
+          .toString()
+          .padStart(
+            2,
+            "0"
+          )}-${dateObj.getFullYear()}`;
+
+      setSelectedMenuName(formattedDate);
+
+      setDialogOpen(true);
+    },
+    []
+  );
+
+  // Confirm Delete
   const confirmDelete = useCallback(() => {
-    selectedIds.length > 0 && !selectedMenuName
-      ? bulkDeleteMenu(selectedIds)
-      : deleteMenu(selectedId);
-    setDialogOpen(false);
-  }, [selectedIds, selectedMenuName, selectedId, bulkDeleteMenu, deleteMenu]);
+    if (
+      selectedIds.length > 0 &&
+      !selectedMenuName
+    ) {
+      bulkDeleteMenu(selectedIds);
+    } else {
+      deleteMenu(selectedId);
+    }
 
+    setDialogOpen(false);
+  }, [
+    selectedIds,
+    selectedMenuName,
+    selectedId,
+    bulkDeleteMenu,
+    deleteMenu,
+  ]);
+
+  // Cancel Delete
   const cancelDelete = useCallback(() => {
     setDialogOpen(false);
+
     setSelectedId(null);
+
     setSelectedMenuName("");
   }, []);
 
-  const handleView = useCallback((id) => {
-    const selectedRow = menuList.find((row) => row.id === id);
-    navigate(`/menu-details/${id}`, { state: selectedRow });
-  }, [navigate, menuList]);
+  // View
+  const handleView = useCallback(
+    (id) => {
+      const selectedRow = menuList.find(
+        (row) => row.id === id
+      );
 
-  const handleEdit = useCallback((id) => {
-    const selectedRow = menuList.find((row) => row.id === id);
-    navigate(`/menu-details/${id}/edit`, { state: selectedRow });
-  }, [navigate, menuList]);
+      navigate(`/menu-details/${id}`, {
+        state: selectedRow,
+      });
+    },
+    [navigate, menuList]
+  );
 
-  const handleAddNewClick = useCallback(() => {
-    navigate("/menu-details/create");
-  }, [navigate]);
+  // Edit
+  const handleEdit = useCallback(
+    (id) => {
+      const selectedRow = menuList.find(
+        (row) => row.id === id
+      );
 
+      navigate(
+        `/menu-details/${id}/edit`,
+        {
+          state: selectedRow,
+        }
+      );
+    },
+    [navigate, menuList]
+  );
+
+  // Add New
+  const handleAddNewClick =
+    useCallback(() => {
+      navigate("/menu-details/create");
+    }, [navigate]);
+
+  // Bulk Delete Button
   const handleBulkDelete = useCallback(() => {
     if (selectedIds.length > 0) {
       setDialogOpen(true);
     } else {
-      toast.warning("Please select at least one Menu to delete.");
+      toast.warning(
+        "Please select at least one Menu to delete."
+      );
     }
   }, [selectedIds]);
 
-  const handleRowSelection = useCallback((ids) => {
-    setSelectedIds(ids);
-  }, []);
+  // Row Selection
+  const handleRowSelection =
+    useCallback((ids) => {
+      setSelectedIds(ids);
+    }, []);
 
-  const handlePaginationChange = useCallback((newPaginationModel) => {
-    setPagination((prev) => ({
-      ...prev,
-      page: newPaginationModel.page + 1,
-      pageSize: newPaginationModel.pageSize,
-    }));
-  }, []);
+  // Pagination
+  const handlePaginationChange =
+    useCallback((newPaginationModel) => {
+      setPagination((prev) => ({
+        ...prev,
+        page:
+          newPaginationModel.page + 1,
+        pageSize:
+          newPaginationModel.pageSize,
+      }));
+    }, []);
 
-  const canAdd = useMemo(() => hasPermission(permissionList, "add_Menus"), [permissionList]);
-  const canView = useMemo(() => hasPermission(permissionList, "read_Menus"), [permissionList]);
-  const canEdit = useMemo(() => hasPermission(permissionList, "edit_Menus"), [permissionList]);
-  const canDelete = useMemo(() => hasPermission(permissionList, "delete_Menus"), [permissionList]);
-  const canBrowse = useMemo(() => hasPermission(permissionList, "browse_Menus"), [permissionList]);
-
-  const columns = useMemo(() => [
-    // { field: "menu_name", headerName: "Menu Name", flex: 1 },
-    {
-      field: "date",
-      headerName: "Date",
-      flex: 1,
-      valueFormatter: (params) => {
-        const date = new Date(params.value);
-        return `${(date.getMonth() + 1)
-          .toString()
-          .padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}-${date.getFullYear()}`; //MM-DD-YYYY
-      },
-    },
-    {
-      field: "actions",
-      headerName: "Actions",
-      flex: 1,
-      renderCell: ({ row }) => (
-        <Box display="flex" gap={1}>
-          <Button
-            variant="contained"
-            color="info"
-            size="small"
-            onClick={() => handleView(row.id)}
-            disabled={!canView}
-          >
-            View
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            onClick={() => handleEdit(row.id)}
-            disabled={!canEdit}
-          >
-            Edit
-          </Button>
-          <Button
-            variant="contained"
-            color="secondary"
-            size="small"
-            onClick={() => handleDelete(row)}
-            disabled={!canDelete}
-          >
-            Delete
-          </Button>
-        </Box>
+  // Permissions
+  const canAdd = useMemo(
+    () =>
+      hasPermission(
+        permissionList,
+        "add_Menus"
       ),
-    },
-  ], [handleView, handleEdit, handleDelete, canView, canEdit, canDelete]);
+    [permissionList]
+  );
 
-  // Filtered rows for client-side search (if needed)
+  const canView = useMemo(
+    () =>
+      hasPermission(
+        permissionList,
+        "read_Menus"
+      ),
+    [permissionList]
+  );
+
+  const canEdit = useMemo(
+    () =>
+      hasPermission(
+        permissionList,
+        "edit_Menus"
+      ),
+    [permissionList]
+  );
+
+  const canDelete = useMemo(
+    () =>
+      hasPermission(
+        permissionList,
+        "delete_Menus"
+      ),
+    [permissionList]
+  );
+
+  const canBrowse = useMemo(
+    () =>
+      hasPermission(
+        permissionList,
+        "browse_Menus"
+      ),
+    [permissionList]
+  );
+
+  // Columns
+  const columns = useMemo(
+    () => [
+      {
+        field: "date",
+        headerName: "Date",
+        flex: 1,
+
+        valueFormatter: (params) => {
+          const date = new Date(
+            params.value
+          );
+
+          return `${(
+            date.getMonth() + 1
+          )
+            .toString()
+            .padStart(
+              2,
+              "0"
+            )}-${date
+              .getDate()
+              .toString()
+              .padStart(
+                2,
+                "0"
+              )}-${date.getFullYear()}`;
+        },
+      },
+
+      {
+        field: "actions",
+        headerName: "Actions",
+        flex: 1,
+
+        renderCell: ({ row }) => (
+          <Box display="flex" gap={1}>
+            <Button
+              variant="contained"
+              color="info"
+              size="small"
+              onClick={() =>
+                handleView(row.id)
+              }
+              disabled={!canView}
+            >
+              View
+            </Button>
+
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              onClick={() =>
+                handleEdit(row.id)
+              }
+              disabled={!canEdit}
+            >
+              Edit
+            </Button>
+
+            <Button
+              variant="contained"
+              color="secondary"
+              size="small"
+              onClick={() =>
+                handleDelete(row)
+              }
+              disabled={!canDelete}
+            >
+              Delete
+            </Button>
+          </Box>
+        ),
+      },
+    ],
+    [
+      handleView,
+      handleEdit,
+      handleDelete,
+      canView,
+      canEdit,
+      canDelete,
+    ]
+  );
+
+  // Local Filter
   const filteredRows = useMemo(() => {
-    if (!debouncedSearch) return menuList;
-    const search = debouncedSearch.toLowerCase();
+    if (!debouncedSearch) {
+      return menuList;
+    }
+
+    const search =
+      debouncedSearch.toLowerCase();
+
     return menuList.filter((row) => {
-      const menuNameMatch = row.menu_name?.toLowerCase().includes(search);
       let dateMatch = false;
+
       if (row.date) {
-        const dateObj = new Date(row.date);
-        const formattedDate = `${dateObj.getDate().toString().padStart(2, "0")}-${(dateObj.getMonth() + 1)
+        const dateObj = new Date(
+          row.date
+        );
+
+        // MM-DD-YYYY
+        const formattedDate = `${(
+          dateObj.getMonth() + 1
+        )
           .toString()
-          .padStart(2, "0")}-${dateObj.getFullYear()}`;
-        dateMatch = formattedDate.includes(search);
+          .padStart(
+            2,
+            "0"
+          )}-${dateObj
+            .getDate()
+            .toString()
+            .padStart(
+              2,
+              "0"
+            )}-${dateObj.getFullYear()}`;
+
+        dateMatch =
+          formattedDate.includes(search);
       }
-      return menuNameMatch || dateMatch;
+
+      return dateMatch;
     });
   }, [menuList, debouncedSearch]);
 
@@ -248,87 +488,155 @@ const MenuDetails = () => {
       <Header
         title="Menu Details"
         icon={<CreateOutlined />}
-        addNewClick={handleAddNewClick}
-        addBulkDelete={handleBulkDelete}
+        addNewClick={
+          handleAddNewClick
+        }
+        addBulkDelete={
+          handleBulkDelete
+        }
         orderClick={() => { }}
         showToggleClick={() => { }}
         buttons={true}
-        addButton={canAdd && canBrowse}
-        deleteButton={canDelete && canBrowse}
+        addButton={
+          canAdd && canBrowse
+        }
+        deleteButton={
+          canDelete && canBrowse
+        }
       />
+
       {canBrowse ? (
         <Box
           mt="40px"
           height="75vh"
           flex={1}
           sx={{
-            "& .MuiDataGrid-root": { border: "none" },
-            "& .MuiDataGrid-cell": { border: "none" },
-            "& .name-column--cell": { color: colors.greenAccent[300] },
-            "& .MuiDataGrid-columnHeaders": {
-              backgroundColor: colors.blueAccent[700],
+            "& .MuiDataGrid-root": {
+              border: "none",
+            },
+
+            "& .MuiDataGrid-cell": {
+              border: "none",
+            },
+
+            "& .name-column--cell": {
+              color:
+                colors.greenAccent[300],
+            },
+
+            "& .MuiDataGrid-columnHeaders":
+            {
+              backgroundColor:
+                colors.blueAccent[700],
+
               borderBottom: "none",
             },
-            "& .MuiDataGrid-virtualScroller": {
-              backgroundColor: colors.primary[400],
+
+            "& .MuiDataGrid-virtualScroller":
+            {
+              backgroundColor:
+                colors.primary[400],
             },
-            "& .MuiDataGrid-footerContainer": {
+
+            "& .MuiDataGrid-footerContainer":
+            {
               borderTop: "none",
-              backgroundColor: colors.blueAccent[700],
+
+              backgroundColor:
+                colors.blueAccent[700],
             },
+
             "& .MuiCheckbox-root": {
               color: `${colors.greenAccent[200]} !important`,
             },
-            "& .MuiDataGrid-iconSeparator": {
-              color: colors.primary[100],
+
+            "& .MuiDataGrid-iconSeparator":
+            {
+              color:
+                colors.primary[100],
             },
           }}
         >
           <Box
             display="flex"
             alignItems="center"
-            bgcolor={colors.primary[400]}
+            bgcolor={
+              colors.primary[400]
+            }
             borderRadius="3px"
             mb="10px"
           >
             <InputBase
               placeholder="Search by Menu Date..."
-              sx={{ ml: 2, flex: 1 }}
+              sx={{
+                ml: 2,
+                flex: 1,
+              }}
               value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
+              onChange={(e) =>
+                setSearchText(
+                  e.target.value
+                )
+              }
             />
+
             <IconButton
               type="button"
               sx={{ p: 1 }}
-              onClick={() => setSearchText("")}
+              onClick={() =>
+                setSearchText("")
+              }
             >
-              {searchText ? <Close /> : <SearchOutlined />}
+              {searchText ? (
+                <Close />
+              ) : (
+                <SearchOutlined />
+              )}
             </IconButton>
           </Box>
+
           <DataGrid
             rows={filteredRows}
             columns={columns}
             loading={loading}
             pagination
             paginationMode="server"
-            rowCount={pagination.total}
+            rowCount={
+              pagination.total
+            }
             paginationModel={{
-              page: pagination.page - 1,
-              pageSize: pagination.pageSize,
+              page:
+                pagination.page - 1,
+
+              pageSize:
+                pagination.pageSize,
             }}
-            pageSizeOptions={[10, 20, 50, 100]}
-            onPaginationModelChange={handlePaginationChange}
+            pageSizeOptions={[
+              10,
+              20,
+              50,
+              100,
+            ]}
+            onPaginationModelChange={
+              handlePaginationChange
+            }
             checkboxSelection
-            onRowSelectionModelChange={handleRowSelection}
+            onRowSelectionModelChange={
+              handleRowSelection
+            }
             components={{
-              LoadingOverlay: CustomLoadingOverlay,
+              LoadingOverlay:
+                CustomLoadingOverlay,
             }}
           />
+
           <ConfirmationDialog
             open={dialogOpen}
             title="Confirm Delete"
             message={
-              selectedIds.length > 0 && !selectedMenuName
+              selectedIds.length >
+                0 &&
+                !selectedMenuName
                 ? `Are you sure you want to delete ${selectedIds.length} items?`
                 : `Are you sure you want to delete the menu "${selectedMenuName}" ?`
             }
@@ -347,3 +655,5 @@ const MenuDetails = () => {
 };
 
 export default MenuDetails;
+
+
