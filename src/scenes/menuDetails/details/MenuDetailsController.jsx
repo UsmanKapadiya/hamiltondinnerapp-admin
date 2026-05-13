@@ -1,6 +1,6 @@
 import { useTheme, useMediaQuery } from "@mui/material";
 import { useLocation } from "react-router-dom";
-import { tokens } from "../../theme";
+import { tokens } from "../../../theme";
 import useMenuDetails from "./useMenuDetails";
 import MenuDetailsFormView from "./menuDetails-form";
 

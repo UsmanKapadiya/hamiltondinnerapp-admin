@@ -1,3 +1,3 @@
-import MenuDetailsListController from "./MenuDetailsListController";
+import MenuDetailsListController from "./list/MenuDetailsListController";
 
 export default MenuDetailsListController;

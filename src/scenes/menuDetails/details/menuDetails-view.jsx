@@ -6,12 +6,12 @@ import {
     useMediaQuery,
     useTheme,
 } from "@mui/material";
-import { Header } from "../../components";
+import { Header } from "../../../components";
 import { ListAltOutlined } from "@mui/icons-material";
-import { tokens } from "../../theme";
+import { tokens } from "../../../theme";
 import { useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
-import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
+import CustomLoadingOverlay from "../../../components/CustomLoadingOverlay";
 
 const MenuDetailsView = () => {
     const theme = useTheme();

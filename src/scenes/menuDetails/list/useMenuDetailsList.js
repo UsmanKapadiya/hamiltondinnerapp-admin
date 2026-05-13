@@ -3,10 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import _ from "lodash";
-import MenuServices from "../../services/menuServices";
-import ItemServices from "../../services/itemServices";
-import { setItemList } from "../../redux/action/itemAction";
-import { hasPermission } from "../../components/permissions";
+import MenuServices from "../../../services/menuServices";
+import ItemServices from "../../../services/itemServices";
+import { setItemList } from "../../../redux/action/itemAction";
+import { hasPermission } from "../../../components/permissions";
 
 const useMenuDetailsList = () => {
   const dispatch = useDispatch();

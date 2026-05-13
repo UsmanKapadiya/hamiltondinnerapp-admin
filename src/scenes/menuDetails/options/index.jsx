@@ -1,40 +1,46 @@
 import { Box, Typography, useTheme, Button, InputBase, IconButton } from "@mui/material";
-import { Header } from "../../components";
+import { Header } from "../../../components";
 import { DataGrid } from "@mui/x-data-grid";
-import { tokens } from "../../theme";
+import { tokens } from "../../../theme";
 import {
-  AdminPanelSettingsOutlined,
-  ClearAllOutlined,
   Close,
-  DvrOutlined,
   FormatListBulletedOutlined,
-  Home,
   SearchOutlined,
-  SecurityOutlined,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState, useMemo, useCallback, useRef } from "react";
-import ConfirmationDialog from "../../components/ConfirmationDialog";
-import ItemServices from "../../services/itemServices";
-import CustomLoadingOverlay from "../../components/CustomLoadingOverlay";
+import { useEffect, useState, useMemo, useCallback } from "react";
+import ConfirmationDialog from "../../../components/ConfirmationDialog";
+import ItemServices from "../../../services/itemServices";
+import CustomLoadingOverlay from "../../../components/CustomLoadingOverlay";
 import { toast } from "react-toastify";
-import { hasPermission } from "../../components/permissions";
+import { hasPermission } from "../../../components/permissions";
 import { useSelector } from "react-redux";
-import NoPermissionMessage from "../../components/NoPermissionMessage";
+import NoPermissionMessage from "../../../components/NoPermissionMessage";
 
-const ItemPreferences = () => {
+// Debounce hook for search input
+function useDebounce(value, delay) {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const handler = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+  return debounced;
+}
+
+const ItemOptions = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const permissionList = useSelector((state) => state?.permissionState?.permissionsList);
+
   const [searchText, setSearchText] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const debouncedSearchText = useDebounce(searchText, 300);
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
-  const [selectedPreferenceName, setSelectedPreferenceName] = useState("");
-  const [preferencesListData, setPreferencesListData] = useState([]);
-  const permissionList = useSelector((state) => state?.permissionState?.permissionsList);
+  const [selectedOptionName, setSelectedOptionName] = useState("");
+  const [optionsListData, setOptionsListData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({
     page: 1,
@@ -42,27 +48,19 @@ const ItemPreferences = () => {
     total: 0,
   });
 
-  // Debounce search input
-  useEffect(() => {
-    const handler = setTimeout(() => setDebouncedSearch(searchText), 300);
-    return () => clearTimeout(handler);
-  }, [searchText]);
+  // Permissions
+  const canAdd = hasPermission(permissionList, "add_ItemOptions");
+  const canView = hasPermission(permissionList, "read_ItemOptions");
+  const canEdit = hasPermission(permissionList, "edit_ItemOptions");
+  const canDelete = hasPermission(permissionList, "delete_ItemOptions");
+  const canBrowse = hasPermission(permissionList, "browse_Options");
 
-  // Fetch data on mount, pagination, or search change
-  useEffect(() => {
-    fetchALLPreferenceList();
-    // eslint-disable-next-line
-  }, [pagination.page, pagination.pageSize, debouncedSearch]);
-
-  const fetchALLPreferenceList = useCallback(async () => {
+  // Fetch options list
+  const fetchALLOptionsList = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await ItemServices.getPreferencesList({
-        page: pagination.page,
-        pageSize: pagination.pageSize,
-        search: debouncedSearch,
-      });
-      setPreferencesListData(response.data);
+      const response = await ItemServices.getOptionList();
+      setOptionsListData(response.data);
       setPagination((prev) => ({
         ...prev,
         total: response.count,
@@ -72,114 +70,98 @@ const ItemPreferences = () => {
     } finally {
       setLoading(false);
     }
-  }, [pagination.page, pagination.pageSize, debouncedSearch]);
-
-  const handleRowSelection = useCallback((ids) => {
-    setSelectedIds(ids);
   }, []);
 
+  useEffect(() => {
+    fetchALLOptionsList();
+  }, [fetchALLOptionsList]);
+
+  // Handlers
+  const handleRowSelection = useCallback((ids) => setSelectedIds(ids), []);
   const handleDelete = useCallback((data) => {
     setSelectedIds([]);
     setSelectedId(data?.id);
-    setSelectedPreferenceName(data?.pname);
+    setSelectedOptionName(data?.option_name);
     setDialogOpen(true);
   }, []);
-
   const confirmDelete = useCallback(() => {
-    selectedIds.length > 0 && !selectedPreferenceName
-      ? bulkDeletePreference(selectedIds)
-      : deletePreference(selectedId);
+    selectedIds.length > 0 && !selectedOptionName
+      ? bulkDeleteOptions(selectedIds)
+      : deleteOptions(selectedId);
     setDialogOpen(false);
-  }, [selectedIds, selectedPreferenceName, selectedId]);
-
+  }, [selectedIds, selectedOptionName, selectedId]);
   const cancelDelete = useCallback(() => {
     setDialogOpen(false);
     setSelectedId(null);
-    setSelectedPreferenceName("");
+    setSelectedOptionName("");
   }, []);
-
   const handleView = useCallback((id) => {
-    navigate(`/menu-item-preferences/${id}`, { state: { id } });
+    navigate(`/menu-item-options/${id}`, { state: { id } });
   }, [navigate]);
-
   const handleEdit = useCallback((id) => {
-    const selectedRow = preferencesListData.find((row) => row.id === id);
-    navigate(`/menu-item-preferences/${id}/edit`, { state: selectedRow });
-  }, [navigate, preferencesListData]);
-
+    const selectedRow = optionsListData.find((row) => row.id === id);
+    navigate(`/menu-item-options/${id}/edit`, { state: selectedRow });
+  }, [navigate, optionsListData]);
   const handleAddNewClick = useCallback(() => {
-    navigate("/menu-item-preferences/create");
+    navigate("/menu-item-options/create");
   }, [navigate]);
-
   const handleBulkDelete = useCallback(() => {
     if (selectedIds.length > 0) {
       setDialogOpen(true);
     } else {
-      toast.warning("Please select at least one Preferences to delete.");
+      toast.warning("Please select at least one Option to delete.");
     }
   }, [selectedIds]);
-
   const handlePaginationChange = useCallback((newPaginationModel) => {
     setPagination((prev) => ({
       ...prev,
       page: newPaginationModel.page + 1,
       pageSize: newPaginationModel.pageSize,
     }));
-    setCurrentPage(newPaginationModel.page + 1);
   }, []);
 
-  const bulkDeletePreference = useCallback(async (ids) => {
+  // Delete functions
+  const bulkDeleteOptions = useCallback(async (ids) => {
+    setLoading(true);
     try {
       let data = JSON.stringify({ ids });
-      await ItemServices.bulkdeletePreferences(data);
-      setLoading(true);
-      toast.success("Multiple Preferences Deleted successfully!");
-      fetchALLPreferenceList();
+      await ItemServices.bulkdeleteOptions(data);
+      toast.success("Multiple Options Deleted successfully!");
+      fetchALLOptionsList();
     } catch (error) {
-      console.error("Error deleting preferences:", error);
-      toast.error("Failed to process preference. Please try again.");
+      console.error("Error deleting options:", error);
+      toast.error("Failed to process Option. Please try again.");
     } finally {
       setLoading(false);
     }
-  }, [fetchALLPreferenceList]);
-
-  const deletePreference = useCallback(async (id) => {
+  }, [fetchALLOptionsList]);
+  const deleteOptions = useCallback(async (id) => {
+    setLoading(true);
     try {
-      setLoading(true);
-      await ItemServices.deletePreferences(id);
-      toast.success("Preference Deleted successfully!");
-      fetchALLPreferenceList();
-      setSelectedPreferenceName("");
+      await ItemServices.deleteOptions(id);
+      toast.success("Options Deleted successfully!");
+      fetchALLOptionsList();
+      setSelectedOptionName("");
     } catch (error) {
-      console.error("Error deleting preference:", error);
-      toast.error("Failed to process Preference. Please try again.");
+      console.error("Error deleting option:", error);
+      toast.error("Failed to process Option. Please try again.");
     } finally {
       setLoading(false);
     }
-  }, [fetchALLPreferenceList]);
+  }, [fetchALLOptionsList]);
 
-  const canAdd = useMemo(() => hasPermission(permissionList, "add_ItemPreference"), [permissionList]);
-  const canView = useMemo(() => hasPermission(permissionList, "read_ItemPreference"), [permissionList]);
-  const canEdit = useMemo(() => hasPermission(permissionList, "edit_ItemPreference"), [permissionList]);
-  const canDelete = useMemo(() => hasPermission(permissionList, "delete_ItemPreference"), [permissionList]);
-  const canBrowse = useMemo(() => hasPermission(permissionList, "browse_Preference"), [permissionList]);
-
-  // Memoize filtered rows
-  const filteredRows = useMemo(() => {
-    if (!debouncedSearch) return preferencesListData;
-    return preferencesListData.filter(
-      (row) =>
-        row.pname?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-        row.pname_cn?.toLowerCase().includes(debouncedSearch.toLowerCase())
-    );
-  }, [preferencesListData, debouncedSearch]);
-
+  // Memoized columns
   const columns = useMemo(() => [
-    { field: "pname", headerName: "Preference Name", flex: 1 },
+    { field: "option_name", headerName: "Option Name", flex: 1 },
     {
-      field: "pname_cn",
-      headerName: "Preference Chinese Name",
+      field: "option_name_cn",
+      headerName: "Option Chinese Name",
       flex: 1,
+    },
+    {
+      field: "is_paid_item",
+      headerName: "Is Paid Item",
+      renderCell: (params) => (params.value ? "Yes" : "No"),
     },
     {
       field: "actions",
@@ -219,15 +201,23 @@ const ItemPreferences = () => {
     },
   ], [handleView, handleEdit, handleDelete, canView, canEdit, canDelete]);
 
+  // Memoized filtered rows
+  const filteredRows = useMemo(() => {
+    const search = debouncedSearchText.toLowerCase();
+    return optionsListData.filter(
+      (row) =>
+        row.option_name?.toLowerCase().includes(search) ||
+        row.option_name_cn?.toLowerCase().includes(search)
+    );
+  }, [optionsListData, debouncedSearchText]);
+
   return (
     <Box m="20px">
       <Header
-        title="Menu Item Preferences"
-        icon={<ClearAllOutlined />}
+        title="Menu Item Options"
+        icon={<FormatListBulletedOutlined />}
         addNewClick={handleAddNewClick}
         addBulkDelete={handleBulkDelete}
-        orderClick={() => {}}
-        showToggleClick={() => {}}
         buttons={true}
         addButton={canAdd && canBrowse}
         deleteButton={canDelete && canBrowse}
@@ -268,7 +258,7 @@ const ItemPreferences = () => {
             mb="10px"
           >
             <InputBase
-              placeholder="Search by Preference Name, or Preference Chinese Name..."
+              placeholder="Search by Option Name, or Option Chinese Name..."
               sx={{ ml: 2, flex: 1 }}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
@@ -291,8 +281,8 @@ const ItemPreferences = () => {
               pageSize: pagination.pageSize,
             }}
             onPaginationModelChange={handlePaginationChange}
-            onRowSelectionModelChange={handleRowSelection}
             checkboxSelection
+            onRowSelectionModelChange={handleRowSelection}
             components={{
               LoadingOverlay: CustomLoadingOverlay,
             }}
@@ -301,9 +291,9 @@ const ItemPreferences = () => {
             open={dialogOpen}
             title="Confirm Delete"
             message={
-              selectedIds.length > 0 && !selectedPreferenceName
-                ? `Are you sure you want to delete ${selectedIds.length} Preferences?`
-                : `Are you sure you want to delete the Preference "${selectedPreferenceName}"?`
+              selectedIds.length > 0 && !selectedOptionName
+                ? `Are you sure you want to delete ${selectedIds.length} Option items?`
+                : `Are you sure you want to delete the Option "${selectedOptionName}"?`
             }
             onConfirm={confirmDelete}
             onCancel={cancelDelete}
@@ -311,7 +301,7 @@ const ItemPreferences = () => {
         </Box>
       ) : (
         <NoPermissionMessage
-          title="You do not have permission to view Preferences Details."
+          title="You do not have permission to view Options Details."
           message="Please contact your administrator if you believe this is a mistake."
         />
       )}
@@ -319,4 +309,4 @@ const ItemPreferences = () => {
   );
 };
 
-export default ItemPreferences;
+export default ItemOptions;
