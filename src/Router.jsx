@@ -1,9 +1,10 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import App from "./App";
-import {
-  Dashboard
-} from "./scenes";
+// import {
+//   Dashboard
+// } from "./scenes";
+import Dashboard from "./scenes/dashboard/DashboardController";
 import Room from "./scenes/room/RoomController";
 import RoomDetailsForm from "./scenes/room/RoomDetailsForm/RoomDetailsFormController";
 import RoomDetailsView from "./scenes/room/RoomDetailsView/RoomDetailsViewController";
