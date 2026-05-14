@@ -2,8 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import App from "./App";
 import {
-  Dashboard,
-  FAQ
+  Dashboard
 } from "./scenes";
 import Room from "./scenes/room/RoomController";
 import RoomDetailsForm from "./scenes/room/RoomDetailsForm/RoomDetailsFormController";
@@ -33,9 +32,9 @@ import User from "./scenes/user/UserController";
 import UserDetailsView from "./scenes/user/userDetailsView/UserDetailsViewController";
 import UserDetailsForm from "./scenes/user/UserDetailsForm/UserDetailsForm";
 import NotFound from "./scenes/pageNotFounf/NotFound";
-import Forms from "./scenes/Forms";
-import FormsAddUpdate from "./scenes/Forms/forms-addUpdate";
-import FormsDetailsView from "./scenes/Forms/formsDetails-view";
+import Forms from "./scenes/Forms/FormsController";
+import FormsAddUpdate from "./scenes/Forms/FormsAddUpdate/FormsAddUpdateController";
+import FormsDetailsView from "./scenes/Forms/FormsDetailsView/FormsDetailsView";
 import ChargesReports from "./scenes/chargesReports/ChargesReportsController";
 
 
@@ -111,7 +110,7 @@ const AppRouter = () => {
           <Route path="/forms/create" element={<FormsAddUpdate />} />
           <Route path="/forms/:id/edit" element={<FormsAddUpdate />} /> */}
 
-          <Route path="/faq" element={<FAQ />} />
+          
           <Route path="*" element={<NotFound />} />
 
         </Route>
