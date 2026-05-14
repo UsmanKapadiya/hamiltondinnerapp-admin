@@ -21,9 +21,10 @@ import ItemOptionsView from "./scenes/menuDetails/options/ItemOptionsViewControl
 import ItemPreferences from "./scenes/menuDetails/preferences";
 import ItemPreferencesView from "./scenes/menuDetails/preferences/ItemPreferencesViewController";
 import ItemPreferencesForm from "./scenes/menuDetails/preferences/itemPreferences-form";
-import MenuDetails from "./scenes/menuDetails";
-import MenuDetailsController from "./scenes/menuDetails/details/MenuDetailsController";
-import MenuDetailsView from "./scenes/menuDetails/details/menuDetails-view";
+import MenuDetails from "./scenes/menuDetails/MenuDetailsController";
+import MenuDetailsController from "./scenes/menuDetails/MenuDetailsForm/MenuDetailsFormController";
+// import MenuDetailsForm from "./scenes/menuDetails/MenuDetailsForm/MenuDetailsFormController";
+import MenuDetailsView from "./scenes/menuDetails/MenuDetailsView/MenuDetailsViewController";
 import OrderDetails from "./scenes/orderDetails/OrderDetailsController";
 import Setting from "./scenes/settings/SettingController";
 import Roles from "./scenes/Roles/RolesController";

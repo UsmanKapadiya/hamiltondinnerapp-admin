@@ -7,7 +7,7 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import CustomLoadingOverlay from "../../../components/CustomLoadingOverlay";
-import MealTypeSection from "./components/MealTypeSection";
+import MealTypeSection from "../../menuDetails/components/MealTypeSection";
 import _ from "lodash";
 
 const validationSchema = yup.object().shape({
