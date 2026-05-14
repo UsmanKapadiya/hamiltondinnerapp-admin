@@ -8,11 +8,11 @@ import {
 } from "@mui/material";
 import {
   Header,
-  StatBox,
-  LineChart,
-  ProgressCircle,
-  BarChart,
-  GeographyChart,
+  // StatBox,
+  // LineChart,
+  // ProgressCircle,
+  // BarChart,
+  // GeographyChart,
 } from "../../components";
 import {
   DownloadOutlined,
