@@ -11,9 +11,9 @@ import RoomDetailsView from "./scenes/room/RoomDetailsView/RoomDetailsViewContro
 import Category from "./scenes/category/CategoryController";
 import CategoryDetailsView from "./scenes/category/CategoryDetailsViewController";
 import CategoryDetailsForm from "./scenes/category/CategoryDetailsFormController";
-import Item from "./scenes/item";
-import ItemDetailsView from "./scenes/item/itemDetails-view";
-import ItemDetailsForm from "./scenes/item/itemDetails-form";
+import Item from "./scenes/item/ItemController";
+import ItemDetailsView from "./scenes/item/ItemDetailsView/ItemDetailsViewController";
+import ItemDetailsForm from "./scenes/item/ItemDetailsForm/ItemDetailsFormController";
 import Login from "./scenes/login/LoginController";
 import ItemOptions from "./scenes/menuDetails/options";
 import ItemoptionsForm from "./scenes/menuDetails/options/itemOptions-form";
